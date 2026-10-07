@@ -1,69 +1,68 @@
-# Wera-Frontend
+# Wera Frontend
 
-The dashboard for [wera](../wera) — a private job-tracker pipeline
-(Go + Postgres + Coral LLM). Dark, fast triage of scored infrastructure jobs:
-today's best fits, a filterable jobs table, an application tracker kanban,
-and a System page with pipeline health and LLM cost.
+The dashboard for [Wera](https://github.com/jessechumo/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume using Coral Bricks.
 
-It never applies anywhere — postings always open at the source. Types come
-from real API fixtures captured from `wera serve` (`src/api/__fixtures__`).
+It shows today's best matches, a filterable jobs table, an application tracker, and a System page with pipeline health and LLM cost. Wera never applies on your behalf. Every posting opens at its source.
+
+## Features
+
+- **Today:** new matches ranked by fit score, with sponsorship and work-mode badges
+- **Jobs:** filterable, searchable table with keyboard navigation (`j`/`k` to move, `Enter` to open, `o` to open the posting)
+- **Job detail:** fit score, reasoning, skills matched and missing, and the sponsorship quote
+- **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected
+- **System:** runs, company fetch status, tokens, cache hit rate, and cost
+- **Excluded:** every filtered job with the reason and evidence, for auditing filters
 
 ## Stack
 
-Vite · React 18 · TypeScript (strict) · Tailwind CSS v4 (`@theme` tokens in
-CSS, no config file) · react-router-dom v6 · @tanstack/react-query v5 ·
-recharts · lucide-react · Geist / Geist Mono.
+Vite, React 18, TypeScript (strict), Tailwind CSS v4, React Router, TanStack Query, Recharts, Lucide icons, Geist fonts.
+
+## Setup
+
+Clone this repo next to the backend:
+
+```
+projects/
+├── Wera/            backend
+└── Wera-Frontend/   this repo
+```
 
 ## Develop
 
 ```sh
-# backend (repo root of ../wera):
-go run ./cmd/wera serve        # :8080
+# in Wera/
+go run ./cmd/wera serve      # API on :8080
 
-# frontend:
+# in Wera-Frontend/
 npm install
-npm run dev                    # :5173, /api proxied to :8080
+npm run dev                  # http://localhost:5173, /api proxied to :8080
 ```
 
 ## Build
 
 ```sh
-npm run build                  # tsc (strict, zero errors) + vite build -> dist/
+npm run build                # type-check and build to dist/
+npx vite preview --port 3000 # preview the production bundle locally
 ```
-
-### Production-mode test on your PC
-
-```sh
-npm run build
-npx vite preview --port 3000   # serves the real dist/ bundle; /api proxied to :8080
-```
-
-With `wera serve` running on :8080 this exercises the exact shipped bundle
-(minified, hashed assets, SPA fallback) — everything except the nginx
-header/gzip layer and the container build.
-
 
 ## Docker
 
-Built by the backend repo's compose file as the `wera-web` service
-(build context `../Wera-Frontend`), served by nginx with the SPA fallback
-and `/api` proxied to `wera-api:8080`:
+The backend's `docker-compose.yml` builds this repo as the `wera-web` service. Nginx serves the app and proxies `/api` to the backend.
 
 ```sh
-cd ../wera
+cd ../Wera
 docker compose up -d --build wera-web   # http://localhost:3000
 ```
 
-## Layout
+## Project layout
 
 ```
 src/
-├── api/          client.ts, types.ts (from fixtures), hooks.ts (react-query)
-├── components/   Badge, ScoreRing, JobCard/Row/Drawer, FilterBar, Charts, …
+├── api/          API client, types, and React Query hooks
+├── components/   Badge, ScoreRing, JobCard, JobDrawer, FilterBar, charts
 ├── pages/        Today, Jobs, Tracker, System, Excluded
-├── layout/       AppShell (sidebar, top bar, Run now, health dot)
-└── lib/          format.ts, toast.tsx
+├── layout/       App shell with sidebar, top bar, and Run now
+└── lib/          Formatting and toast helpers
 ```
 
-Design tokens live in `src/index.css` (`@theme`). Keyboard shortcuts on the
-Jobs page: `j`/`k` to move, `Enter` to open the drawer, `o` to open the posting.
+API types are generated from real responses captured in `src/api/__fixtures__`. Design tokens live in `src/index.css`.
