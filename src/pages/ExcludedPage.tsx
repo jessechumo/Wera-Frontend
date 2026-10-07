@@ -4,6 +4,7 @@ import type { Job } from '../api/types';
 import { Badge } from '../components/Badge';
 import { ErrorState, SkeletonRows } from '../components/States';
 import { prettyReason, relTime } from '../lib/format';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 
 const PAGE = 50;
@@ -38,6 +39,7 @@ function reasonVariant(reason: string): 'bad' | 'warn' | 'neutral' {
 }
 
 export default function ExcludedPage() {
+  useDocumentTitle('Excluded');
   const [reason, setReason] = useState('');
   const [offset, setOffset] = useState(0);
 

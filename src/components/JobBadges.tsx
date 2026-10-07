@@ -5,7 +5,9 @@ import type { AppStatus, Job } from '../api/types';
 export function SponsorshipBadge({ value }: { value: Job['sponsorship'] }) {
   if (!value) return null;
   if (value === 'yes') return <Badge variant="good">Sponsors: yes</Badge>;
-  return <Badge variant="warn">Sponsorship unknown</Badge>;
+  if (value === 'no') return <Badge variant="bad">No sponsorship</Badge>;
+  // "Unknown" is the common case — keep it quiet instead of warning-yellow.
+  return <Badge>Sponsorship unknown</Badge>;
 }
 
 export function WorkModeBadge({ value }: { value: Job['work_mode'] }) {

@@ -1,20 +1,35 @@
 import { Ban, Bookmark, ExternalLink } from 'lucide-react';
 import { ScoreRing } from './ScoreRing';
-import { CategoryChips, SponsorshipBadge, StatusPill, WorkModeBadge } from './JobBadges';
+import { Badge } from './Badge';
+import { CategoryChips, StatusPill } from './JobBadges';
 import { relTime, shortLocation } from '../lib/format';
 import type { AppStatus, Job } from '../api/types';
 
 export function JobCard({
   job,
+  index = 0,
   onOpen,
   onQuickStatus,
   quickActions = true,
 }: {
   job: Job;
+  /** Position in the grid; drives the staggered entrance delay. */
+  index?: number;
   onOpen: (id: number) => void;
   onQuickStatus?: (id: number, status: AppStatus) => void;
   quickActions?: boolean;
 }) {
+  // One quiet mono line instead of a wall of badges; the sponsor chip stays
+  // because it is the one signal worth interrupting the scan for.
+  const meta = [
+    job.seniority,
+    job.years_required != null ? `${job.years_required}+ yrs` : null,
+    shortLocation(job),
+    job.work_mode,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <div
       onClick={() => onOpen(job.id)}
@@ -24,7 +39,8 @@ export function JobCard({
       tabIndex={0}
       role="button"
       aria-label={`${job.title} at ${job.company}`}
-      className="group cursor-pointer rounded-card border border-border bg-surface p-4 transition-colors duration-150 hover:border-accent/40 focus-visible:border-accent/40"
+      className="group anim-rise cursor-pointer rounded-card border border-border bg-surface p-4 transition-colors duration-150 hover:border-accent/40 focus-visible:border-accent/40"
+      style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
     >
       <div className="flex items-start gap-4">
         <ScoreRing score={job.fit_score} />
@@ -37,9 +53,8 @@ export function JobCard({
             <StatusPill value={job.application_status} />
           </div>
           <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-            <SponsorshipBadge value={job.sponsorship} />
-            <WorkModeBadge value={job.work_mode} />
-            <span className="truncate text-xs text-faint">{shortLocation(job)}</span>
+            <span className="truncate font-mono text-[11px] text-faint">{meta || '—'}</span>
+            {job.sponsorship === 'yes' && <Badge variant="good">sponsors</Badge>}
             <span
               className="text-xs text-faint"
               title={`First seen ${job.first_seen_at}`}

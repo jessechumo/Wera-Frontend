@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ExternalLink, X } from 'lucide-react';
+import { Ban, Bookmark, ExternalLink, X } from 'lucide-react';
 import { useJob, useUpdateApplication } from '../api/hooks';
 import type { AppStatus, DeepAnalysis, JobDetail } from '../api/types';
 import { ScoreRing } from './ScoreRing';
@@ -16,6 +16,14 @@ import {
   verdictLabel,
   verdictOf,
 } from '../lib/format';
+
+function Kbd({ children }: { children: React.ReactNode }) {
+  return (
+    <kbd className="rounded border border-border bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-faint">
+      {children}
+    </kbd>
+  );
+}
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -138,15 +146,12 @@ function DrawerBody({ job }: { job: JobDetail }) {
           <StatusPill value={job.application_status} />
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-bg transition-colors duration-150 hover:bg-accent/85"
-          >
-            <ExternalLink className="size-3.5" /> Open posting
-          </a>
           <span className="font-mono text-[11px] text-faint">{job.source}</span>
+          {job.posted_at && (
+            <span className="text-[11px] text-faint" title={absTime(job.posted_at)}>
+              · posted {relTime(job.posted_at)}
+            </span>
+          )}
         </div>
       </div>
 
@@ -264,12 +269,17 @@ function DrawerBody({ job }: { job: JobDetail }) {
 /** Right-side slide-over with the full job detail. */
 export function JobDrawer({ jobId, onClose }: { jobId: number; onClose: () => void }) {
   const { data: job, isLoading, error } = useJob(jobId);
+  const update = useUpdateApplication();
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // ESC to close, scroll lock while open.
+  // ESC closes, o opens the posting, scroll lock while open.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
+      if (e.key === 'o' && job?.url) {
+        e.preventDefault();
+        window.open(job.url, '_blank', 'noopener');
+      }
     };
     window.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
@@ -279,12 +289,12 @@ export function JobDrawer({ jobId, onClose }: { jobId: number; onClose: () => vo
       window.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
     };
-  }, [onClose]);
+  }, [onClose, job?.url]);
 
   return (
     <div className="fixed inset-0 z-50">
       <div
-        className="fade-enter absolute inset-0 bg-black/60 backdrop-blur-[2px]"
+        className="fade-enter absolute inset-0 bg-black/60 backdrop-blur-[4px]"
         onClick={onClose}
         aria-hidden
       />
@@ -321,6 +331,48 @@ export function JobDrawer({ jobId, onClose }: { jobId: number; onClose: () => vo
             <DrawerBody job={job} />
           ) : null}
         </div>
+
+        {job && (
+          <footer className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border bg-surface px-4 py-3">
+            <a
+              href={job.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-bg transition-colors duration-150 hover:bg-accent/85"
+            >
+              <ExternalLink className="size-3.5" /> Open posting
+            </a>
+            <button
+              onClick={() =>
+                update.mutate({
+                  id: job.id,
+                  status: 'saved',
+                  notes: job.application_notes ?? '',
+                })
+              }
+              disabled={job.application_status === 'saved'}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs font-medium text-text transition-colors duration-150 hover:border-accent/40 hover:text-accent disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Bookmark className="size-3.5" /> Save
+            </button>
+            <button
+              onClick={() =>
+                update.mutate({
+                  id: job.id,
+                  status: 'not_interested',
+                  notes: job.application_notes ?? '',
+                })
+              }
+              disabled={job.application_status === 'not_interested'}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs font-medium text-muted transition-colors duration-150 hover:border-bad/40 hover:text-bad disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Ban className="size-3.5" /> Not interested
+            </button>
+            <span className="ml-auto hidden items-center gap-2 text-[10px] text-faint sm:flex">
+              <Kbd>o</Kbd> open · <Kbd>esc</Kbd> close
+            </span>
+          </footer>
+        )}
       </aside>
     </div>
   );

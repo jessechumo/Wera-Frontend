@@ -6,10 +6,13 @@ import type { Job } from '../api/types';
 /** Dense table row for the Jobs page. */
 export function JobRow({
   job,
+  index = 0,
   selected,
   onOpen,
 }: {
   job: Job;
+  /** Position on the page; drives the staggered entrance delay. */
+  index?: number;
   selected?: boolean;
   onOpen: (id: number) => void;
 }) {
@@ -23,9 +26,10 @@ export function JobRow({
       tabIndex={0}
       aria-label={`${job.title} at ${job.company}`}
       className={clsx(
-        'cursor-pointer border-b border-border/60 transition-colors duration-150 hover:bg-surface-2/60',
+        'anim-rise cursor-pointer border-b border-border/60 transition-colors duration-150 hover:bg-surface-2/60',
         selected && 'bg-accent/5 ring-1 ring-accent/25 ring-inset',
       )}
+      style={{ animationDelay: `${Math.min(index * 24, 360)}ms` }}
     >
       <td className="px-3 py-2.5">
         <span className={clsx('font-mono text-sm font-semibold', verdictColor[verdict])}>

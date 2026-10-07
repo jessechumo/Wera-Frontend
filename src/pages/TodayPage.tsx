@@ -1,17 +1,104 @@
 import { useState } from 'react';
+import { Ban, Bookmark, ExternalLink, Sun } from 'lucide-react';
 import { useLatestRun, useStats, useToday, useUpdateApplication } from '../api/hooks';
 import type { AppStatus, Job } from '../api/types';
 import { JobCard } from '../components/JobCard';
 import { JobDrawer } from '../components/JobDrawer';
+import { ScoreRing } from '../components/ScoreRing';
 import { StatTile } from '../components/StatTile';
+import { StatusPill } from '../components/JobBadges';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
-import { minutesUntil, relTime } from '../lib/format';
-import { Sun } from 'lucide-react';
+import { minutesUntil, relTime, shortLocation } from '../lib/format';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 /** The next worker run is ~30 min after the previous one started. */
 const RUN_INTERVAL_MIN = 30;
 
+/** Today's best job, presented large above the grid. */
+function TopPick({
+  job,
+  onOpen,
+  onQuickStatus,
+}: {
+  job: Job;
+  onOpen: (id: number) => void;
+  onQuickStatus: (id: number, status: AppStatus) => void;
+}) {
+  const meta = [
+    job.seniority,
+    job.years_required != null ? `${job.years_required}+ yrs` : null,
+    shortLocation(job),
+    job.work_mode,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  return (
+    <div
+      onClick={() => onOpen(job.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') onOpen(job.id);
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`Top pick: ${job.title} at ${job.company}`}
+      className="anim-rise group cursor-pointer rounded-card border border-accent/25 bg-surface p-5 transition-colors duration-150 hover:border-accent/50"
+    >
+      <div className="flex flex-wrap items-start gap-5">
+        <ScoreRing score={job.fit_score} size="lg" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px] font-semibold tracking-widest text-accent uppercase">
+              Top pick
+            </span>
+            <StatusPill value={job.application_status} />
+          </div>
+          <h2 className="mt-1.5 truncate text-lg font-semibold text-text">{job.title}</h2>
+          <div className="mt-0.5 truncate text-sm text-muted">{job.company}</div>
+          {job.reason && (
+            <p className="mt-2 line-clamp-3 max-w-2xl text-xs leading-relaxed text-muted">
+              {job.reason}
+            </p>
+          )}
+          <div className="mt-2.5 font-mono text-[11px] text-faint">{meta || '—'}</div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <a
+            href={job.url}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-colors duration-150 hover:bg-accent/85"
+          >
+            <ExternalLink className="size-3.5" /> Open posting
+          </a>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickStatus(job.id, 'saved');
+            }}
+            aria-label="Save job"
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-[11px] font-medium text-text transition-colors duration-150 hover:border-accent/40 hover:text-accent"
+          >
+            <Bookmark className="size-3.5" /> Save
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onQuickStatus(job.id, 'not_interested');
+            }}
+            aria-label="Mark not interested"
+            className="inline-flex items-center gap-1 rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-[11px] font-medium text-muted transition-colors duration-150 hover:border-bad/40 hover:text-bad"
+          >
+            <Ban className="size-3.5" /> Not interested
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function TodayPage() {
+  useDocumentTitle('Today');
   const { data, isLoading, error, refetch } = useToday();
   const stats = useStats();
   const latest = useLatestRun();
@@ -32,6 +119,25 @@ export default function TodayPage() {
     update.mutate({ id, status, notes: '' });
   };
 
+  // Sparkline + delta from /api/stats: new jobs per day, most recent last.
+  const perDay = stats.data?.new_per_day ?? [];
+  const spark = perDay.slice(-14).map((d) => d.count);
+  const yesterday = perDay.length >= 2 ? perDay[perDay.length - 2]!.count : null;
+  const delta =
+    yesterday != null && !stats.isLoading
+      ? (() => {
+          const diff = jobs.length - yesterday;
+          const sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
+          return {
+            text: `${sign}${Math.abs(diff)} vs yesterday`,
+            tone: (diff > 0 ? 'good' : diff < 0 ? 'bad' : 'neutral') as
+              | 'good'
+              | 'bad'
+              | 'neutral',
+          };
+        })()
+      : undefined;
+
   return (
     <div className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
@@ -45,9 +151,9 @@ export default function TodayPage() {
       </header>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="New today" value={jobs.length} accent />
-        <StatTile label="Strong fits (80+)" value={strong} />
-        <StatTile label="Sponsors explicitly" value={sponsors} />
+        <StatTile label="New today" value={jobs.length} accent spark={spark} delta={delta} />
+        <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} new`} />
+        <StatTile label="Sponsors explicitly" value={sponsors} sub={`of ${jobs.length} new`} />
         <StatTile label="Applied this week" value={stats.data?.applications_per_week ?? '—'} />
       </div>
 
@@ -65,16 +171,22 @@ export default function TodayPage() {
           hint={`Next run in ~${nextIn} min. Come back after the worker cycles.`}
         />
       ) : (
-        <div className="grid gap-3 xl:grid-cols-2">
-          {jobs.map((job) => (
-            <JobCard
-              key={job.id}
-              job={job}
-              onOpen={(id) => setDrawerId(id)}
-              onQuickStatus={quickStatus}
-            />
-          ))}
-        </div>
+        <>
+          <TopPick job={jobs[0]!} onOpen={(id) => setDrawerId(id)} onQuickStatus={quickStatus} />
+          {jobs.length > 1 && (
+            <div className="grid gap-3 xl:grid-cols-2">
+              {jobs.slice(1).map((job, i) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  index={i + 1}
+                  onOpen={(id) => setDrawerId(id)}
+                  onQuickStatus={quickStatus}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {drawerId != null && <JobDrawer jobId={drawerId} onClose={() => setDrawerId(null)} />}

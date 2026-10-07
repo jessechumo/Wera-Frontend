@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
-import { Activity, Briefcase, EyeOff, ListChecks, Play, RefreshCw, Sun } from 'lucide-react';
+import { Activity, Briefcase, EyeOff, ListChecks, Play, RefreshCw, Search, Sun } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
   useLatestRun,
@@ -27,15 +28,24 @@ function Logo() {
   );
 }
 
-function HealthDot() {
+function HealthDot({ pulse = false }: { pulse?: boolean }) {
   const health = useHealth();
   return (
     <span
       className={clsx(
         'inline-block size-2 rounded-full',
+        pulse && 'animate-pulse',
         health.data ? 'bg-good' : health.isError ? 'bg-bad' : 'bg-warn',
       )}
-      title={health.data ? 'API healthy' : health.isError ? 'API unreachable' : 'checking…'}
+      title={
+        pulse
+          ? 'Run in flight'
+          : health.data
+            ? 'API healthy'
+            : health.isError
+              ? 'API unreachable'
+              : 'checking…'
+      }
       aria-label={health.data ? 'API healthy' : 'API unreachable'}
     />
   );
@@ -78,6 +88,21 @@ function TopBarMeta() {
 export function AppShell() {
   const qc = useQueryClient();
   const latest = useLatestRun();
+  const location = useLocation();
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const running = latest.data?.runs[0]?.status == null;
+
+  // ⌘K / Ctrl+K toggles the command palette.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // When a run we saw in flight finishes, refresh everything once.
   const seenRunning = useRef<number | null>(null);
@@ -110,15 +135,20 @@ export function AppShell() {
               end={to === '/'}
               className={({ isActive }) =>
                 clsx(
-                  'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
-                  isActive
-                    ? 'bg-accent/10 text-accent'
-                    : 'text-muted hover:bg-surface-2 hover:text-text',
+                  'relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
+                  isActive ? 'text-accent' : 'text-muted hover:bg-surface-2 hover:text-text',
                 )
               }
             >
-              <Icon className="size-4" />
-              {label}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <span className="absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-full bg-accent" />
+                  )}
+                  <Icon className="size-4" />
+                  {label}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -157,17 +187,30 @@ export function AppShell() {
               ))}
             </nav>
             <div className="ml-auto flex items-center gap-3">
+              <button
+                onClick={() => setPaletteOpen(true)}
+                aria-label="Open command palette"
+                title="Search jobs and actions (⌘K)"
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-muted transition-colors duration-150 hover:border-accent/40 hover:text-text"
+              >
+                <Search className="size-3.5" />
+                <span className="hidden font-mono text-[11px] sm:inline">⌘K</span>
+              </button>
               <TopBarMeta />
-              <HealthDot />
+              <HealthDot pulse={running} />
               <RunNowButton />
             </div>
           </div>
         </header>
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 md:px-6 md:py-6">
-          <Outlet />
+          <div key={location.pathname} className="route-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
+
+      {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
     </div>
   );
 }

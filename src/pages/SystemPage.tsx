@@ -5,6 +5,7 @@ import { StatTile } from '../components/StatTile';
 import { Badge } from '../components/Badge';
 import { ErrorState, Skeleton } from '../components/States';
 import { groupLabel, money, pct, relTime, runDuration } from '../lib/format';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 import type { Company } from '../api/types';
 import clsx from 'clsx';
 
@@ -33,6 +34,7 @@ function statusBadge(status: string | null) {
 }
 
 export default function SystemPage() {
+  useDocumentTitle('System');
   const stats = useStats();
   const usage = useUsage();
   const runs = useRuns(10);
@@ -44,6 +46,18 @@ export default function SystemPage() {
   const openJobs = Object.values(byStage).reduce((a, b) => a + b, 0);
   const totals = usage.data?.totals;
   const perDay = usage.data?.per_day ?? [];
+
+  // Cost trend: sparkline of recent days + delta vs yesterday.
+  const costSpark = perDay.map((d) => d.cost_usd);
+  let costDelta: { text: string; tone: 'good' | 'bad' } | undefined;
+  if (costSpark.length >= 2) {
+    const diff = costSpark[costSpark.length - 1]! - costSpark[costSpark.length - 2]!;
+    const sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
+    costDelta = {
+      text: `${sign}${money(Math.abs(diff))} vs yesterday`,
+      tone: diff <= 0 ? 'good' : 'bad',
+    };
+  }
 
   return (
     <div className="space-y-5">
@@ -59,10 +73,19 @@ export default function SystemPage() {
 
       {/* Tiles */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <StatTile label="Open jobs" value={openJobs} />
+        <StatTile
+          label="Open jobs"
+          value={openJobs}
+          spark={(stats.data?.new_per_day ?? []).map((d) => d.count)}
+        />
         <StatTile label="Scored" value={scored} accent />
         <StatTile label="Excluded" value={excluded} />
-        <StatTile label="LLM cost" value={money(totals?.cost_usd)} />
+        <StatTile
+          label="LLM cost"
+          value={money(totals?.cost_usd)}
+          spark={costSpark}
+          delta={costDelta}
+        />
         <StatTile
           label="Cost / scored job"
           value={scored > 0 && totals ? money(totals.cost_usd / scored) : '—'}

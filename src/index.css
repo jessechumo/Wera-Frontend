@@ -98,9 +98,32 @@
     opacity: 0;
   }
 }
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
 .drawer-enter {
-  animation: drawer-in 150ms ease-out;
+  /* Decelerate curve so the panel feels like it settles, not slides. */
+  animation: drawer-in 260ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 .fade-enter {
   animation: fade-in 150ms ease-out;
+}
+.route-enter {
+  animation: rise-in 200ms ease-out;
+}
+/* Staggered card/row entrance; pair with an inline animationDelay. */
+.anim-rise {
+  animation: rise-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

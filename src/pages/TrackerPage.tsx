@@ -5,6 +5,7 @@ import { JobDrawer } from '../components/JobDrawer';
 import { StatusSelect } from '../components/StatusSelect';
 import { Skeleton } from '../components/States';
 import { relTime, verdictColor, verdictOf } from '../lib/format';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 import clsx from 'clsx';
 import { ExternalLink, EyeOff } from 'lucide-react';
 
@@ -21,16 +22,22 @@ const COLUMN_LABEL: Record<AppStatus, string> = {
 
 function KanbanCard({
   job,
+  index = 0,
   onOpen,
   onStatus,
 }: {
   job: Job;
+  /** Position in the column; drives the staggered entrance delay. */
+  index?: number;
   onOpen: (id: number) => void;
   onStatus: (id: number, status: AppStatus) => void;
 }) {
   const verdict = verdictOf(job.fit_score);
   return (
-    <div className="group rounded-xl border border-border bg-surface p-3 transition-colors duration-150 hover:border-accent/40">
+    <div
+      className="group anim-rise rounded-xl border border-border bg-surface p-3 transition-colors duration-150 hover:border-accent/40"
+      style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+    >
       <div
         onClick={() => onOpen(job.id)}
         role="button"
@@ -102,8 +109,8 @@ function Column({
         ) : jobs.length === 0 ? (
           <p className="px-1 py-4 text-center text-[11px] text-faint">Nothing here yet</p>
         ) : (
-          jobs.map((job) => (
-            <KanbanCard key={job.id} job={job} onOpen={onOpen} onStatus={onStatus} />
+          jobs.map((job, i) => (
+            <KanbanCard key={job.id} job={job} index={i} onOpen={onOpen} onStatus={onStatus} />
           ))
         )}
       </div>
@@ -112,6 +119,7 @@ function Column({
 }
 
 export default function TrackerPage() {
+  useDocumentTitle('Tracker');
   const update = useUpdateApplication();
   const [showNI, setShowNI] = useState(false);
   const [drawerId, setDrawerId] = useState<number | null>(null);

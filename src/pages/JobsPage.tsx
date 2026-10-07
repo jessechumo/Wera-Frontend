@@ -7,6 +7,7 @@ import { JobCard } from '../components/JobCard';
 import { JobDrawer } from '../components/JobDrawer';
 import { JobRow } from '../components/JobRow';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PAGE = 50;
@@ -25,6 +26,7 @@ function valuesFromParams(sp: URLSearchParams): FilterValues {
 }
 
 export default function JobsPage() {
+  useDocumentTitle('Jobs');
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const routeId = useParams<{ id?: string }>().id;
@@ -102,6 +104,8 @@ export default function JobsPage() {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'A') return;
+      // While the drawer is open it owns the keyboard (esc, o).
+      if (drawerId != null) return;
       if (e.key === 'j' || e.key === 'k') {
         e.preventDefault();
         setSel((s) => {
@@ -118,7 +122,7 @@ export default function JobsPage() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [jobs, sel, openDrawer]);
+  }, [jobs, sel, openDrawer, drawerId]);
 
   return (
     <div className="space-y-4">
@@ -178,6 +182,7 @@ export default function JobsPage() {
                   <JobRow
                     key={job.id}
                     job={job}
+                    index={i}
                     selected={i === sel}
                     onOpen={openDrawer}
                   />
@@ -188,10 +193,11 @@ export default function JobsPage() {
 
           {/* Stacked cards (<640px) */}
           <div className="grid gap-2.5 sm:hidden">
-            {jobs.map((job) => (
+            {jobs.map((job, i) => (
               <JobCard
                 key={job.id}
                 job={job}
+                index={i}
                 onOpen={openDrawer}
                 onQuickStatus={quickStatus}
                 quickActions={false}
