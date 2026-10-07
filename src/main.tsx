@@ -1,0 +1,43 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AppShell } from './layout/AppShell';
+import { Toasts } from './lib/toast';
+import TodayPage from './pages/TodayPage';
+import JobsPage from './pages/JobsPage';
+import TrackerPage from './pages/TrackerPage';
+import SystemPage from './pages/SystemPage';
+import ExcludedPage from './pages/ExcludedPage';
+import './index.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      refetchOnWindowFocus: true,
+      retry: 1,
+    },
+  },
+});
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<AppShell />}>
+            <Route index element={<TodayPage />} />
+            <Route path="jobs" element={<JobsPage />} />
+            <Route path="jobs/:id" element={<JobsPage />} />
+            <Route path="tracker" element={<TrackerPage />} />
+            <Route path="system" element={<SystemPage />} />
+            <Route path="excluded" element={<ExcludedPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+      <Toasts />
+    </QueryClientProvider>
+  </StrictMode>,
+);

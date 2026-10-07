@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0A0B0F;
+  --color-surface: #12141A;
+  --color-surface-2: #1A1D25;
+  --color-border: #262A35;
+  --color-text: #E8EAF0;
+  --color-muted: #8A90A2;
+  --color-faint: #5B6173;
+
+  --color-accent: #FF7A59;
+  --color-accent-2: #7C9CFF;
+
+  --color-good: #3DDC97;
+  --color-warn: #F5C451;
+  --color-bad: #FF5C7A;
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Subtle ember glow behind the top of every page. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(700px 340px at 50% -80px, rgb(255 122 89 / 0.06), transparent 70%);
+  }
+  #root {
+    position: relative;
+  }
+  .font-mono {
+    font-variant-numeric: tabular-nums;
+  }
+  ::selection {
+    background: rgb(255 122 89 / 0.3);
+  }
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-2);
+    border: 2px solid var(--color-bg);
+    border-radius: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-surface-2);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.04), transparent);
+    animation: shimmer 1.5s infinite;
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+.drawer-enter {
+  animation: drawer-in 150ms ease-out;
+}
+.fade-enter {
+  animation: fade-in 150ms ease-out;
+}
