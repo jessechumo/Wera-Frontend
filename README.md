@@ -1,6 +1,10 @@
+
+
 # Wera Frontend
 
 The dashboard for [Wera](https://github.com/jessechumo/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume using Coral Bricks.
+
+https://github.com/user-attachments/assets/525e661c-765b-4137-98b7-168d57af9690
 
 It shows today's best matches, a filterable jobs table, an application tracker, and a System page with pipeline health and LLM cost. Wera never applies on your behalf. Every posting opens at its source.
 
