@@ -31,6 +31,18 @@ npm run dev                    # :5173, /api proxied to :8080
 npm run build                  # tsc (strict, zero errors) + vite build -> dist/
 ```
 
+### Production-mode test on your PC
+
+```sh
+npm run build
+npx vite preview --port 3000   # serves the real dist/ bundle; /api proxied to :8080
+```
+
+With `wera serve` running on :8080 this exercises the exact shipped bundle
+(minified, hashed assets, SPA fallback) — everything except the nginx
+header/gzip layer and the container build.
+
+
 ## Docker
 
 Built by the backend repo's compose file as the `wera-web` service
