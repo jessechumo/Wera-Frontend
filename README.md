@@ -27,17 +27,17 @@ Clone this repo next to the backend:
 
 ```
 projects/
-├── Wera/            backend
-└── Wera-Frontend/   this repo
+├── wera/            backend
+└── wera-frontend/   this repo
 ```
 
 ## Develop
 
 ```sh
-# in Wera/
+# in wera/
 go run ./cmd/wera serve      # API on :8080
 
-# in Wera-Frontend/
+# in wera-frontend/
 npm install
 npm run dev                  # http://localhost:5173, /api proxied to :8080
 ```
@@ -54,7 +54,7 @@ npx vite preview --port 3000 # preview the production bundle locally
 The backend's `docker-compose.yml` builds this repo as the `wera-web` service. Nginx serves the app and proxies `/api` to the backend.
 
 ```sh
-cd ../Wera
+cd ../wera
 docker compose up -d --build wera-web   # http://localhost:3000
 ```
 
