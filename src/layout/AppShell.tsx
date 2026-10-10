@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
-import { Activity, Briefcase, EyeOff, ListChecks, Play, RefreshCw, Search, Sun } from 'lucide-react';
+import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLogout, useMe } from '../api/auth';
+import { useNav } from './nav';
 import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
@@ -12,13 +14,31 @@ import {
 import { relTime } from '../lib/format';
 import { toast } from '../lib/toast';
 
-const NAV = [
-  { to: '/', label: 'Today', icon: Sun },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase },
-  { to: '/tracker', label: 'Tracker', icon: ListChecks },
-  { to: '/system', label: 'System', icon: Activity },
-  { to: '/excluded', label: 'Excluded', icon: EyeOff },
-];
+function UserMenu() {
+  const me = useMe();
+  const logout = useLogout();
+  const user = me.data;
+  if (!user) return null;
+  return (
+    <div className="flex items-center gap-2 border-t border-border px-3 py-3">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-xs font-semibold text-accent">
+        {(user.name || user.email).slice(0, 1).toUpperCase()}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-xs font-medium text-text">{user.name || user.email}</div>
+        {user.name && <div className="truncate text-[11px] text-faint">{user.email}</div>}
+      </div>
+      <button
+        onClick={() => logout.mutate()}
+        aria-label="Log out"
+        title="Log out"
+        className="rounded-lg p-1.5 text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text"
+      >
+        <LogOut className="size-4" />
+      </button>
+    </div>
+  );
+}
 
 function Logo() {
   return (
@@ -87,6 +107,8 @@ function TopBarMeta() {
 
 export function AppShell() {
   const qc = useQueryClient();
+  const nav = useNav();
+  const isAdmin = useMe().data?.is_admin ?? false;
   const latest = useLatestRun();
   const location = useLocation();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -128,7 +150,7 @@ export function AppShell() {
           <Logo />
         </div>
         <nav className="flex-1 space-y-0.5 p-3">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -152,6 +174,7 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
+        <UserMenu />
         <div className="flex items-center gap-2 border-t border-border px-5 py-3 text-[11px] text-faint">
           <HealthDot />
           <span>api</span>
@@ -169,7 +192,7 @@ export function AppShell() {
             </span>
             {/* Mobile nav */}
             <nav className="flex flex-1 items-center gap-1 lg:hidden">
-              {NAV.map(({ to, label, icon: Icon }) => (
+              {nav.map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
                   to={to}
@@ -198,7 +221,7 @@ export function AppShell() {
               </button>
               <TopBarMeta />
               <HealthDot pulse={running} />
-              <RunNowButton />
+              {isAdmin && <RunNowButton />}
             </div>
           </div>
         </header>
