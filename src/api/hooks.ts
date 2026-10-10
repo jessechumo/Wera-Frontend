@@ -52,12 +52,21 @@ function toQuery(params: object): string {
   return s ? `?${s}` : '';
 }
 
-/** The review queue; `fast` polls every 4s (while first scores arrive). */
-export function useToday(fast = false) {
+/**
+ * The review queue. It polls every 4s while scores are still arriving
+ * (jobs pending, or the profile was saved in the last 3 minutes), else
+ * every 5 minutes.
+ */
+export function useToday(profileUpdatedAt?: string) {
   return useQuery({
     queryKey: ['today'],
     queryFn: () => api<JobList>('/api/today'),
-    refetchInterval: fast ? 4_000 : 5 * 60_000,
+    refetchInterval: (query) => {
+      const pending = (query.state.data?.pending ?? 0) > 0;
+      const justSaved =
+        profileUpdatedAt != null && Date.now() - new Date(profileUpdatedAt).getTime() < 3 * 60_000;
+      return pending || justSaved ? 4_000 : 5 * 60_000;
+    },
   });
 }
 

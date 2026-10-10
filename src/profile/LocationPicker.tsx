@@ -29,7 +29,6 @@ export function LocationPicker({
   const custom = typed !== '' && !results.some((r) => r.name.toLowerCase() === typed.toLowerCase());
   const options = [...results.map((r) => r.name), ...(custom ? [typed] : [])];
 
-  useEffect(() => setActive(0), [query]);
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (!box.current?.contains(e.target as Node)) setOpen(false);
@@ -42,6 +41,7 @@ export function LocationPicker({
     const n = name.trim();
     if (n && !value.some((v) => v.toLowerCase() === n.toLowerCase())) onChange([...value, n]);
     setQuery('');
+    setActive(0);
     input.current?.focus();
   };
   const remove = (name: string) => onChange(value.filter((v) => v !== name));
@@ -99,6 +99,7 @@ export function LocationPicker({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
+            setActive(0);
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}

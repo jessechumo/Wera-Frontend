@@ -151,8 +151,7 @@ function Tabs({ tab, setTab }: { tab: 'posting' | 'letter'; setTab: (t: 'posting
 /** Right column: the fit analysis, facts, and the user's application. */
 function Insights({ job, scoring }: { job: JobDetail; scoring: boolean }) {
   const update = useUpdateApplication();
-  const [notes, setNotes] = useState<string | null>(null); // null: mirror the server
-  useEffect(() => setNotes(null), [job.id]);
+  const [notes, setNotes] = useState<string | null>(null); // null: mirror the server (reset per job by key)
   const currentNotes = notes ?? job.application_notes ?? '';
   const setStatus = (status: AppStatus) => update.mutate({ id: job.id, status, notes: currentNotes });
   const saveNotes = () => {
@@ -373,7 +372,12 @@ export function JobDrawer({
   const setStatus = (status: AppStatus) =>
     job && update.mutate({ id: job.id, status, notes: job.application_notes ?? '' });
   const [tab, setTab] = useState<'posting' | 'letter'>('posting');
-  useEffect(() => setTab('posting'), [jobId]);
+  const [tabJob, setTabJob] = useState(jobId);
+  if (tabJob !== jobId) {
+    // A different job opens on its posting.
+    setTabJob(jobId);
+    setTab('posting');
+  }
   const hide = useHideCompany();
   const hideCompany = () => {
     if (!job) return;
@@ -497,7 +501,7 @@ export function JobDrawer({
             className="order-1 border-border bg-surface-2/35 md:order-2 md:overflow-y-auto md:border-l"
           >
             {job ? (
-              <Insights job={job} scoring={score.isPending && score.variables === job.id} />
+              <Insights key={job.id} job={job} scoring={score.isPending && score.variables === job.id} />
             ) : isLoading ? (
               <Skeleton className="m-5 h-40" />
             ) : null}

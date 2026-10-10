@@ -43,13 +43,17 @@ export default function JobsPage() {
   const { data, isLoading, error, refetch, isFetching } = useJobs(params);
   const update = useUpdateApplication();
 
-  const jobs = data?.jobs ?? [];
+  const jobs = useMemo(() => data?.jobs ?? [], [data]);
   const drawerId = Number(searchParams.get('job') ?? routeId ?? '') || null;
 
   const [sel, setSel] = useState(0);
-  useEffect(() => {
+  const query = searchParams.toString();
+  const [selQuery, setSelQuery] = useState(query);
+  if (selQuery !== query) {
+    // New filters or page: the selection starts at the top.
+    setSelQuery(query);
     setSel(0);
-  }, [searchParams.toString()]);
+  }
 
   const patchParams = useCallback(
     (patch: Record<string, string | number>, opts?: { keepOffset?: boolean }) => {

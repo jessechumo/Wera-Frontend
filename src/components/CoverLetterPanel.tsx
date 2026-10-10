@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Copy, Download, LoaderCircle, PenLine, RefreshCw, Sparkles } from 'lucide-react';
 import { useMe } from '../api/auth';
 import { ApiError } from '../api/client';
@@ -40,7 +40,6 @@ export function CoverLetterPanel({ job }: { job: JobDetail }) {
   const write = useWriteCoverLetter(job.id);
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState('');
-  useEffect(() => setText(letter.data?.body ?? ''), [letter.data?.body]);
 
   const name = me.data?.name || me.data?.email || '';
   const generate = () => write.mutate(undefined, { onError: (e) => toast.error(errorText(e)) });
@@ -85,13 +84,21 @@ export function CoverLetterPanel({ job }: { job: JobDetail }) {
             >
               Save
             </button>
-            <button onClick={() => { setEditing(false); setText(letter.data?.body ?? ''); }} className="rounded-lg px-3 py-1.5 text-xs text-muted hover:text-text">
+            <button onClick={() => setEditing(false)} className="rounded-lg px-3 py-1.5 text-xs text-muted hover:text-text">
               Cancel
             </button>
           </>
         ) : (
           <>
-            <ToolButton icon={PenLine} label="Edit" onClick={() => setEditing(true)} disabled={writing} />
+            <ToolButton
+              icon={PenLine}
+              label="Edit"
+              onClick={() => {
+                setText(letter.data?.body ?? '');
+                setEditing(true);
+              }}
+              disabled={writing}
+            />
             <ToolButton
               icon={Copy}
               label="Copy"

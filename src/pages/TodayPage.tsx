@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Ban, Bookmark, ExternalLink, LoaderCircle, Sun } from 'lucide-react';
 import { useLatestRun, useStats, useToday, useUpdateApplication } from '../api/hooks';
 import { useProfile } from '../api/profile';
@@ -107,11 +107,11 @@ export default function TodayPage() {
   // estimates fill the list and it refreshes every few seconds as real
   // scores replace them.
   const profile = useProfile();
-  const updatedAt = profile.data?.updated_at;
-  const justSaved = updatedAt != null && Date.now() - new Date(updatedAt).getTime() < 3 * 60_000;
-  const [pending, setPending] = useState(0);
-  const { data, isLoading, error, refetch } = useToday(pending > 0 || justSaved);
-  useEffect(() => setPending(data?.pending ?? 0), [data?.pending]);
+  const updatedAt = profile.data?.updated_at ?? undefined;
+  const { data, isLoading, error, refetch } = useToday(updatedAt);
+  const pending = data?.pending ?? 0;
+  const [loadedAt] = useState(() => Date.now());
+  const justSaved = updatedAt != null && loadedAt - new Date(updatedAt).getTime() < 3 * 60_000;
   const estimatedCount = (data?.jobs ?? []).filter((j) => j.fit_score == null).length;
   const estimating = estimatedCount > 0;
   const stats = useStats();
@@ -123,7 +123,7 @@ export default function TodayPage() {
   const jobs: Job[] = data?.jobs ?? [];
   // /api/today is the review queue (not yet applied to or dismissed), so it
   // includes older jobs; "new" means first seen in the last 24h.
-  const dayAgo = Date.now() - 24 * 60 * 60_000;
+  const dayAgo = loadedAt - 24 * 60 * 60_000;
   const newToday = jobs.filter((j) => new Date(j.first_seen_at).getTime() >= dayAgo).length;
   const strong = jobs.filter((j) => (j.fit_score ?? 0) >= 80).length;
   const sponsors = jobs.filter((j) => j.sponsorship === 'yes').length;

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Camera, Download, FileText, LoaderCircle, Save } from 'lucide-react';
 import { useAvatar, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
@@ -149,7 +149,6 @@ function ResumeCard({ resumeChars, onUploaded }: { resumeChars: number; onUpload
 
 export default function ProfilePage() {
   useDocumentTitle('Profile');
-  const me = useMe();
   const profile = useProfile();
   const draft = useDraftProfile();
   const save = useSaveProfile();
@@ -161,14 +160,15 @@ export default function ProfilePage() {
   const [dirty, setDirty] = useState(false);
 
   // Load the saved profile into the form (again after each save).
-  useEffect(() => {
+  const [loadedFrom, setLoadedFrom] = useState<typeof profile.data>(undefined);
+  if (profile.data && profile.data !== loadedFrom && !dirty) {
     const p = profile.data;
-    if (!p || dirty) return;
+    setLoadedFrom(p);
     setPrefs(p.preferences);
     setAnswers(p.answers ?? {});
     setMarkdown(p.markdown);
     setResumeChars(p.resume_chars);
-  }, [profile.data, dirty]);
+  }
 
   const edit =
     <T,>(set: (v: T) => void) =>
@@ -195,12 +195,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-5 pb-20">
       <ProfileHeader />
-      <header className="sr-only">
-        <h1 className="text-[28px] leading-tight font-semibold">Profile</h1>
-        <p className="mt-1 text-xs text-muted">
-          {me.data?.email} · Changes to what you want or to the profile text rematch your jobs.
-        </p>
-      </header>
+      <p className="-mt-2 text-xs text-muted">Changes to what you want or to the profile text rematch your jobs.</p>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
         <div className="space-y-5">
