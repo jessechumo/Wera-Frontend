@@ -176,3 +176,58 @@ export interface User {
   is_admin: boolean;
   created_at: string;
 }
+
+export interface Preferences {
+  role_families: string[];
+  levels: string[];
+  max_years_required: number;
+  us_only: boolean;
+  needs_sponsorship: boolean;
+}
+
+export type WorkAuthorization =
+  | 'citizen_or_resident'
+  | 'sponsorship_now'
+  | 'sponsorship_future'
+  | 'outside_us';
+
+export interface Answers {
+  current_title?: string;
+  years_experience?: number | null;
+  work_authorization?: WorkAuthorization | '';
+  locations?: string;
+  work_modes?: ('remote' | 'hybrid' | 'onsite')[];
+  industries?: string[];
+  target_roles?: string;
+  avoid?: string;
+  notes?: string;
+}
+
+export interface Profile {
+  markdown: string;
+  preferences: Preferences;
+  answers: Answers;
+  /** Characters of resume text on file; 0 when none was uploaded. */
+  resume_chars: number;
+  /** Matching runs for this profile (text plus a family and a level). */
+  ready: boolean;
+  updated_at: string | null;
+}
+
+export interface Choice {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface ProfileOptions {
+  role_families: Choice[];
+  levels: Choice[];
+  industries: Choice[];
+}
+
+export interface MyUsage {
+  monthly_budget_usd: number;
+  month_spend_usd: number;
+  remaining_usd: number;
+}

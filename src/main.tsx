@@ -4,6 +4,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppShell } from './layout/AppShell';
 import { RequireAuth } from './auth/RequireAuth';
+import { RequireProfile } from './auth/RequireProfile';
+import WelcomePage from './pages/WelcomePage';
 import AuthPage from './auth/AuthPage';
 import { Toasts } from './lib/toast';
 import TodayPage from './pages/TodayPage';
@@ -31,14 +33,17 @@ createRoot(document.getElementById('root')!).render(
           <Route path="login" element={<AuthPage mode="login" />} />
           <Route path="signup" element={<AuthPage mode="signup" />} />
           <Route element={<RequireAuth />}>
-            <Route element={<AppShell />}>
-              <Route index element={<TodayPage />} />
-              <Route path="jobs" element={<JobsPage />} />
-              <Route path="jobs/:id" element={<JobsPage />} />
-              <Route path="tracker" element={<TrackerPage />} />
-              <Route path="system" element={<SystemPage />} />
-              <Route path="excluded" element={<ExcludedPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="welcome" element={<WelcomePage />} />
+            <Route element={<RequireProfile />}>
+              <Route element={<AppShell />}>
+                <Route index element={<TodayPage />} />
+                <Route path="jobs" element={<JobsPage />} />
+                <Route path="jobs/:id" element={<JobsPage />} />
+                <Route path="tracker" element={<TrackerPage />} />
+                <Route path="system" element={<SystemPage />} />
+                <Route path="excluded" element={<ExcludedPage />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Route>
             </Route>
           </Route>
         </Routes>

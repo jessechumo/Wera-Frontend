@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Ban, Bookmark, ExternalLink, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Ban, Bookmark, ExternalLink, LoaderCircle, Sun } from 'lucide-react';
 import { useLatestRun, useStats, useToday, useUpdateApplication } from '../api/hooks';
+import { useProfile } from '../api/profile';
 import type { AppStatus, Job } from '../api/types';
 import { JobCard } from '../components/JobCard';
 import { JobDrawer } from '../components/JobDrawer';
@@ -99,7 +100,15 @@ function TopPick({
 
 export default function TodayPage() {
   useDocumentTitle('Today');
-  const { data, isLoading, error, refetch } = useToday();
+  // Right after a profile save the queue fills in over a few minutes.
+  const profile = useProfile();
+  const updatedAt = profile.data?.updated_at;
+  const justSaved = updatedAt != null && Date.now() - new Date(updatedAt).getTime() < 20 * 60_000;
+  const [polling, setPolling] = useState(justSaved);
+  const { data, isLoading, error, refetch } = useToday(polling);
+  useEffect(() => {
+    if (!justSaved || (data && data.jobs.length > 0)) setPolling(false);
+  }, [justSaved, data]);
   const stats = useStats();
   const latest = useLatestRun();
   const update = useUpdateApplication();
@@ -168,6 +177,12 @@ export default function TodayPage() {
         <ErrorState
           message={error instanceof Error ? error.message : 'unknown error'}
           onRetry={() => void refetch()}
+        />
+      ) : jobs.length === 0 && justSaved ? (
+        <EmptyState
+          icon={<LoaderCircle className="size-5 animate-spin text-accent" />}
+          title="Scoring your matches"
+          hint="Wera is reading every open job that fits your preferences. The best ones appear here as they're scored."
         />
       ) : jobs.length === 0 ? (
         <EmptyState

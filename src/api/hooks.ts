@@ -49,11 +49,12 @@ function toQuery(params: object): string {
   return s ? `?${s}` : '';
 }
 
-export function useToday() {
+/** The review queue; `fast` polls every 15s (while first scores arrive). */
+export function useToday(fast = false) {
   return useQuery({
     queryKey: ['today'],
     queryFn: () => api<JobList>('/api/today'),
-    refetchInterval: 5 * 60_000,
+    refetchInterval: fast ? 15_000 : 5 * 60_000,
   });
 }
 
