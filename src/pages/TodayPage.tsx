@@ -9,11 +9,9 @@ import { ScoreRing } from '../components/ScoreRing';
 import { StatTile } from '../components/StatTile';
 import { StatusPill } from '../components/JobBadges';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
-import { minutesUntil, relTime, shortLocation } from '../lib/format';
+import { relTime, shortLocation } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 
-/** The next worker run is ~30 min after the previous one started. */
-const RUN_INTERVAL_MIN = 30;
 
 /** Today's best job, presented large above the grid. */
 function TopPick({
@@ -123,10 +121,6 @@ export default function TodayPage() {
   const sponsors = jobs.filter((j) => j.sponsorship === 'yes').length;
 
   const lastRun = latest.data?.runs[0];
-  const nextIn = Math.max(
-    0,
-    minutesUntil(lastRun?.started_at) + RUN_INTERVAL_MIN,
-  );
 
   const quickStatus = (id: number, status: AppStatus) => {
     update.mutate({ id, status, notes: '' });
@@ -188,7 +182,7 @@ export default function TodayPage() {
         <EmptyState
           icon={<Sun className="size-5 text-faint" />}
           title="Nothing left to review"
-          hint={`Every scored job is applied to or dismissed. Next run in ~${nextIn} min.`}
+          hint="Every scored job is applied to or dismissed. Wera checks for new postings several times a day."
         />
       ) : (
         <>
