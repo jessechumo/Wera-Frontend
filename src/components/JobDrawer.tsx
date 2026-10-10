@@ -8,11 +8,16 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
+  EyeOff,
   ExternalLink,
+  FileText,
   MapPin,
+  PenLine,
   X,
 } from 'lucide-react';
-import { useJob, useUpdateApplication } from '../api/hooks';
+import { useHideCompany, useJob, useScoreJob, useUpdateApplication } from '../api/hooks';
+import { CoverLetterPanel } from './CoverLetterPanel';
+import { toast } from '../lib/toast';
 import type { AppStatus, DeepAnalysis, JobDetail } from '../api/types';
 import { ScoreRing } from './ScoreRing';
 import { Badge } from './Badge';
@@ -26,7 +31,7 @@ import {
 } from './JobBadges';
 import { StatusSelect } from './StatusSelect';
 import { Skeleton } from './States';
-import { absTime, compact, money, relTime, verdictLabel, verdictOf } from '../lib/format';
+import { absTime, compact, money, prettyReason, relTime, verdictLabel, verdictOf } from '../lib/format';
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
@@ -117,11 +122,36 @@ function DeepSection({ deep }: { deep: DeepAnalysis }) {
   );
 }
 
+function Tabs({ tab, setTab }: { tab: 'posting' | 'letter'; setTab: (t: 'posting' | 'letter') => void }) {
+  return (
+    <div role="tablist" className="mb-4 flex gap-1 border-b border-border">
+      {(
+        [
+          ['posting', 'The posting'],
+          ['letter', 'Cover letter'],
+        ] as const
+      ).map(([key, label]) => (
+        <button
+          key={key}
+          role="tab"
+          aria-selected={tab === key}
+          onClick={() => setTab(key)}
+          className={clsx(
+            '-mb-px border-b-2 px-3 py-2 text-xs font-medium transition-colors duration-150',
+            tab === key ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-text',
+          )}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 /** Right column: the fit analysis, facts, and the user's application. */
-function Insights({ job }: { job: JobDetail }) {
+function Insights({ job, scoring }: { job: JobDetail; scoring: boolean }) {
   const update = useUpdateApplication();
-  const [notes, setNotes] = useState<string | null>(null); // null: mirror the server
-  useEffect(() => setNotes(null), [job.id]);
+  const [notes, setNotes] = useState<string | null>(null); // null: mirror the server (reset per job by key)
   const currentNotes = notes ?? job.application_notes ?? '';
   const setStatus = (status: AppStatus) => update.mutate({ id: job.id, status, notes: currentNotes });
   const saveNotes = () => {
@@ -134,7 +164,40 @@ function Insights({ job }: { job: JobDetail }) {
 
   return (
     <>
-      {job.fit_score != null ? (
+      {job.stage === 'excluded' && !scoring ? (
+        <div className="flex items-start gap-3 px-5 py-5">
+          <span className="mt-0.5 rounded-full bg-bad/10 p-2 text-bad">
+            <Ban className="size-4" />
+          </span>
+          <div className="min-w-0">
+            <div className="text-sm font-semibold text-text">Not a match for you</div>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              {job.exclude_reason ? prettyReason(job.exclude_reason) : 'Your preferences rule this job out.'}
+              {job.exclude_evidence && <span className="mt-1 block text-faint">“{job.exclude_evidence}”</span>}
+            </p>
+          </div>
+        </div>
+      ) : job.fit_score == null && (scoring || job.estimated_score != null) ? (
+        <div className="flex items-start gap-4 px-5 py-5">
+          <ScoreRing score={null} estimate={job.estimated_score} size="lg" />
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-text">
+              {scoring ? 'Scoring this job…' : 'Estimated match'}
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              {scoring
+                ? 'Reading the posting against your profile. This takes a couple of seconds.'
+                : 'Estimated from your profile. The AI score arrives with the next scoring pass.'}
+            </p>
+            {scoring && (
+              <div className="mt-3 space-y-1.5">
+                <div className="skeleton h-2.5 w-full" />
+                <div className="skeleton h-2.5 w-4/5" />
+              </div>
+            )}
+          </div>
+        </div>
+      ) : job.fit_score != null ? (
         <div className="flex items-start gap-4 px-5 py-5">
           <ScoreRing score={job.fit_score} size="lg" />
           <div className="min-w-0">
@@ -263,6 +326,16 @@ export function JobDrawer({
 }) {
   const { data: job, isLoading, error } = useJob(jobId);
   const update = useUpdateApplication();
+  const score = useScoreJob();
+
+  // An unscored job gets its AI score the moment it is opened.
+  const requested = useRef(new Set<number>());
+  useEffect(() => {
+    if (job && job.fit_score == null && job.stage === 'pending_score' && !requested.current.has(job.id)) {
+      requested.current.add(job.id);
+      score.mutate(job.id);
+    }
+  }, [job, score]);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollers = useRef<(HTMLElement | null)[]>([]);
 
@@ -298,6 +371,26 @@ export function JobDrawer({
 
   const setStatus = (status: AppStatus) =>
     job && update.mutate({ id: job.id, status, notes: job.application_notes ?? '' });
+  const [tab, setTab] = useState<'posting' | 'letter'>('posting');
+  const [tabJob, setTabJob] = useState(jobId);
+  if (tabJob !== jobId) {
+    // A different job opens on its posting.
+    setTabJob(jobId);
+    setTab('posting');
+  }
+  const hide = useHideCompany();
+  const hideCompany = () => {
+    if (!job) return;
+    hide.mutate(
+      { id: job.company_id, hidden: true },
+      {
+        onSuccess: () => {
+          toast.success(`${job.company} hidden. Unhide it in Settings.`);
+          onClose();
+        },
+      },
+    );
+  };
   const saved = job?.application_status === 'saved';
 
   return (
@@ -321,6 +414,16 @@ export function JobDrawer({
             </div>
           )}
           <div className="ml-auto flex shrink-0 items-center gap-1">
+            {job && (
+              <button
+                onClick={hideCompany}
+                aria-label={`Hide ${job.company}`}
+                title={`Hide all ${job.company} jobs`}
+                className="rounded-lg p-2 text-muted transition-colors hover:bg-surface-2 hover:text-text"
+              >
+                <EyeOff className="size-4" />
+              </button>
+            )}
             {onNavigate && (
               <>
                 <button
@@ -371,9 +474,14 @@ export function JobDrawer({
               <p className="text-xs text-bad">
                 Couldn't load this job: {error instanceof Error ? error.message : 'network error'}
               </p>
+            ) : job && tab === 'letter' ? (
+              <>
+                <Tabs tab={tab} setTab={setTab} />
+                <CoverLetterPanel job={job} />
+              </>
             ) : job?.description ? (
               <>
-                <h3 className="mb-3 text-[11px] font-semibold tracking-wide text-faint uppercase">The posting</h3>
+                <Tabs tab={tab} setTab={setTab} />
                 <Description text={job.description} />
               </>
             ) : job ? (
@@ -392,7 +500,11 @@ export function JobDrawer({
             }}
             className="order-1 border-border bg-surface-2/35 md:order-2 md:overflow-y-auto md:border-l"
           >
-            {job ? <Insights job={job} /> : isLoading ? <Skeleton className="m-5 h-40" /> : null}
+            {job ? (
+              <Insights key={job.id} job={job} scoring={score.isPending && score.variables === job.id} />
+            ) : isLoading ? (
+              <Skeleton className="m-5 h-40" />
+            ) : null}
           </aside>
         </div>
 
@@ -414,6 +526,13 @@ export function JobDrawer({
             >
               {saved ? <BookmarkCheck className="size-3.5" /> : <Bookmark className="size-3.5" />}
               {saved ? 'Saved' : 'Save'}
+            </button>
+            <button
+              onClick={() => setTab(tab === 'letter' ? 'posting' : 'letter')}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs font-medium text-text transition-colors duration-150 hover:border-accent/40 hover:text-accent"
+            >
+              {tab === 'letter' ? <FileText className="size-3.5" /> : <PenLine className="size-3.5" />}
+              {tab === 'letter' ? 'Back to posting' : 'Cover letter'}
             </button>
             <button
               onClick={() => setStatus('not_interested')}

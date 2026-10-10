@@ -7,6 +7,7 @@ import { useLogout, useMe } from '../api/auth';
 import { useNav } from './nav';
 import { ThemeToggle } from '../lib/theme';
 import { Logo } from '../components/Logo';
+import { Avatar } from '../components/Avatar';
 import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
@@ -23,9 +24,7 @@ function UserMenu() {
   if (!user) return null;
   return (
     <div className="flex items-center gap-2 border-t border-border px-3 py-3">
-      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-xs font-semibold text-accent">
-        {(user.name || user.email).slice(0, 1).toUpperCase()}
-      </span>
+      <Avatar user={user} />
       <NavLink to="/profile" className="min-w-0 flex-1 hover:opacity-80" title="Your profile">
         <div className="truncate text-xs font-medium text-text">{user.name || user.email}</div>
         {user.name && <div className="truncate text-[11px] text-faint">{user.email}</div>}
@@ -42,6 +41,19 @@ function UserMenu() {
   );
 }
 
+
+/** "v0.3.0 · api v0.3.0": what is running, for bug reports (commits in the tooltip). */
+function Versions() {
+  const health = useHealth();
+  const web = `v${__APP_VERSION__}`;
+  const api = health.data?.version;
+  return (
+    <span className="truncate font-mono" title={`web ${web} (${__APP_COMMIT__}) · api ${api ?? '?'} (${health.data?.commit ?? '?'})`}>
+      {web}
+      {api && <> · api {api}</>}
+    </span>
+  );
+}
 
 function HealthDot({ pulse = false }: { pulse?: boolean }) {
   const health = useHealth();
@@ -172,7 +184,7 @@ export function AppShell() {
         <UserMenu />
         <div className="flex items-center gap-2 border-t border-border px-5 py-3 text-[11px] text-faint">
           <HealthDot />
-          <span>api</span>
+          <Versions />
           <ThemeToggle className="ml-auto -my-1" />
         </div>
       </aside>

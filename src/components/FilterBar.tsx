@@ -70,13 +70,15 @@ export function FilterBar({
   onReset: () => void;
 }) {
   const [text, setText] = useState(values.q);
+  const [syncedQ, setSyncedQ] = useState(values.q);
   const stats = useStats();
   const industries = useIndustries();
 
   // Keep the raw input in sync when filters change outside (reset / back nav).
-  useEffect(() => {
+  if (values.q !== syncedQ) {
+    setSyncedQ(values.q);
     setText(values.q);
-  }, [values.q]);
+  }
 
   // Debounce search input into the URL.
   useEffect(() => {

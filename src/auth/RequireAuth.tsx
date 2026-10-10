@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { useMe } from '../api/auth';
+import { signOutLocally, useMe } from '../api/auth';
 import { UNAUTHORIZED_EVENT } from '../api/client';
 import { ErrorState, Skeleton } from '../components/States';
 
@@ -14,10 +14,7 @@ export function RequireAuth() {
   // Any 401 from the API means the session ended (expired or logged out
   // elsewhere): forget the user so this guard redirects.
   useEffect(() => {
-    const onUnauthorized = () => {
-      qc.clear();
-      qc.setQueryData(['me'], null);
-    };
+    const onUnauthorized = () => signOutLocally(qc);
     window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
     return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
   }, [qc]);

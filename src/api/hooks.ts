@@ -12,7 +12,10 @@ import type {
   Job,
   JobDetail,
   JobList,
+  CoverLetter,
   IndustriesList,
+  SettingsView,
+  Settings,
   RunsList,
   Stats,
   Usage,
@@ -49,12 +52,21 @@ function toQuery(params: object): string {
   return s ? `?${s}` : '';
 }
 
-/** The review queue; `fast` polls every 15s (while first scores arrive). */
-export function useToday(fast = false) {
+/**
+ * The review queue. It polls every 4s while scores are still arriving
+ * (jobs pending, or the profile was saved in the last 3 minutes), else
+ * every 5 minutes.
+ */
+export function useToday(profileUpdatedAt?: string) {
   return useQuery({
     queryKey: ['today'],
     queryFn: () => api<JobList>('/api/today'),
-    refetchInterval: fast ? 15_000 : 5 * 60_000,
+    refetchInterval: (query) => {
+      const pending = (query.state.data?.pending ?? 0) > 0;
+      const justSaved =
+        profileUpdatedAt != null && Date.now() - new Date(profileUpdatedAt).getTime() < 3 * 60_000;
+      return pending || justSaved ? 4_000 : 5 * 60_000;
+    },
   });
 }
 
@@ -198,16 +210,84 @@ export function useTriggerRun() {
   });
 }
 
+/** API health, with the version it runs (from /healthz). */
 export function useHealth() {
   return useQuery({
     queryKey: ['health'],
     queryFn: async () => {
       const res = await fetch('/healthz');
       if (!res.ok) throw new ApiError(res.status, 'unhealthy');
-      return true;
+      const body = (await res.json().catch(() => ({}))) as { version?: string; commit?: string };
+      return { version: body.version ?? 'unknown', commit: body.commit ?? '' };
     },
     refetchInterval: 60_000,
     retry: false,
     staleTime: 30_000,
+  });
+}
+
+/** Score one unscored job now (the user opened it); merges into the cache. */
+export function useScoreJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api<Job>(`/api/jobs/${id}/score`, { method: 'POST' }),
+    onSuccess: (job) => {
+      qc.setQueryData<JobDetail>(['job', job.id], (prev) => (prev ? { ...prev, ...job } : prev));
+      void qc.invalidateQueries({ queryKey: ['today'] });
+      void qc.invalidateQueries({ queryKey: ['jobs'] });
+    },
+  });
+}
+
+export function useSettings() {
+  return useQuery({ queryKey: ['settings'], queryFn: () => api<SettingsView>('/api/settings') });
+}
+
+export function useSaveSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (s: Settings) => api<SettingsView>('/api/settings', { method: 'PUT', body: JSON.stringify(s) }),
+    onSuccess: (s) => qc.setQueryData(['settings'], s),
+  });
+}
+
+/** Hide (true) or unhide (false) a company's jobs. */
+export function useHideCompany() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { id: number; hidden: boolean }) =>
+      api<void>(`/api/companies/${v.id}/hidden`, { method: v.hidden ? 'PUT' : 'DELETE' }),
+    onSuccess: () => void qc.invalidateQueries(),
+  });
+}
+
+export function useCoverLetter(jobId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['cover-letter', jobId],
+    queryFn: async () => {
+      try {
+        return await api<CoverLetter>(`/api/jobs/${jobId}/cover-letter`);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
+      }
+    },
+    enabled,
+    staleTime: Infinity,
+  });
+}
+
+/** Generate (body undefined) or save edits (body set) for a job's letter. */
+export function useWriteCoverLetter(jobId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: string) =>
+      body === undefined
+        ? api<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { method: 'POST' })
+        : api<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { method: 'PUT', body: JSON.stringify({ body }) }),
+    onSuccess: (c) => {
+      qc.setQueryData(['cover-letter', jobId], c);
+      void qc.invalidateQueries({ queryKey: ['usage', 'me'] });
+    },
   });
 }

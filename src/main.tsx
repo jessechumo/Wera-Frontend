@@ -1,3 +1,5 @@
+import '@fontsource-variable/geist';
+import '@fontsource-variable/geist-mono';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
@@ -8,6 +10,12 @@ import { RequireProfile } from './auth/RequireProfile';
 import { RequireAdmin } from './auth/RequireAdmin';
 import WelcomePage from './pages/WelcomePage';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
+import CommunityPage from './pages/CommunityPage';
+import PostPage from './pages/PostPage';
+import NewPostPage from './pages/NewPostPage';
+import InterviewPage from './pages/InterviewPage';
+import SponsorshipPage from './pages/SponsorshipPage';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
@@ -46,11 +54,17 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="industries" element={<IndustriesPage />} />
                 <Route path="industries/:id" element={<IndustryPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
+                <Route path="sponsorship" element={<SponsorshipPage />} />
+                <Route path="interview" element={<InterviewPage />} />
+                <Route path="community" element={<CommunityPage />} />
+                <Route path="community/new" element={<NewPostPage />} />
+                <Route path="community/:id" element={<PostPage />} />
                 <Route element={<RequireAdmin />}>
                   <Route path="system" element={<SystemPage />} />
                 </Route>
                 <Route path="excluded" element={<ExcludedPage />} />
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Route>

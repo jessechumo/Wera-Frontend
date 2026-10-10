@@ -33,22 +33,28 @@ export function JobRow({
     >
       <td className="px-3 py-2.5">
         <span className={clsx('font-mono text-sm font-semibold', verdictColor[verdict])}>
-          {job.fit_score ?? '—'}
+          {job.fit_score ?? (job.estimated_score != null ? (
+            <span className="text-faint" title="Estimated; the AI score is on its way">
+              ~{job.estimated_score}
+            </span>
+          ) : (
+            '—'
+          ))}
         </span>
       </td>
       <td className="max-w-72 truncate px-3 py-2.5 text-sm font-medium text-text">{job.title}</td>
       <td className="max-w-44 truncate px-3 py-2.5 text-sm text-muted">{job.company}</td>
-      <td className="px-3 py-2.5">
+      <td className="hidden px-3 py-2.5 2xl:table-cell">
         <IndustryBadge value={job.industry} />
       </td>
       <td className="max-w-40 truncate px-3 py-2.5 text-xs text-muted">{shortLocation(job)}</td>
-      <td className="px-3 py-2.5">
+      <td className="hidden px-3 py-2.5 2xl:table-cell">
         <WorkModeBadge value={job.work_mode} />
       </td>
       <td className="px-3 py-2.5">
         <SponsorshipBadge value={job.sponsorship} />
       </td>
-      <td className="px-3 py-2.5 text-xs whitespace-nowrap text-faint" title={absTime(job.first_seen_at)}>
+      <td className="hidden px-3 py-2.5 text-xs whitespace-nowrap text-faint 2xl:table-cell" title={absTime(job.first_seen_at)}>
         {relTime(job.first_seen_at)}
       </td>
       <td className="px-3 py-2.5">

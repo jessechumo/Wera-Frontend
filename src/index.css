@@ -16,8 +16,8 @@
   --color-warn: #F5C451;
   --color-bad: #FF5C7A;
 
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
 
   /* Chart and decoration tokens (not Tailwind utilities). */
   --color-grid: rgb(255 255 255 / 0.045);
@@ -29,29 +29,33 @@
   --radius-card: 14px;
 }
 
-/* Light theme: same hues, darkened just enough for contrast on white. The
+/* Light theme: a warm paper background, white cards lifted by soft
+   shadows rather than hard outlines, and the same hues as dark mode toned
+   down (less saturated, slightly deeper) so nothing glares on white. The
    attribute is set before first paint by the script in index.html. */
 :root[data-theme="light"] {
-  --color-bg: #F6F6F3;
+  --color-bg: #F7F6F2;
   --color-surface: #FFFFFF;
-  --color-surface-2: #EFEFEB;
-  --color-border: #E1E1DB;
-  --color-text: #17191F;
-  --color-muted: #5B6170;
-  --color-faint: #8B909C;
+  --color-surface-2: #F1F0EB;
+  --color-border: #E5E3DC;
+  --color-text: #1D1F24;
+  --color-muted: #5F6470;
+  --color-faint: #8E929C;
 
-  --color-accent: #E2572F;
-  --color-accent-2: #3F63E0;
+  --color-accent: #D9653F;
+  --color-accent-2: #4A63C8;
 
-  --color-good: #12935E;
-  --color-warn: #A86E0A;
-  --color-bad: #D5304F;
+  --color-good: #1E8A5F;
+  --color-warn: #9C6B14;
+  --color-bad: #C2445A;
 
-  --color-grid: rgb(23 25 31 / 0.06);
-  --color-cursor: rgb(23 25 31 / 0.05);
-  --color-series-dim: #A9B8E8;
-  --color-glow: rgb(226 87 47 / 0.07);
-  --color-shimmer: rgb(23 25 31 / 0.05);
+  --color-grid: rgb(29 31 36 / 0.06);
+  --color-cursor: rgb(29 31 36 / 0.05);
+  --color-series-dim: #B4C0E6;
+  --color-glow: rgb(217 101 63 / 0.06);
+  --color-shimmer: rgb(29 31 36 / 0.045);
+  --shadow-card: 0 1px 2px rgb(29 31 36 / 0.04), 0 2px 8px -2px rgb(29 31 36 / 0.06);
+  --shadow-card-hover: 0 2px 4px rgb(29 31 36 / 0.05), 0 12px 24px -10px rgb(29 31 36 / 0.14);
 }
 
 @layer base {
@@ -128,6 +132,47 @@
     transform: translateX(100%);
   }
 }
+/* Cards: soft shadow in light mode, a gentle lift on hover everywhere. */
+.rounded-card,
+.rounded-xl {
+  box-shadow: var(--shadow-card, none);
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 150ms ease;
+}
+.cursor-pointer.rounded-card:hover,
+a.rounded-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover, 0 10px 30px -12px rgb(0 0 0 / 0.5));
+}
+button:not(:disabled):active,
+a.inline-flex:active {
+  transform: scale(0.98);
+}
+
+/* Theme switch: a circular reveal (View Transitions), or a short color
+   crossfade where that API is missing. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition:
+    background-color 350ms ease,
+    border-color 350ms ease,
+    color 350ms ease,
+    fill 350ms ease,
+    stroke 350ms ease !important;
+}
+
 @keyframes modal-in {
   from {
     opacity: 0;

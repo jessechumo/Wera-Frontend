@@ -70,7 +70,7 @@ export function PreferencesFields({
       <Section title="Roles" hint="Pick every kind of role you'd apply to. Jobs outside these are hidden.">
         <ChipSelect
           label="Role families"
-          options={role_families}
+          options={[...role_families].sort((a, b) => a.label.localeCompare(b.label))}
           value={prefs.role_families}
           onChange={(v) => onPrefs({ ...prefs, role_families: v })}
         />

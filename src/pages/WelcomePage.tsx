@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowLeft, ArrowRight, Check, LoaderCircle, Sparkles } from 'lucide-react';
@@ -44,15 +44,14 @@ export default function WelcomePage() {
   const [suggested, setSuggested] = useState(false);
 
   // Resume where the user left off.
-  useEffect(() => {
-    if (loaded || !profile.data) return;
+  if (!loaded && profile.data) {
     const p = profile.data;
     if (p.preferences.role_families.length > 0) setPrefs(p.preferences);
     setAnswers(p.answers ?? {});
     setMarkdown(p.markdown);
     setResumeChars(p.resume_chars);
     setLoaded(true);
-  }, [profile.data, loaded]);
+  }
 
   const applySuggestions = (s: Suggestions) => {
     if (touched) return;
@@ -96,7 +95,7 @@ export default function WelcomePage() {
       { markdown, preferences: prefs, answers },
       {
         onSuccess: () => {
-          toast.success('Saved. Matching your jobs now; scores arrive over the next few minutes.');
+          toast.success('Your matches are ready. AI scores fill in as you browse.');
           navigate('/', { replace: true });
         },
       },
@@ -248,7 +247,7 @@ export default function WelcomePage() {
               ) : (
                 <Check className="size-4" />
               )}
-              Save and find my jobs
+              {save.isPending ? 'Finding your matches…' : 'Save and find my jobs'}
             </button>
           )}
         </div>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useJobs, useUpdateApplication } from '../api/hooks';
+import { useJobs, useSettings, useUpdateApplication } from '../api/hooks';
 import type { AppStatus } from '../api/types';
 import { FilterBar, type FilterValues } from '../components/FilterBar';
 import { JobCard } from '../components/JobCard';
@@ -13,7 +13,7 @@ import { ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
 
 const PAGE = 50;
 
-function valuesFromParams(sp: URLSearchParams): FilterValues {
+function valuesFromParams(sp: URLSearchParams, defaultSort: string): FilterValues {
   return {
     q: sp.get('q') ?? '',
     industry: sp.get('industry') ?? '',
@@ -22,7 +22,7 @@ function valuesFromParams(sp: URLSearchParams): FilterValues {
     sponsorship: sp.get('sponsorship') ?? '',
     work_mode: sp.get('work_mode') ?? '',
     status: sp.get('status') ?? '',
-    sort: sp.get('sort') === 'newest' ? 'newest' : 'score',
+    sort: (sp.get('sort') ?? defaultSort) === 'newest' ? 'newest' : 'score',
   };
 }
 
@@ -32,7 +32,8 @@ export default function JobsPage() {
   const navigate = useNavigate();
   const routeId = useParams<{ id?: string }>().id;
 
-  const values = valuesFromParams(searchParams);
+  const settings = useSettings();
+  const values = valuesFromParams(searchParams, settings.data?.default_sort ?? 'score');
   const offset = Number(searchParams.get('offset') ?? 0) || 0;
 
   const params = useMemo(
@@ -42,13 +43,17 @@ export default function JobsPage() {
   const { data, isLoading, error, refetch, isFetching } = useJobs(params);
   const update = useUpdateApplication();
 
-  const jobs = data?.jobs ?? [];
+  const jobs = useMemo(() => data?.jobs ?? [], [data]);
   const drawerId = Number(searchParams.get('job') ?? routeId ?? '') || null;
 
   const [sel, setSel] = useState(0);
-  useEffect(() => {
+  const query = searchParams.toString();
+  const [selQuery, setSelQuery] = useState(query);
+  if (selQuery !== query) {
+    // New filters or page: the selection starts at the top.
+    setSelQuery(query);
     setSel(0);
-  }, [searchParams.toString()]);
+  }
 
   const patchParams = useCallback(
     (patch: Record<string, string | number>, opts?: { keepOffset?: boolean }) => {
@@ -170,17 +175,18 @@ export default function JobsPage() {
         <>
           {/* Dense table (>=640px) */}
           <div className="overflow-x-auto rounded-card border border-border bg-surface">
-            <table className="hidden w-full min-w-[860px] sm:table">
+            {/* Lower-priority columns (industry, mode, first seen) appear on wide screens. */}
+            <table className="hidden w-full min-w-[720px] sm:table">
               <thead>
                 <tr className="border-b border-border text-left text-[10px] font-medium tracking-wide text-faint uppercase">
                   <th className="w-14 px-3 py-2.5">Score</th>
                   <th className="px-3 py-2.5">Title</th>
                   <th className="px-3 py-2.5">Company</th>
-                  <th className="px-3 py-2.5">Industry</th>
+                  <th className="hidden px-3 py-2.5 2xl:table-cell">Industry</th>
                   <th className="px-3 py-2.5">Location</th>
-                  <th className="px-3 py-2.5">Mode</th>
+                  <th className="hidden px-3 py-2.5 2xl:table-cell">Mode</th>
                   <th className="px-3 py-2.5">Sponsorship</th>
-                  <th className="px-3 py-2.5">First seen</th>
+                  <th className="hidden px-3 py-2.5 2xl:table-cell">First seen</th>
                   <th className="px-3 py-2.5">Status</th>
                 </tr>
               </thead>

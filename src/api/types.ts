@@ -39,6 +39,8 @@ export interface Job {
   reason: string | null;
   application_status: AppStatus | null;
   application_notes: string | null;
+  /** Local relevance estimate (35..85) until the AI fit score arrives. */
+  estimated_score: number | null;
 }
 
 export interface DeepGap {
@@ -76,6 +78,8 @@ export interface JobDetail extends Job {
 export interface JobList {
   count: number;
   jobs: Job[];
+  /** Today only: matches still waiting for an AI score. */
+  pending?: number;
 }
 
 export interface DayCount {
@@ -191,6 +195,8 @@ export interface User {
   name: string;
   is_admin: boolean;
   created_at: string;
+  /** Unix time of the profile picture (null when there is none). */
+  avatar_version?: number | null;
 }
 
 export interface Preferences {
@@ -221,6 +227,8 @@ export interface Answers {
 
 export interface Profile {
   markdown: string;
+  resume_text: string;
+  resume_file: { filename: string; uploaded_at: string } | null;
   preferences: Preferences;
   answers: Answers;
   /** Characters of resume text on file; 0 when none was uploaded. */
@@ -256,4 +264,36 @@ export interface Suggestions {
   current_title: string;
   locations: string[];
   target_roles: string;
+}
+
+export interface NotificationSettings {
+  email_digest: boolean;
+  frequency: 'daily' | 'weekly';
+  strong_matches: boolean;
+  min_score: number;
+  product_updates: boolean;
+}
+
+export interface Settings {
+  theme: 'system' | 'light' | 'dark';
+  default_sort: 'score' | 'newest';
+  notifications: NotificationSettings;
+}
+
+export interface HiddenCompany {
+  id: number;
+  name: string;
+  industry: string;
+}
+
+export interface SettingsView extends Settings {
+  hidden_companies: HiddenCompany[];
+}
+
+export interface CoverLetter {
+  body: string;
+  model: string;
+  edited: boolean;
+  created_at: string;
+  updated_at: string;
 }

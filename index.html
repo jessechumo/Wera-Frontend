@@ -4,21 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark light" />
-    <script>
-      // Apply the saved theme before first paint (see src/lib/theme.tsx).
-      (function () {
-        var t = 'system';
-        try { t = localStorage.getItem('wera-theme') || 'system'; } catch (e) {}
-        if (t === 'system') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        document.documentElement.dataset.theme = t;
-        document.documentElement.style.background = t === 'light' ? '#F6F6F3' : '#0A0B0F';
-      })();
-    </script>
+    <!-- Applies the saved theme before first paint; a file, not inline, so the CSP can forbid inline scripts. -->
+    <script src="/theme-init.js"></script>
     <title>wera</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
