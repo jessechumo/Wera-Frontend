@@ -1,14 +1,14 @@
 # Wera Frontend
 
-[![CI](https://github.com/jessechumo/wera-frontend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jessechumo/wera-frontend/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jessechumo/wera-frontend/badges/coverage.json)](https://github.com/jessechumo/wera-frontend/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/jessechumo/wera-frontend?sort=semver&display_name=tag)](https://github.com/jessechumo/wera-frontend/releases)
+[![CI](https://github.com/jessechumo/Wera-Frontend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jessechumo/Wera-Frontend/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jessechumo/Wera-Frontend/badges/coverage.json)](https://github.com/jessechumo/Wera-Frontend/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/jessechumo/Wera-Frontend?sort=semver&display_name=tag)](https://github.com/jessechumo/Wera-Frontend/releases)
 [![Tested with Playwright](https://img.shields.io/badge/e2e-Playwright-2EAD33?logo=playwright&logoColor=white)](e2e)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
-[![License](https://img.shields.io/github/license/jessechumo/wera-frontend)](LICENSE)
+[![License](https://img.shields.io/github/license/jessechumo/Wera-Frontend)](LICENSE)
 
-The dashboard for [Wera](https://github.com/jessechumo/wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume using Coral Bricks.
+The dashboard for [Wera](https://github.com/jessechumo/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume using Coral Bricks.
 
 https://github.com/user-attachments/assets/525e661c-765b-4137-98b7-168d57af9690
 

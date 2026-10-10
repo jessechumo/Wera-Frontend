@@ -72,7 +72,7 @@ jobs:
       - name: Check out the API
         uses: actions/checkout@v4
         with:
-          repository: jessechumo/wera
+          repository: jessechumo/Wera
           ref: ${{ github.base_ref == 'main' && 'main' || 'dev' }}
           path: api
           # Needed only while the API repository is private.
