@@ -61,7 +61,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
           <p className="mt-2 text-sm text-muted">
             {mode === 'login'
               ? 'Welcome back.'
-              : 'Jobs from 400+ companies, scored against your resume.'}
+              : 'Jobs from 500+ companies, from startups to the Fortune 500, scored against your resume.'}
           </p>
         </div>
         <form

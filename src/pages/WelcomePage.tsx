@@ -123,7 +123,7 @@ export default function WelcomePage() {
           {firstName ? `Welcome, ${firstName}.` : 'Welcome.'} Let's find your jobs.
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Wera watches 400+ companies' job boards and scores every new posting against your
+          Wera watches 500+ companies' job boards, from startups to the Fortune 500, and scores every new posting against your
           background. This takes about three minutes.
         </p>
       </div>

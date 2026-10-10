@@ -92,7 +92,7 @@ export function runDuration(started: string, finished: string | null): string {
 }
 
 const REASONS: Record<string, string> = {
-  'title:no_category': 'No matching role category',
+  'title:no_category': 'Not one of your roles',
   'title:senior': 'Senior title',
   'title:sr': 'Senior title',
   'title:staff': 'Staff title',
@@ -107,15 +107,18 @@ const REASONS: Record<string, string> = {
   'title:iii': 'Level III title',
   'location:non_us': 'Non-US location',
   'sponsorship:explicit_no': 'Sponsorship explicitly refused',
-  'llm:sponsorship_no': 'LLM: no sponsorship',
-  'llm:senior': 'LLM: senior role',
-  'llm:non_us': 'LLM: non-US location',
+  'llm:sponsorship_no': 'No sponsorship (AI read)',
+  'llm:senior': 'Senior role (AI read)',
+  'llm:non_us': 'Outside the US (AI read)',
 };
 
 /** Human-readable exclude reason label. */
 export function prettyReason(reason: string): string {
-  if (reason.startsWith('llm:years>')) return `LLM: needs ${reason.slice('llm:years>'.length)}+ years`;
-  return REASONS[reason] ?? reason;
+  if (reason.startsWith('llm:years>')) return `Needs more than ${reason.slice('llm:years>'.length)} years`;
+  if (REASONS[reason]) return REASONS[reason]!;
+  // Any other seniority word the title filter matched, e.g. title:engineering_manager.
+  if (reason.startsWith('title:')) return `${capitalize(reason.slice(6).replace(/_/g, ' '))} title`;
+  return reason;
 }
 
 /**
