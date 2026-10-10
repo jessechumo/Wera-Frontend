@@ -1,6 +1,11 @@
 import { useId } from 'react';
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
+import { useCountUp } from '../lib/useCountUp';
+
+function CountUp({ value }: { value: number }) {
+  return <>{useCountUp(value).toLocaleString()}</>;
+}
 
 /** Tiny inline sparkline; renders nothing for fewer than two points. */
 export function Sparkline({
@@ -83,7 +88,7 @@ export function StatTile({
         <div className="min-w-0">
           <div className="text-xs font-medium text-muted">{label}</div>
           <div className="mt-1.5 font-mono text-2xl font-semibold tabular-nums text-text">
-            {value}
+            {typeof value === 'number' ? <CountUp value={value} /> : value}
           </div>
           {sub != null && <div className="mt-1 text-xs text-faint">{sub}</div>}
           {delta && (
