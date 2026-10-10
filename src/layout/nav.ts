@@ -1,4 +1,12 @@
-import { Activity, Briefcase, EyeOff, ListChecks, Sun, type LucideIcon } from 'lucide-react';
+import {
+  Activity,
+  Briefcase,
+  EyeOff,
+  ListChecks,
+  Sun,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react';
 import { useMe } from '../api/auth';
 
 export interface NavItem {
@@ -13,6 +21,7 @@ const NAV: NavItem[] = [
   { to: '/jobs', label: 'Jobs', icon: Briefcase },
   { to: '/tracker', label: 'Tracker', icon: ListChecks },
   { to: '/excluded', label: 'Excluded', icon: EyeOff },
+  { to: '/profile', label: 'Profile', icon: UserRound },
   { to: '/system', label: 'System', icon: Activity, admin: true },
 ];
 

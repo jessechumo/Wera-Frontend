@@ -6,6 +6,7 @@ import { AppShell } from './layout/AppShell';
 import { RequireAuth } from './auth/RequireAuth';
 import { RequireProfile } from './auth/RequireProfile';
 import WelcomePage from './pages/WelcomePage';
+import ProfilePage from './pages/ProfilePage';
 import AuthPage from './auth/AuthPage';
 import { Toasts } from './lib/toast';
 import TodayPage from './pages/TodayPage';
@@ -42,6 +43,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="tracker" element={<TrackerPage />} />
                 <Route path="system" element={<SystemPage />} />
                 <Route path="excluded" element={<ExcludedPage />} />
+                <Route path="profile" element={<ProfilePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Route>
