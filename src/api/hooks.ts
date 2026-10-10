@@ -49,12 +49,12 @@ function toQuery(params: object): string {
   return s ? `?${s}` : '';
 }
 
-/** The review queue; `fast` polls every 15s (while first scores arrive). */
+/** The review queue; `fast` polls every 4s (while first scores arrive). */
 export function useToday(fast = false) {
   return useQuery({
     queryKey: ['today'],
     queryFn: () => api<JobList>('/api/today'),
-    refetchInterval: fast ? 15_000 : 5 * 60_000,
+    refetchInterval: fast ? 4_000 : 5 * 60_000,
   });
 }
 
@@ -209,5 +209,18 @@ export function useHealth() {
     refetchInterval: 60_000,
     retry: false,
     staleTime: 30_000,
+  });
+}
+
+/** Score one unscored job now (the user opened it); merges into the cache. */
+export function useScoreJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api<Job>(`/api/jobs/${id}/score`, { method: 'POST' }),
+    onSuccess: (job) => {
+      qc.setQueryData<JobDetail>(['job', job.id], (prev) => (prev ? { ...prev, ...job } : prev));
+      void qc.invalidateQueries({ queryKey: ['today'] });
+      void qc.invalidateQueries({ queryKey: ['jobs'] });
+    },
   });
 }

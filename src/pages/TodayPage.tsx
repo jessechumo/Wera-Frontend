@@ -44,15 +44,15 @@ function TopPick({
     >
       <div className="flex flex-wrap items-start gap-4 sm:gap-5">
         <span className="sm:hidden">
-          <ScoreRing score={job.fit_score} size="md" />
+          <ScoreRing score={job.fit_score} estimate={job.estimated_score} size="md" />
         </span>
         <span className="hidden sm:block">
-          <ScoreRing score={job.fit_score} size="lg" />
+          <ScoreRing score={job.fit_score} estimate={job.estimated_score} size="lg" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] font-semibold tracking-widest text-accent uppercase">
-              Top pick
+              {job.fit_score == null ? 'Top estimate' : 'Top pick'}
             </span>
             <StatusPill value={job.application_status} />
           </div>
@@ -103,21 +103,24 @@ function TopPick({
 
 export default function TodayPage() {
   useDocumentTitle('Today');
-  // Right after a profile save the queue fills in over a few minutes.
+  // While matches are still being scored (a new user's first minutes),
+  // estimates fill the list and it refreshes every few seconds as real
+  // scores replace them.
   const profile = useProfile();
   const updatedAt = profile.data?.updated_at;
-  const justSaved = updatedAt != null && Date.now() - new Date(updatedAt).getTime() < 20 * 60_000;
-  const [polling, setPolling] = useState(justSaved);
-  const { data, isLoading, error, refetch } = useToday(polling);
-  useEffect(() => {
-    if (!justSaved || (data && data.jobs.length > 0)) setPolling(false);
-  }, [justSaved, data]);
+  const justSaved = updatedAt != null && Date.now() - new Date(updatedAt).getTime() < 3 * 60_000;
+  const [pending, setPending] = useState(0);
+  const { data, isLoading, error, refetch } = useToday(pending > 0 || justSaved);
+  useEffect(() => setPending(data?.pending ?? 0), [data?.pending]);
+  const estimatedCount = (data?.jobs ?? []).filter((j) => j.fit_score == null).length;
+  const estimating = estimatedCount > 0;
   const stats = useStats();
   const latest = useLatestRun();
   const update = useUpdateApplication();
   const [drawerId, setDrawerId] = useState<number | null>(null);
 
-  const jobs: Job[] = [...(data?.jobs ?? [])].sort((a, b) => (b.fit_score ?? 0) - (a.fit_score ?? 0));
+  // Scored jobs first by fit, then estimates (the API already orders them).
+  const jobs: Job[] = data?.jobs ?? [];
   // /api/today is the review queue (not yet applied to or dismissed), so it
   // includes older jobs; "new" means first seen in the last 24h.
   const dayAgo = Date.now() - 24 * 60 * 60_000;
@@ -156,12 +159,26 @@ export default function TodayPage() {
         <div>
           <h1 className="text-[28px] leading-tight font-semibold">Today</h1>
           <p className="mt-1 text-xs text-muted">
-            {jobs.length} scored {jobs.length === 1 ? 'job' : 'jobs'} to review · {newToday} new in
-            the last 24h
+            {jobs.length} {jobs.length === 1 ? 'match' : 'matches'} to review
+            {estimatedCount > 0 && <> ({estimatedCount} estimated)</>} · {newToday} new in the last 24h
             {lastRun && <> · last run {relTime(lastRun.started_at)}</>}
           </p>
         </div>
       </header>
+
+      {estimating && pending > 0 && (
+        <div className="anim-rise flex items-center gap-3 rounded-card border border-accent-2/25 bg-accent-2/[0.06] px-4 py-3">
+          <LoaderCircle className="size-4 shrink-0 animate-spin text-accent-2" />
+          <div className="min-w-0 text-xs">
+            <span className="font-medium text-text">Scoring your matches</span>
+            <span className="text-muted">
+              {' '}
+              · {pending.toLocaleString()} to go. Your best estimated matches are shown meanwhile and
+              update as AI scores arrive; open any job to score it right away.
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatTile label="New today" value={newToday} accent spark={spark} delta={delta} />
@@ -177,7 +194,7 @@ export default function TodayPage() {
           message={error instanceof Error ? error.message : 'unknown error'}
           onRetry={() => void refetch()}
         />
-      ) : jobs.length === 0 && justSaved ? (
+      ) : jobs.length === 0 && (justSaved || pending > 0) ? (
         <EmptyState
           icon={<LoaderCircle className="size-5 animate-spin text-accent" />}
           title="Scoring your matches"

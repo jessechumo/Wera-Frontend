@@ -12,7 +12,7 @@ import {
   MapPin,
   X,
 } from 'lucide-react';
-import { useJob, useUpdateApplication } from '../api/hooks';
+import { useJob, useScoreJob, useUpdateApplication } from '../api/hooks';
 import type { AppStatus, DeepAnalysis, JobDetail } from '../api/types';
 import { ScoreRing } from './ScoreRing';
 import { Badge } from './Badge';
@@ -118,7 +118,7 @@ function DeepSection({ deep }: { deep: DeepAnalysis }) {
 }
 
 /** Right column: the fit analysis, facts, and the user's application. */
-function Insights({ job }: { job: JobDetail }) {
+function Insights({ job, scoring }: { job: JobDetail; scoring: boolean }) {
   const update = useUpdateApplication();
   const [notes, setNotes] = useState<string | null>(null); // null: mirror the server
   useEffect(() => setNotes(null), [job.id]);
@@ -134,7 +134,27 @@ function Insights({ job }: { job: JobDetail }) {
 
   return (
     <>
-      {job.fit_score != null ? (
+      {job.fit_score == null && (scoring || job.estimated_score != null) ? (
+        <div className="flex items-start gap-4 px-5 py-5">
+          <ScoreRing score={null} estimate={job.estimated_score} size="lg" />
+          <div className="min-w-0 flex-1">
+            <div className="text-sm font-semibold text-text">
+              {scoring ? 'Scoring this job…' : 'Estimated match'}
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-muted">
+              {scoring
+                ? 'Reading the posting against your profile. This takes a couple of seconds.'
+                : 'Estimated from your profile. The AI score arrives with the next scoring pass.'}
+            </p>
+            {scoring && (
+              <div className="mt-3 space-y-1.5">
+                <div className="skeleton h-2.5 w-full" />
+                <div className="skeleton h-2.5 w-4/5" />
+              </div>
+            )}
+          </div>
+        </div>
+      ) : job.fit_score != null ? (
         <div className="flex items-start gap-4 px-5 py-5">
           <ScoreRing score={job.fit_score} size="lg" />
           <div className="min-w-0">
@@ -263,6 +283,16 @@ export function JobDrawer({
 }) {
   const { data: job, isLoading, error } = useJob(jobId);
   const update = useUpdateApplication();
+  const score = useScoreJob();
+
+  // An unscored job gets its AI score the moment it is opened.
+  const requested = useRef(new Set<number>());
+  useEffect(() => {
+    if (job && job.fit_score == null && job.stage === 'pending_score' && !requested.current.has(job.id)) {
+      requested.current.add(job.id);
+      score.mutate(job.id);
+    }
+  }, [job, score]);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollers = useRef<(HTMLElement | null)[]>([]);
 
@@ -392,7 +422,11 @@ export function JobDrawer({
             }}
             className="order-1 border-border bg-surface-2/35 md:order-2 md:overflow-y-auto md:border-l"
           >
-            {job ? <Insights job={job} /> : isLoading ? <Skeleton className="m-5 h-40" /> : null}
+            {job ? (
+              <Insights job={job} scoring={score.isPending && score.variables === job.id} />
+            ) : isLoading ? (
+              <Skeleton className="m-5 h-40" />
+            ) : null}
           </aside>
         </div>
 

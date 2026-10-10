@@ -39,6 +39,8 @@ export interface Job {
   reason: string | null;
   application_status: AppStatus | null;
   application_notes: string | null;
+  /** Local relevance estimate (35..85) until the AI fit score arrives. */
+  estimated_score: number | null;
 }
 
 export interface DeepGap {
@@ -76,6 +78,8 @@ export interface JobDetail extends Job {
 export interface JobList {
   count: number;
   jobs: Job[];
+  /** Today only: matches still waiting for an AI score. */
+  pending?: number;
 }
 
 export interface DayCount {

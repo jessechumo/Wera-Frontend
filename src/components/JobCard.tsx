@@ -43,7 +43,7 @@ export function JobCard({
       style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
     >
       <div className="flex items-start gap-4">
-        <ScoreRing score={job.fit_score} />
+        <ScoreRing score={job.fit_score} estimate={job.estimated_score} />
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">

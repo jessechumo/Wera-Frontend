@@ -96,7 +96,7 @@ export default function WelcomePage() {
       { markdown, preferences: prefs, answers },
       {
         onSuccess: () => {
-          toast.success('Saved. Matching your jobs now; scores arrive over the next few minutes.');
+          toast.success('Your matches are ready. AI scores fill in as you browse.');
           navigate('/', { replace: true });
         },
       },
@@ -248,7 +248,7 @@ export default function WelcomePage() {
               ) : (
                 <Check className="size-4" />
               )}
-              Save and find my jobs
+              {save.isPending ? 'Finding your matches…' : 'Save and find my jobs'}
             </button>
           )}
         </div>

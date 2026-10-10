@@ -33,7 +33,13 @@ export function JobRow({
     >
       <td className="px-3 py-2.5">
         <span className={clsx('font-mono text-sm font-semibold', verdictColor[verdict])}>
-          {job.fit_score ?? '—'}
+          {job.fit_score ?? (job.estimated_score != null ? (
+            <span className="text-faint" title="Estimated; the AI score is on its way">
+              ~{job.estimated_score}
+            </span>
+          ) : (
+            '—'
+          ))}
         </span>
       </td>
       <td className="max-w-72 truncate px-3 py-2.5 text-sm font-medium text-text">{job.title}</td>
