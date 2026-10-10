@@ -11,10 +11,11 @@ Each user signs up, uploads a resume, and answers a few questions; the AI drafts
 ## Features
 
 - **Accounts:** sign up and log in; the session is an HTTP-only cookie set by the API
-- **Setup:** resume upload (PDF or pasted text), role families, seniority, work authorization, locations, industries, then an AI-drafted profile to review
+- **Light and dark themes:** follows the system until you pick one
+- **Setup:** resume upload (PDF or pasted text) that pre-fills roles, seniority, experience and locations; a location autocomplete; work authorization and industries; then an AI-drafted profile to review
 - **Today:** your review queue ranked by fit score, with sponsorship and work-mode badges
 - **Jobs:** filterable, searchable table with keyboard navigation (`j`/`k` to move, `Enter` to open, `o` to open the posting)
-- **Job detail:** fit score, reasoning, skills matched and missing, and the sponsorship quote
+- **Job detail:** the full posting beside the fit score, reasoning, skills you have and lack, and your status and notes; arrow keys step through the list
 - **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected
 - **Industries:** your matches in each of 23 industries, and every company Wera watches there
 - **Profile:** change preferences, profile text, resume, and password; see this month's AI spend
