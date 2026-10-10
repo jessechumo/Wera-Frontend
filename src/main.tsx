@@ -8,6 +8,7 @@ import { RequireProfile } from './auth/RequireProfile';
 import { RequireAdmin } from './auth/RequireAdmin';
 import WelcomePage from './pages/WelcomePage';
 import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
@@ -51,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
                 </Route>
                 <Route path="excluded" element={<ExcludedPage />} />
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Route>

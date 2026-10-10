@@ -4,6 +4,7 @@ import {
   Factory,
   EyeOff,
   ListChecks,
+  Settings,
   Sun,
   UserRound,
   type LucideIcon,
@@ -25,6 +26,7 @@ const NAV: NavItem[] = [
   { to: '/industries', label: 'Industries', icon: Factory, mobile: true },
   { to: '/tracker', label: 'Tracker', icon: ListChecks, mobile: true },
   { to: '/profile', label: 'Profile', icon: UserRound, mobile: true },
+  { to: '/settings', label: 'Settings', icon: Settings },
   { to: '/excluded', label: 'Excluded', icon: EyeOff },
   { to: '/system', label: 'System', icon: Activity, admin: true },
 ];

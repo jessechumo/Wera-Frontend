@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import { useJobs, useUpdateApplication } from '../api/hooks';
+import { useJobs, useSettings, useUpdateApplication } from '../api/hooks';
 import type { AppStatus } from '../api/types';
 import { FilterBar, type FilterValues } from '../components/FilterBar';
 import { JobCard } from '../components/JobCard';
@@ -13,7 +13,7 @@ import { ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
 
 const PAGE = 50;
 
-function valuesFromParams(sp: URLSearchParams): FilterValues {
+function valuesFromParams(sp: URLSearchParams, defaultSort: string): FilterValues {
   return {
     q: sp.get('q') ?? '',
     industry: sp.get('industry') ?? '',
@@ -22,7 +22,7 @@ function valuesFromParams(sp: URLSearchParams): FilterValues {
     sponsorship: sp.get('sponsorship') ?? '',
     work_mode: sp.get('work_mode') ?? '',
     status: sp.get('status') ?? '',
-    sort: sp.get('sort') === 'newest' ? 'newest' : 'score',
+    sort: (sp.get('sort') ?? defaultSort) === 'newest' ? 'newest' : 'score',
   };
 }
 
@@ -32,7 +32,8 @@ export default function JobsPage() {
   const navigate = useNavigate();
   const routeId = useParams<{ id?: string }>().id;
 
-  const values = valuesFromParams(searchParams);
+  const settings = useSettings();
+  const values = valuesFromParams(searchParams, settings.data?.default_sort ?? 'score');
   const offset = Number(searchParams.get('offset') ?? 0) || 0;
 
   const params = useMemo(
