@@ -198,7 +198,7 @@ export default function ProfilePage() {
             />
           </Card>
         </div>
-        <div className="space-y-5">
+        <div className="space-y-5 lg:sticky lg:top-20 lg:self-start">
           <Card title="Resume" hint="Upload a new version, then redraft the profile text.">
             <ResumeUpload resumeChars={resumeChars} onUploaded={setResumeChars} />
           </Card>
