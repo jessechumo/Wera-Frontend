@@ -4,6 +4,8 @@ import type { Answers, Preferences, WorkAuthorization } from '../api/types';
 import { Field, INPUT_CLS } from '../auth/AuthPage';
 import { Skeleton } from '../components/States';
 import { ChipSelect } from './ChipSelect';
+import { LocationPicker } from './LocationPicker';
+import { LOCATION_SEPARATOR, splitLocations } from './places';
 
 const WORK_AUTH: { id: WorkAuthorization; label: string }[] = [
   { id: 'citizen_or_resident', label: 'U.S. citizen or green card' },
@@ -173,14 +175,14 @@ export function PreferencesFields({
 
       <Section title="Where and how">
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Locations">
-            <input
-              value={answers.locations ?? ''}
-              onChange={(e) => onAnswers({ ...answers, locations: e.target.value })}
-              placeholder="e.g. Dallas, Seattle, or anywhere in the US"
-              className={INPUT_CLS}
+          <div className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-muted">Locations</span>
+            <LocationPicker
+              value={splitLocations(answers.locations)}
+              onChange={(v) => onAnswers({ ...answers, locations: v.join(LOCATION_SEPARATOR) })}
             />
-          </Field>
+            <span className="text-[11px] text-faint">Pick as many as you like.</span>
+          </div>
           <Field label="Work modes">
             <ChipSelect
               label="Work modes"
