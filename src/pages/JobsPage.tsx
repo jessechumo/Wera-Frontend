@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useJobs, useUpdateApplication } from '../api/hooks';
 import type { AppStatus } from '../api/types';
 import { FilterBar, type FilterValues } from '../components/FilterBar';
@@ -9,7 +9,7 @@ import { JobRow } from '../components/JobRow';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { stepId } from '../lib/format';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
 
 const PAGE = 50;
 
@@ -136,6 +136,12 @@ export default function JobsPage() {
             opens · <span className="font-mono">o</span> opens posting
           </p>
         </div>
+        <Link
+          to="/excluded"
+          className="inline-flex items-center gap-1.5 self-end rounded-lg px-2 py-1 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-text"
+        >
+          <EyeOff className="size-3.5" /> Excluded jobs
+        </Link>
       </header>
 
       <FilterBar

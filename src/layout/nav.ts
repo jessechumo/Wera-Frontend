@@ -15,15 +15,17 @@ export interface NavItem {
   label: string;
   icon: LucideIcon;
   admin?: boolean;
+  /** Shown in the phone bottom bar (the rest live in the ⌘K palette). */
+  mobile?: boolean;
 }
 
 const NAV: NavItem[] = [
-  { to: '/', label: 'Today', icon: Sun },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase },
-  { to: '/industries', label: 'Industries', icon: Factory },
-  { to: '/tracker', label: 'Tracker', icon: ListChecks },
+  { to: '/', label: 'Today', icon: Sun, mobile: true },
+  { to: '/jobs', label: 'Jobs', icon: Briefcase, mobile: true },
+  { to: '/industries', label: 'Industries', icon: Factory, mobile: true },
+  { to: '/tracker', label: 'Tracker', icon: ListChecks, mobile: true },
   { to: '/excluded', label: 'Excluded', icon: EyeOff },
-  { to: '/profile', label: 'Profile', icon: UserRound },
+  { to: '/profile', label: 'Profile', icon: UserRound, mobile: true },
   { to: '/system', label: 'System', icon: Activity, admin: true },
 ];
 

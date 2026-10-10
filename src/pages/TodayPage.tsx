@@ -42,8 +42,13 @@ function TopPick({
       aria-label={`Top pick: ${job.title} at ${job.company}`}
       className="anim-rise group cursor-pointer rounded-card border border-accent/25 bg-surface p-5 transition-colors duration-150 hover:border-accent/50"
     >
-      <div className="flex flex-wrap items-start gap-5">
-        <ScoreRing score={job.fit_score} size="lg" />
+      <div className="flex flex-wrap items-start gap-4 sm:gap-5">
+        <span className="sm:hidden">
+          <ScoreRing score={job.fit_score} size="md" />
+        </span>
+        <span className="hidden sm:block">
+          <ScoreRing score={job.fit_score} size="lg" />
+        </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] font-semibold tracking-widest text-accent uppercase">
@@ -51,7 +56,7 @@ function TopPick({
             </span>
             <StatusPill value={job.application_status} />
           </div>
-          <h2 className="mt-1.5 truncate text-lg font-semibold text-text">{job.title}</h2>
+          <h2 className="mt-1.5 line-clamp-2 text-lg leading-snug font-semibold text-text">{job.title}</h2>
           <div className="mt-0.5 truncate text-sm text-muted">{job.company}</div>
           {job.reason && (
             <p className="mt-2 line-clamp-3 max-w-2xl text-xs leading-relaxed text-muted">
@@ -60,7 +65,7 @@ function TopPick({
           )}
           <div className="mt-2.5 text-[11px] text-faint">{meta || '—'}</div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex w-full flex-wrap items-center gap-1.5 whitespace-nowrap sm:w-auto">
           <a
             href={job.url}
             target="_blank"

@@ -185,25 +185,7 @@ export function AppShell() {
             <span className="lg:hidden">
               <Logo />
             </span>
-            {/* Mobile nav */}
-            <nav className="flex flex-1 items-center gap-1 lg:hidden">
-              {nav.map(({ to, label, icon: Icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={to === '/'}
-                  aria-label={label}
-                  className={({ isActive }) =>
-                    clsx(
-                      'rounded-lg p-2 transition-colors duration-150',
-                      isActive ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-surface-2',
-                    )
-                  }
-                >
-                  <Icon className="size-4" />
-                </NavLink>
-              ))}
-            </nav>
+            <span className="flex-1 lg:hidden" />
             <div className="ml-auto flex items-center gap-3">
               <button
                 onClick={() => setPaletteOpen(true)}
@@ -222,12 +204,37 @@ export function AppShell() {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 md:px-6 md:py-6">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-24 md:px-6 md:pt-6 lg:pb-6">
           <div key={location.pathname} className="route-enter">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {/* Bottom tab bar (phones and tablets) */}
+      <nav
+        aria-label="Main"
+        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      >
+        {nav
+          .filter((n) => n.mobile)
+          .map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                clsx(
+                  'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors duration-150',
+                  isActive ? 'text-accent' : 'text-faint hover:text-text',
+                )
+              }
+            >
+              <Icon className="size-5" />
+              {label}
+            </NavLink>
+          ))}
+      </nav>
 
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
     </div>

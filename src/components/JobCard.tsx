@@ -39,7 +39,7 @@ export function JobCard({
       tabIndex={0}
       role="button"
       aria-label={`${job.title} at ${job.company}`}
-      className="group anim-rise cursor-pointer rounded-card border border-border bg-surface p-4 transition-colors duration-150 hover:border-accent/40 focus-visible:border-accent/40"
+      className="group anim-rise min-w-0 cursor-pointer rounded-card border border-border bg-surface p-4 transition-colors duration-150 hover:border-accent/40 focus-visible:border-accent/40"
       style={{ animationDelay: `${Math.min(index * 40, 400)}ms` }}
     >
       <div className="flex items-start gap-4">
