@@ -132,6 +132,47 @@
     transform: translateX(100%);
   }
 }
+/* Cards: soft shadow in light mode, a gentle lift on hover everywhere. */
+.rounded-card,
+.rounded-xl {
+  box-shadow: var(--shadow-card, none);
+  transition:
+    box-shadow 200ms ease,
+    transform 200ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 150ms ease;
+}
+.cursor-pointer.rounded-card:hover,
+a.rounded-card:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card-hover, 0 10px 30px -12px rgb(0 0 0 / 0.5));
+}
+button:not(:disabled):active,
+a.inline-flex:active {
+  transform: scale(0.98);
+}
+
+/* Theme switch: a circular reveal (View Transitions), or a short color
+   crossfade where that API is missing. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition:
+    background-color 350ms ease,
+    border-color 350ms ease,
+    color 350ms ease,
+    fill 350ms ease,
+    stroke 350ms ease !important;
+}
+
 @keyframes modal-in {
   from {
     opacity: 0;
