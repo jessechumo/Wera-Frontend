@@ -1,12 +1,23 @@
 import clsx from 'clsx';
-import type { User } from '../api/types';
 
-/** The user's picture, or their initial on an accent disc. */
-export function Avatar({ user, size = 28, className }: { user: User; size?: number; className?: string }) {
-  const initial = (user.name || user.email).slice(0, 1).toUpperCase();
+interface Person {
+  id: number;
+  name: string;
+  email?: string;
+  avatar_version?: number | null;
+}
+
+/**
+ * A person's picture, or their initial on an accent disc. `self` reads the
+ * signed-in user's own picture; others come from /api/users/{id}/avatar.
+ */
+export function Avatar({ user, size = 28, className, self = true }: {
+  user: Person; size?: number; className?: string; self?: boolean;
+}) {
+  const initial = (user.name || user.email || '?').slice(0, 1).toUpperCase();
   return user.avatar_version ? (
     <img
-      src={`/api/profile/avatar?v=${user.avatar_version}`}
+      src={`${self ? '/api/profile/avatar' : `/api/users/${user.id}/avatar`}?v=${user.avatar_version}`}
       alt=""
       width={size}
       height={size}

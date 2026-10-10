@@ -9,6 +9,9 @@ import { RequireAdmin } from './auth/RequireAdmin';
 import WelcomePage from './pages/WelcomePage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
+import CommunityPage from './pages/CommunityPage';
+import PostPage from './pages/PostPage';
+import NewPostPage from './pages/NewPostPage';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
@@ -47,6 +50,9 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="industries" element={<IndustriesPage />} />
                 <Route path="industries/:id" element={<IndustryPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
+                <Route path="community" element={<CommunityPage />} />
+                <Route path="community/new" element={<NewPostPage />} />
+                <Route path="community/:id" element={<PostPage />} />
                 <Route element={<RequireAdmin />}>
                   <Route path="system" element={<SystemPage />} />
                 </Route>
