@@ -23,6 +23,7 @@ import { ScoreRing } from './ScoreRing';
 import { Badge } from './Badge';
 import { Description } from './Description';
 import {
+  AddedBadge,
   CategoryChips,
   IndustryBadge,
   SponsorshipBadge,
@@ -225,7 +226,7 @@ function Insights({ job, scoring }: { job: JobDetail; scoring: boolean }) {
             <span title={absTime(job.first_seen_at)}>{relTime(job.first_seen_at)}</span>
           </Fact>
           <Fact label="Source">
-            <span className="font-mono">{job.source}</span>
+            {job.source === 'manual' ? <AddedBadge source={job.source} /> : <span className="font-mono">{job.source}</span>}
           </Fact>
         </div>
         {job.matched_categories.length > 0 && <CategoryChips cats={job.matched_categories} className="mt-3" />}

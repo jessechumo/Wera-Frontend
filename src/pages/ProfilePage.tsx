@@ -12,6 +12,7 @@ import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ProfileEditor } from '../profile/ProfileEditor';
 import { DEFAULT_PREFS, PreferencesFields, prefsProblem } from '../profile/PreferencesFields';
 import { ResumeUpload } from '../profile/ResumeUpload';
+import { ApplicationDetails } from '../profile/ApplicationDetails';
 
 function errorText(err: unknown): string | null {
   if (!err) return null;
@@ -207,6 +208,11 @@ export default function ProfilePage() {
               onAnswers={edit(setAnswers)}
             />
           </Card>
+          <div id="application" className="scroll-mt-20">
+            <Card title="Application details" hint="Filled into job applications by the Chrome extension.">
+              <ApplicationDetails />
+            </Card>
+          </div>
           <Card title="Profile text">
             <ProfileEditor
               value={markdown}

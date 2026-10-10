@@ -11,6 +11,12 @@ export function SponsorshipBadge({ value }: { value: Job['sponsorship'] }) {
   return <Badge>Sponsorship unknown</Badge>;
 }
 
+/** Marks a job the user saved from a web page with the Chrome extension. */
+export function AddedBadge({ source }: { source: string }) {
+  if (source !== 'manual') return null;
+  return <Badge variant="accent">Added by you</Badge>;
+}
+
 export function WorkModeBadge({ value }: { value: Job['work_mode'] }) {
   if (!value) return null;
   const label = value === 'remote' ? 'Remote' : value === 'hybrid' ? 'Hybrid' : 'Onsite';

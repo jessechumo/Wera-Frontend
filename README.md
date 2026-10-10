@@ -32,7 +32,8 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
 - **Interview prep:** quick A to D quizzes by topic and difficulty, with explanations
 - **Community:** a Medium-style blog with tags, reactions and comments; posts are reviewed by an AI moderator before they go live
 - **Profile:** photo, resume (view, download, see the extracted text), preferences and profile text
-- **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, password, CSV export, account deletion
+- **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/jessechumo/wera-extension)), password, CSV export, account deletion
+- **Application details:** what job applications ask beyond your profile (contact, links, work authorization, education, voluntary self-identification), filled into forms by the extension; can be pre-filled from your resume
 - **System (admins):** runs, company fetch status, every user's spend, tokens, cache hit rate, and cost
 - **Excluded:** every filtered job with the reason and evidence
 - **Polish:** a sun and moon toggle with a circular reveal between themes, a soft light palette, count-up stats, staggered entrances, all respecting reduced motion

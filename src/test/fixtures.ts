@@ -28,6 +28,15 @@ export const profile: Profile = {
   updated_at: '2026-10-01T00:00:00Z',
 };
 
+export const applicant = {
+  first_name: 'Ada', last_name: 'Lovelace', preferred_name: '', email: 'ada@example.com', phone: '', address: '',
+  city: '', state: '', postal_code: '', country: '', linkedin: '', github: '', portfolio: '', current_company: '',
+  current_title: 'SRE intern', years_experience: '', school: '', degree: '', major: '', graduation_year: '', gpa: '',
+  authorized_to_work: 'yes', needs_sponsorship: 'yes', willing_to_relocate: '', salary_expectation: '', start_date: '',
+  how_heard: 'Company website', gender: 'decline', pronouns: '', race: 'decline', hispanic: 'decline', veteran: 'decline',
+  disability: 'decline',
+};
+
 export const options = {
   role_families: [
     { id: 'sre', label: 'Site reliability' },
@@ -78,6 +87,8 @@ export function stubApi(overrides: Record<string, Handler> = {}) {
       theme: 'system', default_sort: 'score', hidden_companies: [],
       notifications: { email_digest: true, frequency: 'daily', strong_matches: true, min_score: 80, product_updates: false },
     }),
+    'GET /api/applicant': () => ({ applicant: applicant, saved: false }),
+    'GET /api/ext/tokens': () => ({ connections: [] }),
     // Every listed job opens with the fixture detail (description etc.).
     ...Object.fromEntries(
       [...jobs.jobs, ...today.jobs, ...excluded.jobs, job].flatMap((j) => [

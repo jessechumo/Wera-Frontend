@@ -41,3 +41,24 @@ describe('SettingsPage', () => {
     );
   });
 });
+
+describe('SettingsPage: Chrome extension', () => {
+  it('lists connected browsers and disconnects one', async () => {
+    let connections = [{ id: 4, name: 'Chrome on Linux', created_at: '2026-10-01T00:00:00Z', last_used_at: null }];
+    mockApi({
+      'GET /api/auth/me': () => ({ user: { id: 1, email: 'a@example.com', name: 'A', is_admin: false, created_at: '' }, avatar_version: null }),
+      'GET /api/settings': () => settings,
+      'GET /api/industries': () => ({ industries: [] }),
+      'GET /api/ext/tokens': () => ({ connections }),
+      'DELETE /api/ext/tokens/4': () => {
+        connections = [];
+        return undefined;
+      },
+    });
+    renderApp(<SettingsPage />);
+    expect(await screen.findByText('Chrome on Linux')).toBeInTheDocument();
+    expect(screen.getByText(/not used yet/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Disconnect' }));
+    expect(await screen.findByText(/No browser connected/)).toBeInTheDocument();
+  });
+});
