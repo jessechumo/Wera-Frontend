@@ -1,6 +1,7 @@
 import {
   Activity,
   Briefcase,
+  Factory,
   EyeOff,
   ListChecks,
   Sun,
@@ -19,6 +20,7 @@ export interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', label: 'Today', icon: Sun },
   { to: '/jobs', label: 'Jobs', icon: Briefcase },
+  { to: '/industries', label: 'Industries', icon: Factory },
   { to: '/tracker', label: 'Tracker', icon: ListChecks },
   { to: '/excluded', label: 'Excluded', icon: EyeOff },
   { to: '/profile', label: 'Profile', icon: UserRound },

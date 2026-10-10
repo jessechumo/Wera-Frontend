@@ -7,6 +7,8 @@ import { RequireAuth } from './auth/RequireAuth';
 import { RequireProfile } from './auth/RequireProfile';
 import WelcomePage from './pages/WelcomePage';
 import ProfilePage from './pages/ProfilePage';
+import IndustriesPage from './pages/IndustriesPage';
+import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
 import { Toasts } from './lib/toast';
 import TodayPage from './pages/TodayPage';
@@ -40,6 +42,8 @@ createRoot(document.getElementById('root')!).render(
                 <Route index element={<TodayPage />} />
                 <Route path="jobs" element={<JobsPage />} />
                 <Route path="jobs/:id" element={<JobsPage />} />
+                <Route path="industries" element={<IndustriesPage />} />
+                <Route path="industries/:id" element={<IndustryPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
                 <Route path="system" element={<SystemPage />} />
                 <Route path="excluded" element={<ExcludedPage />} />
