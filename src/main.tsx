@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppShell } from './layout/AppShell';
 import { RequireAuth } from './auth/RequireAuth';
 import { RequireProfile } from './auth/RequireProfile';
+import { RequireAdmin } from './auth/RequireAdmin';
 import WelcomePage from './pages/WelcomePage';
 import ProfilePage from './pages/ProfilePage';
 import IndustriesPage from './pages/IndustriesPage';
@@ -45,7 +46,9 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="industries" element={<IndustriesPage />} />
                 <Route path="industries/:id" element={<IndustryPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
-                <Route path="system" element={<SystemPage />} />
+                <Route element={<RequireAdmin />}>
+                  <Route path="system" element={<SystemPage />} />
+                </Route>
                 <Route path="excluded" element={<ExcludedPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
