@@ -10,6 +10,7 @@ import { JobRow } from '../components/JobRow';
 import { StatTile } from '../components/StatTile';
 import { EmptyState, ErrorState, Skeleton, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { stepId } from '../lib/format';
 
 /** Public careers page for a company's job board. */
 function boardURL(c: Company): string {
@@ -115,6 +116,8 @@ export default function IndustryPage() {
   useDocumentTitle(ind?.label ?? 'Industry');
   const [tab, setTab] = useState<'matches' | 'companies'>('matches');
   const [drawerId, setDrawerId] = useState<number | null>(null);
+  // Same query as the Matches tab (shared cache), for previous/next.
+  const matches = useJobs({ industry: id, min_score: 1, limit: 100, sort: 'score' });
 
   if (industries.isLoading) return <Skeleton className="h-64 w-full" />;
   if (!ind) return <Navigate to="/industries" replace />;
@@ -160,7 +163,16 @@ export default function IndustryPage() {
 
       {tab === 'matches' ? <Matches industry={ind.id} onOpen={setDrawerId} /> : <Companies industry={ind.id} />}
 
-      {drawerId != null && <JobDrawer jobId={drawerId} onClose={() => setDrawerId(null)} />}
+      {drawerId != null && (
+        <JobDrawer
+          jobId={drawerId}
+          onClose={() => setDrawerId(null)}
+          onNavigate={(dir) => {
+            const next = stepId((matches.data?.jobs ?? []).map((j) => j.id), drawerId, dir);
+            if (next != null) setDrawerId(next);
+          }}
+        />
+      )}
     </div>
   );
 }

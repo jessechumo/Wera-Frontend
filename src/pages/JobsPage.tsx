@@ -8,6 +8,7 @@ import { JobDrawer } from '../components/JobDrawer';
 import { JobRow } from '../components/JobRow';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { stepId } from '../lib/format';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PAGE = 50;
@@ -228,7 +229,19 @@ export default function JobsPage() {
         </>
       )}
 
-      {drawerId != null && <JobDrawer jobId={drawerId} onClose={closeDrawer} />}
+      {drawerId != null && (
+        <JobDrawer
+          jobId={drawerId}
+          onClose={closeDrawer}
+          onNavigate={(dir) => {
+            const next = stepId(jobs.map((j) => j.id), drawerId, dir);
+            if (next != null) {
+              setSel(jobs.findIndex((j) => j.id === next));
+              openDrawer(next);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

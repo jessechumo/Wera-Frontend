@@ -18,6 +18,22 @@ export function useProfileOptions() {
   });
 }
 
+/** Maps a matched category id (a role family or title override) to a label. */
+export function useFamilyLabel(): (id: string) => string {
+  const { data } = useProfileOptions();
+  const labels = new Map((data?.role_families ?? []).map((f) => [f.id, f.label]));
+  return (id) =>
+    labels.get(id) ??
+    labels.get(OVERRIDE_FAMILY[id] ?? '') ??
+    id.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+}
+
+/** Title overrides (roles.yaml) are reported under their own ids. */
+const OVERRIDE_FAMILY: Record<string, string> = {
+  mts_infra: 'infrastructure',
+  mts_software: 'software_engineering',
+};
+
 export function useMyUsage() {
   return useQuery({
     queryKey: ['usage', 'me'],

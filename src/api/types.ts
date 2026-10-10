@@ -68,6 +68,8 @@ export interface DeepAnalysis {
 }
 
 export interface JobDetail extends Job {
+  /** Plain text: paragraphs separated by blank lines. */
+  description: string;
   deep: DeepAnalysis | null;
 }
 

@@ -124,3 +124,10 @@ export function shortLocation(job: { location_summary: string | null; location_r
   if (!loc) return '—';
   return loc.split(';')[0]!.trim();
 }
+
+/** The id dir steps away from current in ids, or null at either end. */
+export function stepId(ids: number[], current: number, dir: -1 | 1): number | null {
+  const i = ids.indexOf(current);
+  if (i < 0) return null;
+  return ids[i + dir] ?? null;
+}

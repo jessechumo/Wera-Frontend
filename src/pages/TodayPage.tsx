@@ -9,7 +9,7 @@ import { ScoreRing } from '../components/ScoreRing';
 import { StatTile } from '../components/StatTile';
 import { StatusPill } from '../components/JobBadges';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
-import { relTime, shortLocation } from '../lib/format';
+import { relTime, shortLocation, stepId } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 
@@ -203,7 +203,16 @@ export default function TodayPage() {
         </>
       )}
 
-      {drawerId != null && <JobDrawer jobId={drawerId} onClose={() => setDrawerId(null)} />}
+      {drawerId != null && (
+        <JobDrawer
+          jobId={drawerId}
+          onClose={() => setDrawerId(null)}
+          onNavigate={(dir) => {
+            const next = stepId(jobs.map((j) => j.id), drawerId, dir);
+            if (next != null) setDrawerId(next);
+          }}
+        />
+      )}
     </div>
   );
 }
