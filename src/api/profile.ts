@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
-import type { Answers, MyUsage, Preferences, Profile, ProfileOptions } from './types';
+import type { Answers, MyUsage, Preferences, Profile, ProfileOptions, Suggestions } from './types';
 
 export function useProfile() {
   return useQuery({
@@ -46,6 +46,15 @@ export interface ProfileInput {
   markdown?: string;
   preferences: Preferences;
   answers: Answers;
+}
+
+/** Ask the AI what the resume suggests for the form; nothing is saved. */
+export function useSuggestPreferences() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api<Suggestions>('/api/profile/suggest', { method: 'POST' }),
+    onSettled: () => void qc.invalidateQueries({ queryKey: ['usage', 'me'] }),
+  });
 }
 
 /** Ask the AI to draft profile text; nothing is saved. */

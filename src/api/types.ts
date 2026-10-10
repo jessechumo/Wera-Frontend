@@ -245,3 +245,13 @@ export interface MyUsage {
   month_spend_usd: number;
   remaining_usd: number;
 }
+
+/** Preferences the AI read off the resume (POST /api/profile/suggest). */
+export interface Suggestions {
+  role_families: string[];
+  levels: string[];
+  years_experience: number | null;
+  current_title: string;
+  locations: string[];
+  target_roles: string;
+}

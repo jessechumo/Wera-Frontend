@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
-import { ArrowLeft, ArrowRight, Check, LoaderCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, LoaderCircle, Sparkles } from 'lucide-react';
 import { useMe } from '../api/auth';
 import { ApiError } from '../api/client';
-import { useDraftProfile, useProfile, useSaveProfile } from '../api/profile';
-import type { Answers, Preferences } from '../api/types';
+import { useDraftProfile, useProfile, useSaveProfile, useSuggestPreferences } from '../api/profile';
+import type { Answers, Preferences, Suggestions } from '../api/types';
+import { LOCATION_SEPARATOR, toPlace } from '../profile/places';
 import { ProfileEditor } from '../profile/ProfileEditor';
 import { DEFAULT_PREFS, PreferencesFields, prefsProblem } from '../profile/PreferencesFields';
 import { ResumeUpload } from '../profile/ResumeUpload';
@@ -37,6 +38,10 @@ export default function WelcomePage() {
   const [markdown, setMarkdown] = useState('');
   const [resumeChars, setResumeChars] = useState(0);
   const [loaded, setLoaded] = useState(false);
+  // Resume suggestions fill step 2 only until the user edits it themselves.
+  const suggest = useSuggestPreferences();
+  const [touched, setTouched] = useState(false);
+  const [suggested, setSuggested] = useState(false);
 
   // Resume where the user left off.
   useEffect(() => {
@@ -49,6 +54,30 @@ export default function WelcomePage() {
     setLoaded(true);
   }, [profile.data, loaded]);
 
+  const applySuggestions = (s: Suggestions) => {
+    if (touched) return;
+    setPrefs((p) => ({
+      ...p,
+      role_families: s.role_families.length ? s.role_families : p.role_families,
+      levels: s.levels.length ? s.levels : p.levels,
+      // Leave room above their experience: 3 years in -> hide jobs asking 5+.
+      max_years_required:
+        s.years_experience != null ? Math.max(2, Math.ceil(s.years_experience) + 2) : p.max_years_required,
+    }));
+    setAnswers((a) => ({
+      ...a,
+      current_title: a.current_title || s.current_title,
+      years_experience: a.years_experience ?? s.years_experience,
+      target_roles: a.target_roles || s.target_roles,
+      locations:
+        a.locations ||
+        [...new Set(s.locations.map(toPlace))].join(LOCATION_SEPARATOR) ||
+        undefined,
+    }));
+    setSuggested(true);
+  };
+  const runSuggest = () => suggest.mutate(undefined, { onSuccess: applySuggestions });
+
   const runDraft = () =>
     draft.mutate({ preferences: prefs, answers }, { onSuccess: (r) => setMarkdown(r.markdown) });
 
@@ -56,6 +85,8 @@ export default function WelcomePage() {
   const next = () => {
     const to = step + 1;
     setStep(to);
+    // A resume uploaded in an earlier visit still pre-fills the form.
+    if (to === 1 && resumeChars > 0 && !suggested && !suggest.isPending && !touched) runSuggest();
     if (to === 2 && !markdown && !draft.isPending) runDraft();
     window.scrollTo({ top: 0 });
   };
@@ -126,16 +157,44 @@ export default function WelcomePage() {
                 yourself in the next step instead.
               </p>
             </div>
-            <ResumeUpload resumeChars={resumeChars} onUploaded={setResumeChars} />
+            <ResumeUpload
+              resumeChars={resumeChars}
+              onUploaded={(chars) => {
+                setResumeChars(chars);
+                setTouched(false);
+                runSuggest();
+              }}
+            />
           </div>
         )}
         {step === 1 && (
-          <PreferencesFields
-            prefs={prefs}
-            answers={answers}
-            onPrefs={setPrefs}
-            onAnswers={setAnswers}
-          />
+          <div className="space-y-5">
+            {suggest.isPending ? (
+              <div className="flex items-center gap-2 rounded-lg border border-accent-2/30 bg-accent-2/10 px-3 py-2 text-xs text-accent-2">
+                <LoaderCircle className="size-3.5 animate-spin" />
+                Reading your resume to pre-fill this…
+              </div>
+            ) : (
+              suggested && (
+                <div className="flex items-center gap-2 rounded-lg border border-accent-2/30 bg-accent-2/10 px-3 py-2 text-xs text-accent-2">
+                  <Sparkles className="size-3.5" />
+                  Pre-filled from your resume. Add or remove anything that doesn't fit.
+                </div>
+              )
+            )}
+            <PreferencesFields
+              prefs={prefs}
+              answers={answers}
+              onPrefs={(p) => {
+                setTouched(true);
+                setPrefs(p);
+              }}
+              onAnswers={(a) => {
+                setTouched(true);
+                setAnswers(a);
+              }}
+            />
+          </div>
         )}
         {step === 2 && (
           <div className="space-y-3">
