@@ -29,29 +29,33 @@
   --radius-card: 14px;
 }
 
-/* Light theme: same hues, darkened just enough for contrast on white. The
+/* Light theme: a warm paper background, white cards lifted by soft
+   shadows rather than hard outlines, and the same hues as dark mode toned
+   down (less saturated, slightly deeper) so nothing glares on white. The
    attribute is set before first paint by the script in index.html. */
 :root[data-theme="light"] {
-  --color-bg: #F6F6F3;
+  --color-bg: #F7F6F2;
   --color-surface: #FFFFFF;
-  --color-surface-2: #EFEFEB;
-  --color-border: #E1E1DB;
-  --color-text: #17191F;
-  --color-muted: #5B6170;
-  --color-faint: #8B909C;
+  --color-surface-2: #F1F0EB;
+  --color-border: #E5E3DC;
+  --color-text: #1D1F24;
+  --color-muted: #5F6470;
+  --color-faint: #8E929C;
 
-  --color-accent: #E2572F;
-  --color-accent-2: #3F63E0;
+  --color-accent: #D9653F;
+  --color-accent-2: #4A63C8;
 
-  --color-good: #12935E;
-  --color-warn: #A86E0A;
-  --color-bad: #D5304F;
+  --color-good: #1E8A5F;
+  --color-warn: #9C6B14;
+  --color-bad: #C2445A;
 
-  --color-grid: rgb(23 25 31 / 0.06);
-  --color-cursor: rgb(23 25 31 / 0.05);
-  --color-series-dim: #A9B8E8;
-  --color-glow: rgb(226 87 47 / 0.07);
-  --color-shimmer: rgb(23 25 31 / 0.05);
+  --color-grid: rgb(29 31 36 / 0.06);
+  --color-cursor: rgb(29 31 36 / 0.05);
+  --color-series-dim: #B4C0E6;
+  --color-glow: rgb(217 101 63 / 0.06);
+  --color-shimmer: rgb(29 31 36 / 0.045);
+  --shadow-card: 0 1px 2px rgb(29 31 36 / 0.04), 0 2px 8px -2px rgb(29 31 36 / 0.06);
+  --shadow-card-hover: 0 2px 4px rgb(29 31 36 / 0.05), 0 12px 24px -10px rgb(29 31 36 / 0.14);
 }
 
 @layer base {
