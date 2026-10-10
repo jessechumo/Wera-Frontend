@@ -13,6 +13,7 @@ import CommunityPage from './pages/CommunityPage';
 import PostPage from './pages/PostPage';
 import NewPostPage from './pages/NewPostPage';
 import InterviewPage from './pages/InterviewPage';
+import SponsorshipPage from './pages/SponsorshipPage';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
@@ -51,6 +52,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="industries" element={<IndustriesPage />} />
                 <Route path="industries/:id" element={<IndustryPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
+                <Route path="sponsorship" element={<SponsorshipPage />} />
                 <Route path="interview" element={<InterviewPage />} />
                 <Route path="community" element={<CommunityPage />} />
                 <Route path="community/new" element={<NewPostPage />} />
