@@ -2,7 +2,7 @@ import { Ban, Bookmark, ExternalLink } from 'lucide-react';
 import { ScoreRing } from './ScoreRing';
 import { Badge } from './Badge';
 import { CategoryChips, StatusPill } from './JobBadges';
-import { relTime, shortLocation } from '../lib/format';
+import { capitalize, relTime, shortLocation } from '../lib/format';
 import type { AppStatus, Job } from '../api/types';
 
 export function JobCard({
@@ -22,12 +22,12 @@ export function JobCard({
   // One quiet mono line instead of a wall of badges; the sponsor chip stays
   // because it is the one signal worth interrupting the scan for.
   const meta = [
-    job.seniority,
-    job.years_required != null ? `${job.years_required}+ yrs` : null,
     shortLocation(job),
-    job.work_mode,
+    job.work_mode ? capitalize(job.work_mode) : null,
+    job.seniority && job.seniority !== 'unknown' ? capitalize(job.seniority) : null,
+    job.years_required != null ? `${job.years_required}+ yrs` : null,
   ]
-    .filter(Boolean)
+    .filter((m) => m && m !== '—')
     .join(' · ');
 
   return (
@@ -52,15 +52,16 @@ export function JobCard({
             </div>
             <StatusPill value={job.application_status} />
           </div>
-          <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
-            <span className="truncate font-mono text-[11px] text-faint">{meta || '—'}</span>
-            {job.sponsorship === 'yes' && <Badge variant="good">sponsors</Badge>}
-            <span
-              className="text-xs text-faint"
-              title={`First seen ${job.first_seen_at}`}
-            >
+          <div className="mt-2 flex min-w-0 items-center gap-2 text-[11px] text-faint">
+            <span className="min-w-0 truncate">{meta || '—'}</span>
+            <span className="shrink-0" title={`First seen ${job.first_seen_at}`}>
               · {relTime(job.first_seen_at)}
             </span>
+            {job.sponsorship === 'yes' && (
+              <Badge variant="good" className="shrink-0">
+                Sponsors visas
+              </Badge>
+            )}
           </div>
           {job.reason && (
             <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted">{job.reason}</p>

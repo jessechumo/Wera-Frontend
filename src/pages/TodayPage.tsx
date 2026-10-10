@@ -9,7 +9,7 @@ import { ScoreRing } from '../components/ScoreRing';
 import { StatTile } from '../components/StatTile';
 import { StatusPill } from '../components/JobBadges';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
-import { relTime, shortLocation, stepId } from '../lib/format';
+import { capitalize, relTime, shortLocation, stepId } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 
 
@@ -24,12 +24,12 @@ function TopPick({
   onQuickStatus: (id: number, status: AppStatus) => void;
 }) {
   const meta = [
-    job.seniority,
-    job.years_required != null ? `${job.years_required}+ yrs` : null,
     shortLocation(job),
-    job.work_mode,
+    job.work_mode ? capitalize(job.work_mode) : null,
+    job.seniority && job.seniority !== 'unknown' ? capitalize(job.seniority) : null,
+    job.years_required != null ? `${job.years_required}+ yrs` : null,
   ]
-    .filter(Boolean)
+    .filter((m) => m && m !== '—')
     .join(' · ');
   return (
     <div
@@ -58,7 +58,7 @@ function TopPick({
               {job.reason}
             </p>
           )}
-          <div className="mt-2.5 font-mono text-[11px] text-faint">{meta || '—'}</div>
+          <div className="mt-2.5 text-[11px] text-faint">{meta || '—'}</div>
         </div>
         <div className="flex items-center gap-1.5">
           <a
@@ -161,7 +161,7 @@ export default function TodayPage() {
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <StatTile label="New today" value={newToday} accent spark={spark} delta={delta} />
         <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} to review`} />
-        <StatTile label="Sponsors explicitly" value={sponsors} sub={`of ${jobs.length} to review`} />
+        <StatTile label="Sponsor visas" value={sponsors} sub={`of ${jobs.length} to review`} />
         <StatTile label="Applied this week" value={stats.data?.applications_per_week ?? '—'} />
       </div>
 

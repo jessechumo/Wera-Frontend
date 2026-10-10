@@ -118,11 +118,25 @@ export function prettyReason(reason: string): string {
   return REASONS[reason] ?? reason;
 }
 
-/** Short "New York, NY" from a possibly longer location summary. */
+/**
+ * Short "New York, NY" from a possibly longer location summary: the first
+ * of several locations, without a trailing "(onsite …)" remark (the work
+ * mode is shown separately), plus "+N" when there were more.
+ */
 export function shortLocation(job: { location_summary: string | null; location_raw: string | null }): string {
   const loc = job.location_summary ?? job.location_raw;
   if (!loc) return '—';
-  return loc.split(';')[0]!.trim();
+  const parts = loc
+    .split(/;|\||\n/)
+    .map((p) => p.replace(/\s*\([^)]*\)?\s*$/, '').trim())
+    .filter(Boolean);
+  if (parts.length === 0) return '—';
+  return parts.length > 1 ? `${parts[0]} +${parts.length - 1}` : parts[0]!;
+}
+
+/** "entry" -> "Entry". */
+export function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 /** The id dir steps away from current in ids, or null at either end. */
