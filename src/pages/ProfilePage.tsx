@@ -1,12 +1,12 @@
-import { useEffect, useState, type FormEvent } from 'react';
-import { LoaderCircle, Save } from 'lucide-react';
-import { useChangePassword, useMe } from '../api/auth';
+import { useEffect, useRef, useState } from 'react';
+import { Camera, Download, FileText, LoaderCircle, Save } from 'lucide-react';
+import { useAvatar, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useDraftProfile, useMyUsage, useProfile, useSaveProfile } from '../api/profile';
 import type { Answers, Preferences } from '../api/types';
-import { Field, INPUT_CLS } from '../auth/AuthPage';
+import { Avatar } from '../components/Avatar';
 import { ErrorState, Skeleton } from '../components/States';
-import { money } from '../lib/format';
+import { money, relTime } from '../lib/format';
 import { toast } from '../lib/toast';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ProfileEditor } from '../profile/ProfileEditor';
@@ -60,56 +60,89 @@ function UsageCard() {
   );
 }
 
-function PasswordCard() {
-  const change = useChangePassword();
-  const [current, setCurrent] = useState('');
-  const [next, setNext] = useState('');
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    change.mutate(
-      { current_password: current, new_password: next },
-      {
-        onSuccess: () => {
-          setCurrent('');
-          setNext('');
-          toast.success('Password changed. Other sessions were logged out.');
-        },
-      },
-    );
-  };
+function ProfileHeader() {
+  const me = useMe();
+  const avatar = useAvatar();
+  const input = useRef<HTMLInputElement>(null);
+  const user = me.data;
+  if (!user) return null;
   return (
-    <Card title="Password">
-      <form onSubmit={submit} className="space-y-3">
-        <Field label="Current password">
-          <input
-            type="password"
-            required
-            value={current}
-            onChange={(e) => setCurrent(e.target.value)}
-            autoComplete="current-password"
-            className={INPUT_CLS}
-          />
-        </Field>
-        <Field label="New password" hint="At least 10 characters.">
-          <input
-            type="password"
-            required
-            minLength={10}
-            value={next}
-            onChange={(e) => setNext(e.target.value)}
-            autoComplete="new-password"
-            className={INPUT_CLS}
-          />
-        </Field>
-        {change.error && <p className="text-xs text-bad">{errorText(change.error)}</p>}
+    <section className="flex flex-wrap items-center gap-5 rounded-card border border-border bg-surface p-5">
+      <div className="group relative">
+        <Avatar user={user} size={72} />
         <button
-          type="submit"
-          disabled={change.isPending}
-          className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-text hover:border-accent/40 disabled:opacity-60"
+          type="button"
+          onClick={() => input.current?.click()}
+          aria-label="Change profile picture"
+          className="absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100"
         >
-          Change password
+          {avatar.isPending ? <LoaderCircle className="size-5 animate-spin" /> : <Camera className="size-5" />}
         </button>
-      </form>
+        <input
+          ref={input}
+          type="file"
+          accept="image/png,image/jpeg,image/gif,image/webp"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) avatar.mutate(f, { onError: (err) => toast.error(errorText(err) ?? 'Upload failed') });
+            e.target.value = '';
+          }}
+        />
+      </div>
+      <div className="min-w-0 flex-1">
+        <h1 className="text-[26px] leading-tight font-semibold">{user.name || 'Your profile'}</h1>
+        <p className="mt-0.5 text-sm text-muted">{user.email}</p>
+        <p className="mt-1 text-xs text-faint">Member since {new Date(user.created_at).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</p>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={() => input.current?.click()} className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-text hover:border-accent/40">
+          {user.avatar_version ? 'Change photo' : 'Add photo'}
+        </button>
+        {user.avatar_version && (
+          <button onClick={() => avatar.mutate(null)} className="rounded-lg px-3 py-1.5 text-xs text-muted hover:text-bad">
+            Remove
+          </button>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function ResumeCard({ resumeChars, onUploaded }: { resumeChars: number; onUploaded: (n: number) => void }) {
+  const profile = useProfile();
+  const [showText, setShowText] = useState(false);
+  const file = profile.data?.resume_file;
+  return (
+    <Card title="Resume" hint="Upload a new version, then redraft the profile text.">
+      {file && (
+        <div className="mb-3 flex items-center gap-2 rounded-lg border border-border bg-surface-2/60 px-3 py-2">
+          <FileText className="size-4 shrink-0 text-accent" />
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-xs font-medium text-text">{file.filename}</div>
+            <div className="text-[11px] text-faint">Uploaded {relTime(file.uploaded_at)}</div>
+          </div>
+          <a href="/api/profile/resume/file" target="_blank" rel="noreferrer" className="rounded-md px-2 py-1 text-xs font-medium text-accent hover:bg-accent/10">
+            View
+          </a>
+          <a href="/api/profile/resume/file?download=1" className="rounded-md p-1 text-muted hover:text-text" aria-label="Download resume">
+            <Download className="size-3.5" />
+          </a>
+        </div>
+      )}
+      <ResumeUpload resumeChars={resumeChars} onUploaded={onUploaded} />
+      {profile.data?.resume_text && (
+        <div className="mt-3">
+          <button onClick={() => setShowText((v) => !v)} className="text-xs font-medium text-muted hover:text-text">
+            {showText ? 'Hide' : 'Show'} the text Wera read
+          </button>
+          {showText && (
+            <pre className="mt-2 max-h-72 overflow-auto rounded-lg border border-border bg-surface-2/50 p-3 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-muted">
+              {profile.data.resume_text}
+            </pre>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
@@ -161,7 +194,8 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-5 pb-20">
-      <header>
+      <ProfileHeader />
+      <header className="sr-only">
         <h1 className="text-[28px] leading-tight font-semibold">Profile</h1>
         <p className="mt-1 text-xs text-muted">
           {me.data?.email} · Changes to what you want or to the profile text rematch your jobs.
@@ -199,11 +233,8 @@ export default function ProfilePage() {
           </Card>
         </div>
         <div className="space-y-5 lg:sticky lg:top-20 lg:self-start">
-          <Card title="Resume" hint="Upload a new version, then redraft the profile text.">
-            <ResumeUpload resumeChars={resumeChars} onUploaded={setResumeChars} />
-          </Card>
+          <ResumeCard resumeChars={resumeChars} onUploaded={setResumeChars} />
           <UsageCard />
-          <PasswordCard />
         </div>
       </div>
 
