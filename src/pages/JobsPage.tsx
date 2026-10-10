@@ -15,7 +15,7 @@ const PAGE = 50;
 function valuesFromParams(sp: URLSearchParams): FilterValues {
   return {
     q: sp.get('q') ?? '',
-    group: sp.get('group') ?? '',
+    industry: sp.get('industry') ?? '',
     category: sp.get('category') ?? '',
     min_score: Number(sp.get('min_score') ?? 0) || 0,
     sponsorship: sp.get('sponsorship') ?? '',
@@ -169,7 +169,7 @@ export default function JobsPage() {
                   <th className="w-14 px-3 py-2.5">Score</th>
                   <th className="px-3 py-2.5">Title</th>
                   <th className="px-3 py-2.5">Company</th>
-                  <th className="px-3 py-2.5">Group</th>
+                  <th className="px-3 py-2.5">Industry</th>
                   <th className="px-3 py-2.5">Location</th>
                   <th className="px-3 py-2.5">Mode</th>
                   <th className="px-3 py-2.5">Sponsorship</th>

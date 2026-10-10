@@ -13,7 +13,7 @@ export interface Job {
   id: number;
   company_id: number;
   company: string;
-  group: string;
+  industry: string;
   source: string;
   ext_id: string;
   title: string;
@@ -83,7 +83,7 @@ export interface DayCount {
 
 export interface Stats {
   by_stage: Record<string, number>;
-  by_group: Record<string, number>;
+  by_industry: Record<string, number>;
   by_category: Record<string, number>;
   by_status: Record<string, number>;
   new_per_day: DayCount[];
@@ -119,7 +119,7 @@ export interface Company {
   name: string;
   ats: string;
   token: string;
-  group: string;
+  industry: string;
   enabled: boolean;
   last_fetch_at: string | null;
   last_fetch_ok: boolean | null;
@@ -152,4 +152,19 @@ export interface UsageTotals {
 export interface Usage {
   per_day: UsageDay[];
   totals: UsageTotals;
+}
+
+export interface Industry {
+  id: string;
+  label: string;
+  description: string;
+  companies: number;
+  open_jobs: number;
+  /** The user's open, scored matches. */
+  matches: number;
+  top_score: number | null;
+}
+
+export interface IndustriesList {
+  industries: Industry[];
 }

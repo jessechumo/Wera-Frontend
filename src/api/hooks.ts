@@ -12,6 +12,7 @@ import type {
   Job,
   JobDetail,
   JobList,
+  IndustriesList,
   RunsList,
   Stats,
   Usage,
@@ -19,7 +20,7 @@ import type {
 
 export interface JobsParams {
   q?: string;
-  group?: string;
+  industry?: string;
   category?: string;
   min_score?: number;
   sponsorship?: string;
@@ -109,6 +110,21 @@ export function useUsage() {
     queryFn: () => api<Usage>('/api/usage'),
     refetchInterval: 5 * 60_000,
   });
+}
+
+export function useIndustries() {
+  return useQuery({
+    queryKey: ['industries'],
+    queryFn: () => api<IndustriesList>('/api/industries'),
+    staleTime: 5 * 60_000,
+  });
+}
+
+/** Maps an industry id to its label (the id itself until labels load). */
+export function useIndustryLabel(): (id: string) => string {
+  const { data } = useIndustries();
+  const labels = new Map((data?.industries ?? []).map((i) => [i.id, i.label]));
+  return (id) => labels.get(id) ?? id;
 }
 
 export function useExcluded(params: ExcludedParams) {

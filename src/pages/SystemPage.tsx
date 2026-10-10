@@ -1,10 +1,10 @@
-import { useCompanies, useRuns, useStats, useUsage } from '../api/hooks';
+import { useCompanies, useIndustryLabel, useRuns, useStats, useUsage } from '../api/hooks';
 import { CostChart, NewJobsChart, TokensChart } from '../components/Charts';
 import { RunNowButton } from '../layout/AppShell';
 import { StatTile } from '../components/StatTile';
 import { Badge } from '../components/Badge';
 import { ErrorState, Skeleton } from '../components/States';
-import { groupLabel, money, pct, relTime, runDuration } from '../lib/format';
+import { money, pct, relTime, runDuration } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import type { Company } from '../api/types';
 import clsx from 'clsx';
@@ -39,6 +39,7 @@ export default function SystemPage() {
   const usage = useUsage();
   const runs = useRuns(10);
   const companies = useCompanies();
+  const industryLabel = useIndustryLabel();
 
   const byStage = stats.data?.by_stage ?? {};
   const scored = byStage['scored'] ?? 0;
@@ -176,7 +177,7 @@ export default function SystemPage() {
                 <tr className="border-b border-border text-left text-[10px] font-medium tracking-wide text-faint uppercase">
                   <th className="py-2 pr-3">Name</th>
                   <th className="py-2 pr-3">ATS</th>
-                  <th className="py-2 pr-3">Group</th>
+                  <th className="py-2 pr-3">Industry</th>
                   <th className="py-2 pr-3">Enabled</th>
                   <th className="py-2 pr-3">Last fetch</th>
                   <th className="py-2 pr-3">Open</th>
@@ -188,7 +189,7 @@ export default function SystemPage() {
                   <tr key={c.id} className="border-b border-border/50">
                     <td className="py-2 pr-3 font-medium text-text">{c.name}</td>
                     <td className="py-2 pr-3 font-mono text-muted">{c.ats}</td>
-                    <td className="py-2 pr-3 text-muted">{groupLabel(c.group)}</td>
+                    <td className="py-2 pr-3 text-muted">{industryLabel(c.industry)}</td>
                     <td className="py-2 pr-3">
                       <Badge variant={c.enabled ? 'good' : 'neutral'}>
                         {c.enabled ? 'yes' : 'off'}

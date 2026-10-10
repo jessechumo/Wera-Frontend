@@ -91,12 +91,6 @@ export function runDuration(started: string, finished: string | null): string {
   return `${m}m ${Math.round(sec % 60)}s`;
 }
 
-export function groupLabel(g: string): string {
-  if (g === 'ai_infra') return 'AI infra';
-  if (g === 'trading') return 'Trading';
-  return g;
-}
-
 const REASONS: Record<string, string> = {
   'title:no_category': 'No matching role category',
   'title:senior': 'Senior title',

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown, FilterX, Search } from 'lucide-react';
-import { useStats } from '../api/hooks';
+import { useIndustries, useStats } from '../api/hooks';
 import { APP_STATUSES } from './StatusSelect';
 
 export interface FilterValues {
   q: string;
-  group: string;
+  industry: string;
   category: string;
   min_score: number;
   sponsorship: string;
@@ -16,7 +16,7 @@ export interface FilterValues {
 
 export const DEFAULT_FILTERS: FilterValues = {
   q: '',
-  group: '',
+  industry: '',
   category: '',
   min_score: 0,
   sponsorship: '',
@@ -71,6 +71,7 @@ export function FilterBar({
 }) {
   const [text, setText] = useState(values.q);
   const stats = useStats();
+  const industries = useIndustries();
 
   // Keep the raw input in sync when filters change outside (reset / back nav).
   useEffect(() => {
@@ -91,7 +92,7 @@ export function FilterBar({
 
   const isDefault =
     values.q === '' &&
-    values.group === '' &&
+    values.industry === '' &&
     values.category === '' &&
     values.min_score === 0 &&
     values.sponsorship === '' &&
@@ -115,13 +116,12 @@ export function FilterBar({
         </label>
 
         <Select
-          label="Group"
-          value={values.group}
-          onChange={(v) => onChange({ group: v })}
+          label="Industry"
+          value={values.industry}
+          onChange={(v) => onChange({ industry: v })}
           options={[
-            { value: '', label: 'All groups' },
-            { value: 'ai_infra', label: 'AI infra' },
-            { value: 'trading', label: 'Trading' },
+            { value: '', label: 'All industries' },
+            ...(industries.data?.industries ?? []).map((i) => ({ value: i.id, label: i.label })),
           ]}
         />
         <Select
