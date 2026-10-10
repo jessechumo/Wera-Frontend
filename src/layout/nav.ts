@@ -24,8 +24,8 @@ const NAV: NavItem[] = [
   { to: '/jobs', label: 'Jobs', icon: Briefcase, mobile: true },
   { to: '/industries', label: 'Industries', icon: Factory, mobile: true },
   { to: '/tracker', label: 'Tracker', icon: ListChecks, mobile: true },
-  { to: '/excluded', label: 'Excluded', icon: EyeOff },
   { to: '/profile', label: 'Profile', icon: UserRound, mobile: true },
+  { to: '/excluded', label: 'Excluded', icon: EyeOff },
   { to: '/system', label: 'System', icon: Activity, admin: true },
 ];
 
