@@ -175,17 +175,18 @@ export default function JobsPage() {
         <>
           {/* Dense table (>=640px) */}
           <div className="overflow-x-auto rounded-card border border-border bg-surface">
-            <table className="hidden w-full min-w-[860px] sm:table">
+            {/* Lower-priority columns (industry, mode, first seen) appear on wide screens. */}
+            <table className="hidden w-full min-w-[720px] sm:table">
               <thead>
                 <tr className="border-b border-border text-left text-[10px] font-medium tracking-wide text-faint uppercase">
                   <th className="w-14 px-3 py-2.5">Score</th>
                   <th className="px-3 py-2.5">Title</th>
                   <th className="px-3 py-2.5">Company</th>
-                  <th className="px-3 py-2.5">Industry</th>
+                  <th className="hidden px-3 py-2.5 2xl:table-cell">Industry</th>
                   <th className="px-3 py-2.5">Location</th>
-                  <th className="px-3 py-2.5">Mode</th>
+                  <th className="hidden px-3 py-2.5 2xl:table-cell">Mode</th>
                   <th className="px-3 py-2.5">Sponsorship</th>
-                  <th className="px-3 py-2.5">First seen</th>
+                  <th className="hidden px-3 py-2.5 2xl:table-cell">First seen</th>
                   <th className="px-3 py-2.5">Status</th>
                 </tr>
               </thead>

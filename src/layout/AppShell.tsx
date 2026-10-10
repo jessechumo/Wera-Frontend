@@ -42,14 +42,14 @@ function UserMenu() {
 }
 
 
-/** "web v0.3.0 · api v0.3.0": what is running, for bug reports. */
+/** "v0.3.0 · api v0.3.0": what is running, for bug reports (commits in the tooltip). */
 function Versions() {
   const health = useHealth();
   const web = `v${__APP_VERSION__}`;
   const api = health.data?.version;
   return (
     <span className="truncate font-mono" title={`web ${web} (${__APP_COMMIT__}) · api ${api ?? '?'} (${health.data?.commit ?? '?'})`}>
-      web {web}
+      {web}
       {api && <> · api {api}</>}
     </span>
   );
