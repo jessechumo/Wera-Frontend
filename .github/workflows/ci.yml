@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Lint, types, unit tests, build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # publishes the coverage badge on main
+    env:
+      MIN_COVERAGE: "65"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Types
+        run: npm run typecheck
+      - name: Unit and component tests with coverage
+        run: npm run coverage
+      - name: Coverage gate
+        run: |
+          pct=$(node -p "require('./coverage/coverage-summary.json').total.statements.pct")
+          echo "Coverage: ${pct}% of statements" | tee -a "$GITHUB_STEP_SUMMARY"
+          echo "COVERAGE=${pct}" >> "$GITHUB_ENV"
+          node -e "process.exit(${pct} < ${MIN_COVERAGE} ? 1 : 0)" \
+            || { echo "::error::coverage ${pct}% is below ${MIN_COVERAGE}%"; exit 1; }
+      - name: Build
+        run: APP_COMMIT="${GITHUB_SHA}" npm run build
+      - name: Audit dependencies
+        run: npm audit --omit=dev --audit-level=moderate
+      - name: Publish coverage badge
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./scripts/publish-badge.sh coverage "${COVERAGE}%" "$COVERAGE"
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wera
+          POSTGRES_PASSWORD: wera
+          POSTGRES_DB: wera_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U wera" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://wera:wera@localhost:5432/wera_e2e?sslmode=disable
+      WERA_API: http://127.0.0.1:8080
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out the API
+        uses: actions/checkout@v4
+        with:
+          repository: jessechumo/wera
+          ref: ${{ github.base_ref == 'main' && 'main' || 'dev' }}
+          path: api
+          # Needed only while the API repository is private.
+          token: ${{ secrets.WERA_API_REPO_TOKEN || github.token }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: api/go.mod
+          cache-dependency-path: api/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Start the API on a seeded database
+        working-directory: api
+        run: |
+          go build -o wera ./cmd/wera
+          ./wera migrate
+          psql "$DATABASE_URL" -q -f ../e2e/seed.sql
+          SIGNUPS_PER_HOUR=1000 HTTP_ADDR=127.0.0.1:8080 nohup ./wera serve > ../api.log 2>&1 &
+          for _ in $(seq 30); do curl -sf http://127.0.0.1:8080/healthz && break; sleep 1; done
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Playwright
+        run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            api.log
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build --build-arg APP_COMMIT="${GITHUB_SHA}" -t wera-web:ci .
