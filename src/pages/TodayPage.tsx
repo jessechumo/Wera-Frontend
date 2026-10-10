@@ -106,6 +106,10 @@ export default function TodayPage() {
   const [drawerId, setDrawerId] = useState<number | null>(null);
 
   const jobs: Job[] = [...(data?.jobs ?? [])].sort((a, b) => (b.fit_score ?? 0) - (a.fit_score ?? 0));
+  // /api/today is the review queue (not yet applied to or dismissed), so it
+  // includes older jobs; "new" means first seen in the last 24h.
+  const dayAgo = Date.now() - 24 * 60 * 60_000;
+  const newToday = jobs.filter((j) => new Date(j.first_seen_at).getTime() >= dayAgo).length;
   const strong = jobs.filter((j) => (j.fit_score ?? 0) >= 80).length;
   const sponsors = jobs.filter((j) => j.sponsorship === 'yes').length;
 
@@ -126,7 +130,7 @@ export default function TodayPage() {
   const delta =
     yesterday != null && !stats.isLoading
       ? (() => {
-          const diff = jobs.length - yesterday;
+          const diff = newToday - yesterday;
           const sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
           return {
             text: `${sign}${Math.abs(diff)} vs yesterday`,
@@ -144,16 +148,17 @@ export default function TodayPage() {
         <div>
           <h1 className="text-[28px] leading-tight font-semibold">Today</h1>
           <p className="mt-1 text-xs text-muted">
-            {jobs.length} new scored {jobs.length === 1 ? 'job' : 'jobs'} in the last 24h
+            {jobs.length} scored {jobs.length === 1 ? 'job' : 'jobs'} to review · {newToday} new in
+            the last 24h
             {lastRun && <> · last run {relTime(lastRun.started_at)}</>}
           </p>
         </div>
       </header>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="New today" value={jobs.length} accent spark={spark} delta={delta} />
-        <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} new`} />
-        <StatTile label="Sponsors explicitly" value={sponsors} sub={`of ${jobs.length} new`} />
+        <StatTile label="New today" value={newToday} accent spark={spark} delta={delta} />
+        <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} to review`} />
+        <StatTile label="Sponsors explicitly" value={sponsors} sub={`of ${jobs.length} to review`} />
         <StatTile label="Applied this week" value={stats.data?.applications_per_week ?? '—'} />
       </div>
 
@@ -167,8 +172,8 @@ export default function TodayPage() {
       ) : jobs.length === 0 ? (
         <EmptyState
           icon={<Sun className="size-5 text-faint" />}
-          title="No new matches since the last run"
-          hint={`Next run in ~${nextIn} min. Come back after the worker cycles.`}
+          title="Nothing left to review"
+          hint={`Every scored job is applied to or dismissed. Next run in ~${nextIn} min.`}
         />
       ) : (
         <>
