@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { absTime, relTime, shortLocation, verdictColor, verdictOf } from '../lib/format';
-import { IndustryBadge, SponsorshipBadge, StatusPill, WorkModeBadge } from './JobBadges';
+import { IndustryBadge, SponsorshipBadge, StatusPill, WorkModeBadge, AddedBadge } from './JobBadges';
 import type { Job } from '../api/types';
 
 /** Dense table row for the Jobs page. */
@@ -43,7 +43,9 @@ export function JobRow({
         </span>
       </td>
       <td className="max-w-72 truncate px-3 py-2.5 text-sm font-medium text-text">{job.title}</td>
-      <td className="max-w-44 truncate px-3 py-2.5 text-sm text-muted">{job.company}</td>
+      <td className="max-w-44 truncate px-3 py-2.5 text-sm text-muted">
+        {job.company} {job.source === 'manual' && <AddedBadge source={job.source} />}
+      </td>
       <td className="hidden px-3 py-2.5 2xl:table-cell">
         <IndustryBadge value={job.industry} />
       </td>
