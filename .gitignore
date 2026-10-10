@@ -3,3 +3,7 @@ dist/
 *.local
 .DS_Store
 npm-debug.log*
+coverage
+playwright-report/
+test-results/
+*.tsbuildinfo
