@@ -42,6 +42,19 @@ function UserMenu() {
 }
 
 
+/** "web v0.3.0 · api v0.3.0": what is running, for bug reports. */
+function Versions() {
+  const health = useHealth();
+  const web = `v${__APP_VERSION__}`;
+  const api = health.data?.version;
+  return (
+    <span className="truncate font-mono" title={`web ${web} (${__APP_COMMIT__}) · api ${api ?? '?'} (${health.data?.commit ?? '?'})`}>
+      web {web}
+      {api && <> · api {api}</>}
+    </span>
+  );
+}
+
 function HealthDot({ pulse = false }: { pulse?: boolean }) {
   const health = useHealth();
   return (
@@ -171,7 +184,7 @@ export function AppShell() {
         <UserMenu />
         <div className="flex items-center gap-2 border-t border-border px-5 py-3 text-[11px] text-faint">
           <HealthDot />
-          <span>api</span>
+          <Versions />
           <ThemeToggle className="ml-auto -my-1" />
         </div>
       </aside>

@@ -4,7 +4,6 @@ import { defineConfig, devices } from '@playwright/test';
 // `wera serve` and PostgreSQL. Start the API yourself (see e2e/README.md);
 // Playwright starts Vite. PW_CHROME_PATH runs an installed Chrome instead
 // of Playwright's bundled browser.
-declare const process: { env: Record<string, string | undefined> };
 const chrome = process.env.PW_CHROME_PATH;
 
 export default defineConfig({

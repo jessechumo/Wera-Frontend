@@ -210,13 +210,15 @@ export function useTriggerRun() {
   });
 }
 
+/** API health, with the version it runs (from /healthz). */
 export function useHealth() {
   return useQuery({
     queryKey: ['health'],
     queryFn: async () => {
       const res = await fetch('/healthz');
       if (!res.ok) throw new ApiError(res.status, 'unhealthy');
-      return true;
+      const body = (await res.json().catch(() => ({}))) as { version?: string; commit?: string };
+      return { version: body.version ?? 'unknown', commit: body.commit ?? '' };
     },
     refetchInterval: 60_000,
     retry: false,
