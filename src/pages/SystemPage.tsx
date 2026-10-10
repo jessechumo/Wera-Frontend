@@ -115,6 +115,51 @@ export default function SystemPage() {
       </div>
 
       {/* Runs */}
+      <Card title="Users">
+        {usage.isLoading ? (
+          <Skeleton className="h-24 w-full" />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] text-xs">
+              <thead>
+                <tr className="border-b border-border text-left text-[10px] font-medium tracking-wide text-faint uppercase">
+                  <th className="py-2 pr-3">User</th>
+                  <th className="py-2 pr-3">Joined</th>
+                  <th className="py-2 pr-3">Last login</th>
+                  <th className="py-2 pr-3">Profile</th>
+                  <th className="py-2 pr-3">Matches</th>
+                  <th className="py-2 pr-3">Spend this month</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(usage.data?.users ?? []).map((u) => (
+                  <tr key={u.id} className="border-b border-border/50">
+                    <td className="py-2 pr-3">
+                      <div className="font-medium text-text">{u.name || u.email}</div>
+                      {u.name && <div className="text-faint">{u.email}</div>}
+                    </td>
+                    <td className="py-2 pr-3 text-muted">{relTime(u.created_at)}</td>
+                    <td className="py-2 pr-3 text-muted">{relTime(u.last_login_at)}</td>
+                    <td className="py-2 pr-3">
+                      <Badge variant={u.has_profile ? 'good' : 'neutral'}>
+                        {u.has_profile ? 'ready' : 'none'}
+                      </Badge>
+                    </td>
+                    <td className="py-2 pr-3 font-mono text-text">{u.matches}</td>
+                    <td className="py-2 pr-3 font-mono">
+                      <span className={u.month_spend_usd >= u.monthly_budget_usd ? 'text-bad' : 'text-text'}>
+                        {money(u.month_spend_usd)}
+                      </span>
+                      <span className="text-faint"> / {money(u.monthly_budget_usd)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Card>
+
       <Card title="Recent runs">
         {runs.error ? (
           <ErrorState message={String(runs.error)} />
