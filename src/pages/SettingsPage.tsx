@@ -1,6 +1,8 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import clsx from 'clsx';
-import { Bell, Download, EyeOff, KeyRound, LoaderCircle, Palette, ShieldAlert, SlidersHorizontal } from 'lucide-react';
+import { Bell, Download, EyeOff, KeyRound, LoaderCircle, Palette, Puzzle, ShieldAlert, SlidersHorizontal } from 'lucide-react';
+import { useConnections, useDisconnect } from '../api/extension';
+import { relTime } from '../lib/format';
 import { useChangePassword, useDeleteAccount, useMe } from '../api/auth';
 import { api, ApiError } from '../api/client';
 import { useHideCompany, useIndustryLabel, useSaveSettings, useSettings } from '../api/hooks';
@@ -123,6 +125,37 @@ async function exportApplications() {
   a.click();
   URL.revokeObjectURL(url);
   toast.success(`Exported ${rows.length} application${rows.length === 1 ? '' : 's'}.`);
+}
+
+function Connections() {
+  const q = useConnections();
+  const disconnect = useDisconnect();
+  const list = q.data?.connections ?? [];
+  return (
+    <div>
+      {list.length === 0 ? (
+        <p className="text-xs text-faint">No browser connected. Install the Wera extension, open it on any job page and sign in.</p>
+      ) : (
+        <ul className="divide-y divide-border rounded-lg border border-border">
+          {list.map((c) => (
+            <li key={c.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
+              <div className="min-w-0">
+                <div className="truncate text-text">{c.name}</div>
+                <div className="text-xs text-faint">
+                  Connected {relTime(c.created_at)} · {c.last_used_at ? `last used ${relTime(c.last_used_at)}` : 'not used yet'}
+                </div>
+              </div>
+              <button onClick={() => disconnect.mutate(c.id, { onSuccess: () => toast.success(`${c.name} disconnected.`) })}
+                className="shrink-0 text-xs font-medium text-bad hover:underline">
+                Disconnect
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="mt-2 text-xs text-faint">Changing your password disconnects every browser.</p>
+    </div>
+  );
 }
 
 function DeleteAccount() {
@@ -269,6 +302,10 @@ export default function SettingsPage() {
         <Row label="Product updates" hint="Occasional news about new Wera features.">
           <Switch label="Product updates" checked={n.product_updates} onChange={(v) => setN({ product_updates: v })} />
         </Row>
+      </Section>
+
+      <Section icon={Puzzle} title="Chrome extension" hint="Save jobs, write cover letters, tailor your resume and fill applications from any job site.">
+        <Connections />
       </Section>
 
       <Section icon={KeyRound} title="Account" hint={me.data?.email}>
