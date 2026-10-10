@@ -3,13 +3,18 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 // The app always calls relative /api and /healthz, so it behaves the same in
-// dev (proxied to `wera serve` on :8080) and behind nginx in production.
+// dev (proxied to `wera serve`, :8080 unless WERA_API says otherwise), behind
+// nginx, and behind Vercel rewrites.
+// Node's process, typed here so the config needs no @types/node.
+declare const process: { env: Record<string, string | undefined> };
+const api = process.env.WERA_API ?? 'http://localhost:8080';
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      '/api': 'http://localhost:8080',
-      '/healthz': 'http://localhost:8080',
+      '/api': api,
+      '/healthz': api,
     },
   },
 });
