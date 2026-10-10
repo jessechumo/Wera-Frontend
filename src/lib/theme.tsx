@@ -120,22 +120,25 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={`Switch to ${next} mode`}
       title={`Switch to ${next} mode`}
       className={clsx(
-        'relative inline-flex size-7 items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:bg-surface-2 hover:text-text',
+        'inline-flex size-7 items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:bg-surface-2 hover:text-text',
         className,
       )}
     >
+      {/* The icons overlap in their own box, so callers may position the button freely. */}
+      <span className="relative size-4">
       <Sun
         className={clsx(
-          'absolute size-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'absolute inset-0 size-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
           theme === 'light' ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-50 opacity-0',
         )}
       />
       <Moon
         className={clsx(
-          'absolute size-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'absolute inset-0 size-4 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
           theme === 'dark' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-50 opacity-0',
         )}
       />
+      </span>
     </button>
   );
 }

@@ -13,6 +13,13 @@ describe('theme', () => {
     expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
   });
 
+  it('can be positioned by the caller (no built-in relative positioning)', () => {
+    render(<ThemeToggle className="absolute top-4 right-4" />);
+    const button = screen.getByRole('button');
+    expect(button.className).toContain('absolute');
+    expect(button.className.split(' ')).not.toContain('relative');
+  });
+
   it('the settings control offers light, dark and system', async () => {
     render(<ThemeChoice />);
     const radios = screen.getAllByRole('radio');
