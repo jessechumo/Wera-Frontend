@@ -21,7 +21,7 @@ jobs:
     env:
       MIN_COVERAGE: "65"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -68,9 +68,9 @@ jobs:
       DATABASE_URL: postgres://wera:wera@localhost:5432/wera_e2e?sslmode=disable
       WERA_API: http://127.0.0.1:8080
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Check out the API
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: jessechumo/Wera
           ref: ${{ github.base_ref == 'main' && 'main' || 'dev' }}
@@ -109,5 +109,5 @@ jobs:
     name: Docker build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker build --build-arg APP_COMMIT="${GITHUB_SHA}" -t wera-web:ci .
