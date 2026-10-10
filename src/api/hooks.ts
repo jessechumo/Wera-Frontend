@@ -12,7 +12,10 @@ import type {
   Job,
   JobDetail,
   JobList,
+  CoverLetter,
   IndustriesList,
+  SettingsView,
+  Settings,
   RunsList,
   Stats,
   Usage,
@@ -221,6 +224,59 @@ export function useScoreJob() {
       qc.setQueryData<JobDetail>(['job', job.id], (prev) => (prev ? { ...prev, ...job } : prev));
       void qc.invalidateQueries({ queryKey: ['today'] });
       void qc.invalidateQueries({ queryKey: ['jobs'] });
+    },
+  });
+}
+
+export function useSettings() {
+  return useQuery({ queryKey: ['settings'], queryFn: () => api<SettingsView>('/api/settings') });
+}
+
+export function useSaveSettings() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (s: Settings) => api<SettingsView>('/api/settings', { method: 'PUT', body: JSON.stringify(s) }),
+    onSuccess: (s) => qc.setQueryData(['settings'], s),
+  });
+}
+
+/** Hide (true) or unhide (false) a company's jobs. */
+export function useHideCompany() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { id: number; hidden: boolean }) =>
+      api<void>(`/api/companies/${v.id}/hidden`, { method: v.hidden ? 'PUT' : 'DELETE' }),
+    onSuccess: () => void qc.invalidateQueries(),
+  });
+}
+
+export function useCoverLetter(jobId: number, enabled: boolean) {
+  return useQuery({
+    queryKey: ['cover-letter', jobId],
+    queryFn: async () => {
+      try {
+        return await api<CoverLetter>(`/api/jobs/${jobId}/cover-letter`);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) return null;
+        throw err;
+      }
+    },
+    enabled,
+    staleTime: Infinity,
+  });
+}
+
+/** Generate (body undefined) or save edits (body set) for a job's letter. */
+export function useWriteCoverLetter(jobId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body?: string) =>
+      body === undefined
+        ? api<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { method: 'POST' })
+        : api<CoverLetter>(`/api/jobs/${jobId}/cover-letter`, { method: 'PUT', body: JSON.stringify({ body }) }),
+    onSuccess: (c) => {
+      qc.setQueryData(['cover-letter', jobId], c);
+      void qc.invalidateQueries({ queryKey: ['usage', 'me'] });
     },
   });
 }
