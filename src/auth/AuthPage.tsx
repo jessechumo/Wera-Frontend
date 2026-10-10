@@ -5,6 +5,7 @@ import { useAuthMutation, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ThemeToggle } from '../lib/theme';
+import { Logo } from '../components/Logo';
 
 export const INPUT_CLS =
   'w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text placeholder:text-faint transition-colors duration-150 hover:border-accent/40 focus:border-accent/60';
@@ -56,9 +57,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
       <ThemeToggle className="absolute top-4 right-4" />
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
-          <span className="font-mono text-2xl font-semibold tracking-tight text-text">
-            wera<span className="text-accent">.</span>
-          </span>
+          <Logo size="lg" />
           <p className="mt-2 text-sm text-muted">
             {mode === 'login'
               ? 'Welcome back.'

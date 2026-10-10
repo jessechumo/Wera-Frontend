@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useLogout, useMe } from '../api/auth';
 import { useNav } from './nav';
 import { ThemeToggle } from '../lib/theme';
+import { Logo } from '../components/Logo';
 import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
@@ -41,13 +42,6 @@ function UserMenu() {
   );
 }
 
-function Logo() {
-  return (
-    <span className="font-mono text-lg font-semibold tracking-tight text-text">
-      wera<span className="text-accent">.</span>
-    </span>
-  );
-}
 
 function HealthDot({ pulse = false }: { pulse?: boolean }) {
   const health = useHealth();
