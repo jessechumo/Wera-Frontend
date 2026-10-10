@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { api, ApiError } from './client';
 import type { User } from './types';
 
@@ -33,20 +33,30 @@ export function useAuthMutation(kind: 'login' | 'signup') {
     mutationFn: (c: Credentials) =>
       api<{ user: User }>(`/api/auth/${kind}`, { method: 'POST', body: JSON.stringify(c) }),
     onSuccess: ({ user }) => {
-      qc.clear();
+      // A different user may have been cached: drop their data, keep the
+      // "me" query mounted and point it at the new user.
+      signOutLocally(qc);
       qc.setQueryData(['me'], user);
     },
   });
+}
+
+/**
+ * Forgets the signed-in user and everything cached for them. The "me"
+ * query is set to null in place (not cleared): clear() would detach the
+ * mounted components watching it, so the route guard would never
+ * re-render to send the user to the login page.
+ */
+export function signOutLocally(qc: QueryClient) {
+  qc.setQueryData(['me'], null);
+  qc.removeQueries({ predicate: (q) => q.queryKey[0] !== 'me' });
 }
 
 export function useLogout() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: () => api<void>('/api/auth/logout', { method: 'POST' }),
-    onSettled: () => {
-      qc.clear();
-      qc.setQueryData(['me'], null);
-    },
+    onSettled: () => signOutLocally(qc),
   });
 }
 
@@ -57,16 +67,14 @@ export function useChangePassword() {
   });
 }
 
-/** Delete the account (password required); the session ends with it. */
+/**
+ * Delete the account (password required); the session ends with it. The
+ * caller reloads the app afterwards so nothing of the account stays cached.
+ */
 export function useDeleteAccount() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: (password: string) =>
       api<void>('/api/auth/account', { method: 'DELETE', body: JSON.stringify({ password }) }),
-    onSuccess: () => {
-      qc.clear();
-      qc.setQueryData(['me'], null);
-    },
   });
 }
 

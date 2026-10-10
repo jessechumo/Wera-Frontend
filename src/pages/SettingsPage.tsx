@@ -1,5 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, type FormEvent, type ReactNode } from 'react';
 import clsx from 'clsx';
 import { Bell, Download, EyeOff, KeyRound, LoaderCircle, Palette, ShieldAlert, SlidersHorizontal } from 'lucide-react';
 import { useChangePassword, useDeleteAccount, useMe } from '../api/auth';
@@ -128,7 +127,6 @@ async function exportApplications() {
 
 function DeleteAccount() {
   const del = useDeleteAccount();
-  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState('');
   if (!open) {
@@ -144,7 +142,8 @@ function DeleteAccount() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        del.mutate(password, { onSuccess: () => navigate('/signup', { replace: true }) });
+        // A full page load: nothing of the deleted account stays in memory.
+        del.mutate(password, { onSuccess: () => window.location.replace('/signup') });
       }}
       className="space-y-3 rounded-lg border border-bad/30 bg-bad/5 p-4"
     >
@@ -172,12 +171,10 @@ export default function SettingsPage() {
   const industryLabel = useIndustryLabel();
   const [draft, setDraft] = useState<Settings | null>(null);
 
-  useEffect(() => {
-    if (settings.data && !draft) {
-      const { hidden_companies: _hidden, ...rest } = settings.data;
-      setDraft(rest);
-    }
-  }, [settings.data, draft]);
+  if (settings.data && !draft) {
+    const { hidden_companies: _hidden, ...rest } = settings.data;
+    setDraft(rest);
+  }
 
   if (settings.isLoading || !draft) return <Skeleton className="h-96 w-full" />;
   if (settings.error) return <ErrorState message={String(settings.error)} onRetry={() => void settings.refetch()} />;
