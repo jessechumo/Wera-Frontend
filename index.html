@@ -1,9 +1,19 @@
 <!doctype html>
-<html lang="en" style="background:#0A0B0F">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      // Apply the saved theme before first paint (see src/lib/theme.tsx).
+      (function () {
+        var t = 'system';
+        try { t = localStorage.getItem('wera-theme') || 'system'; } catch (e) {}
+        if (t === 'system') t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+        document.documentElement.style.background = t === 'light' ? '#F6F6F3' : '#0A0B0F';
+      })();
+    </script>
     <title>wera</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='38' fill='%23FF7A59'/%3E%3C/svg%3E" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

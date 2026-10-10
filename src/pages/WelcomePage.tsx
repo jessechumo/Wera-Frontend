@@ -12,6 +12,7 @@ import { ResumeUpload } from '../profile/ResumeUpload';
 import { Skeleton } from '../components/States';
 import { toast } from '../lib/toast';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { ThemeToggle } from '../lib/theme';
 
 const STEPS = ['Resume', 'What you want', 'Your profile'] as const;
 
@@ -82,9 +83,12 @@ export default function WelcomePage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <div className="mb-6">
-        <span className="font-mono text-lg font-semibold text-text">
-          wera<span className="text-accent">.</span>
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-lg font-semibold text-text">
+            wera<span className="text-accent">.</span>
+          </span>
+          <ThemeToggle />
+        </div>
         <h1 className="mt-4 text-[26px] leading-tight font-semibold">
           {firstName ? `Welcome, ${firstName}.` : 'Welcome.'} Let's find your jobs.
         </h1>

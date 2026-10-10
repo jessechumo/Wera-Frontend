@@ -11,10 +11,10 @@ export function verdictOf(score: number | null): Verdict {
 // Verdict palette: the ember accent marks the best fits; everything below
 // desaturates toward zinc so score color signals quality without shouting.
 export const verdictHex: Record<Verdict, string> = {
-  strong: '#FF7A59',
-  good: '#7C9CFF',
-  stretch: '#8A90A2',
-  poor: '#5B6173',
+  strong: 'var(--color-accent)',
+  good: 'var(--color-accent-2)',
+  stretch: 'var(--color-muted)',
+  poor: 'var(--color-faint)',
 };
 
 export const verdictColor: Record<Verdict, string> = {

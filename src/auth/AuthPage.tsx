@@ -4,6 +4,7 @@ import { ArrowRight, LoaderCircle } from 'lucide-react';
 import { useAuthMutation, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
+import { ThemeToggle } from '../lib/theme';
 
 export const INPUT_CLS =
   'w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text placeholder:text-faint transition-colors duration-150 hover:border-accent/40 focus:border-accent/60';
@@ -51,7 +52,8 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     auth.error instanceof ApiError ? auth.error.message : auth.error ? 'Network error' : null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-10">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-10">
+      <ThemeToggle className="absolute top-4 right-4" />
       <div className="w-full max-w-sm">
         <div className="mb-6 text-center">
           <span className="font-mono text-2xl font-semibold tracking-tight text-text">

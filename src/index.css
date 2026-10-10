@@ -19,12 +19,47 @@
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
 
+  /* Chart and decoration tokens (not Tailwind utilities). */
+  --color-grid: rgb(255 255 255 / 0.045);
+  --color-cursor: rgb(255 255 255 / 0.06);
+  --color-series-dim: #41537A;
+  --color-glow: rgb(255 122 89 / 0.06);
+  --color-shimmer: rgb(255 255 255 / 0.04);
+
   --radius-card: 14px;
+}
+
+/* Light theme: same hues, darkened just enough for contrast on white. The
+   attribute is set before first paint by the script in index.html. */
+:root[data-theme="light"] {
+  --color-bg: #F6F6F3;
+  --color-surface: #FFFFFF;
+  --color-surface-2: #EFEFEB;
+  --color-border: #E1E1DB;
+  --color-text: #17191F;
+  --color-muted: #5B6170;
+  --color-faint: #8B909C;
+
+  --color-accent: #E2572F;
+  --color-accent-2: #3F63E0;
+
+  --color-good: #12935E;
+  --color-warn: #A86E0A;
+  --color-bad: #D5304F;
+
+  --color-grid: rgb(23 25 31 / 0.06);
+  --color-cursor: rgb(23 25 31 / 0.05);
+  --color-series-dim: #A9B8E8;
+  --color-glow: rgb(226 87 47 / 0.07);
+  --color-shimmer: rgb(23 25 31 / 0.05);
 }
 
 @layer base {
   html {
     color-scheme: dark;
+  }
+  html[data-theme="light"] {
+    color-scheme: light;
   }
   body {
     background-color: var(--color-bg);
@@ -39,7 +74,7 @@
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background: radial-gradient(700px 340px at 50% -80px, rgb(255 122 89 / 0.06), transparent 70%);
+    background: radial-gradient(700px 340px at 50% -80px, var(--color-glow), transparent 70%);
   }
   #root {
     position: relative;
@@ -48,7 +83,7 @@
     font-variant-numeric: tabular-nums;
   }
   ::selection {
-    background: rgb(255 122 89 / 0.3);
+    background: color-mix(in oklab, var(--color-accent) 30%, transparent);
   }
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--color-accent);
@@ -78,7 +113,7 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.04), transparent);
+    background: linear-gradient(90deg, transparent, var(--color-shimmer), transparent);
     animation: shimmer 1.5s infinite;
   }
 }

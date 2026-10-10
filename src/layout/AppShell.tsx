@@ -5,6 +5,7 @@ import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLogout, useMe } from '../api/auth';
 import { useNav } from './nav';
+import { ThemeToggle } from '../lib/theme';
 import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
@@ -178,7 +179,7 @@ export function AppShell() {
         <div className="flex items-center gap-2 border-t border-border px-5 py-3 text-[11px] text-faint">
           <HealthDot />
           <span>api</span>
-          <span className="ml-auto font-mono">v0.1</span>
+          <ThemeToggle className="ml-auto -my-1" />
         </div>
       </aside>
 
@@ -221,6 +222,7 @@ export function AppShell() {
               </button>
               <TopBarMeta />
               <HealthDot pulse={running} />
+              <ThemeToggle className="lg:hidden" />
               {isAdmin && <RunNowButton />}
             </div>
           </div>

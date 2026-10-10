@@ -13,16 +13,16 @@ import { compact, money } from '../lib/format';
 import type { DayCount, UsageDay } from '../api/types';
 
 const AXIS_TICK = {
-  fill: '#5B6173',
+  fill: 'var(--color-faint)',
   fontSize: 10,
   fontFamily: '"Geist Mono", monospace',
 } as const;
 
 /** Series colors for the stacked token chart, also used by its legend. */
 const TOKEN_SERIES: [string, string][] = [
-  ['cached input', '#7C9CFF'],
-  ['uncached input', '#41537A'],
-  ['output', '#3DDC97'],
+  ['cached input', 'var(--color-accent-2)'],
+  ['uncached input', 'var(--color-series-dim)'],
+  ['output', 'var(--color-good)'],
 ];
 
 interface TipEntry {
@@ -72,7 +72,7 @@ export function NewJobsChart({ data }: { data: DayCount[] }) {
     <div className="h-56 w-full">
       <ResponsiveContainer>
         <BarChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-          <CartesianGrid stroke="rgba(255,255,255,0.045)" vertical={false} />
+          <CartesianGrid stroke="var(--color-grid)" vertical={false} />
           <XAxis
             dataKey="day"
             tickFormatter={shortDay}
@@ -83,10 +83,10 @@ export function NewJobsChart({ data }: { data: DayCount[] }) {
           />
           <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={44} />
           <Tooltip
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+            cursor={{ fill: 'var(--color-cursor)' }}
             content={<ChartTip format={(v) => String(v)} />}
           />
-          <Bar dataKey="count" name="new jobs" fill="#FF7A59" radius={[3, 3, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="count" name="new jobs" fill="var(--color-accent)" radius={[3, 3, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -114,7 +114,7 @@ export function TokensChart({ data }: { data: UsageDay[] }) {
       <div className="h-56 w-full">
       <ResponsiveContainer>
         <BarChart data={rows} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
-          <CartesianGrid stroke="rgba(255,255,255,0.045)" vertical={false} />
+          <CartesianGrid stroke="var(--color-grid)" vertical={false} />
           <XAxis
             dataKey="day"
             tickFormatter={shortDay}
@@ -130,12 +130,12 @@ export function TokensChart({ data }: { data: UsageDay[] }) {
             tickFormatter={(v: number) => compact(v)}
           />
           <Tooltip
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+            cursor={{ fill: 'var(--color-cursor)' }}
             content={<ChartTip format={compact} />}
           />
-          <Bar dataKey="cached input" stackId="t" fill="#7C9CFF" maxBarSize={28} />
-          <Bar dataKey="uncached input" stackId="t" fill="#41537A" maxBarSize={28} />
-          <Bar dataKey="output" stackId="t" fill="#3DDC97" radius={[3, 3, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="cached input" stackId="t" fill="var(--color-accent-2)" maxBarSize={28} />
+          <Bar dataKey="uncached input" stackId="t" fill="var(--color-series-dim)" maxBarSize={28} />
+          <Bar dataKey="output" stackId="t" fill="var(--color-good)" radius={[3, 3, 0, 0]} maxBarSize={28} />
         </BarChart>
       </ResponsiveContainer>
       </div>
@@ -151,11 +151,11 @@ export function CostChart({ data }: { data: UsageDay[] }) {
         <AreaChart data={data} margin={{ top: 8, right: 8, left: -14, bottom: 0 }}>
           <defs>
             <linearGradient id="costFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#FF7A59" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#FF7A59" stopOpacity={0} />
+              <stop offset="0%" stopColor="var(--color-accent)" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="var(--color-accent)" stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke="rgba(255,255,255,0.045)" vertical={false} />
+          <CartesianGrid stroke="var(--color-grid)" vertical={false} />
           <XAxis
             dataKey="day"
             tickFormatter={shortDay}
@@ -172,14 +172,14 @@ export function CostChart({ data }: { data: UsageDay[] }) {
             tickFormatter={(v: number) => money(v)}
           />
           <Tooltip
-            cursor={{ stroke: 'rgba(255,255,255,0.12)' }}
+            cursor={{ stroke: 'var(--color-faint)' }}
             content={<ChartTip format={money} />}
           />
           <Area
             type="monotone"
             dataKey="cost_usd"
             name="cost"
-            stroke="#FF7A59"
+            stroke="var(--color-accent)"
             strokeWidth={2}
             fill="url(#costFill)"
             dot={false}
