@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import clsx from 'clsx';
-import { Activity, Briefcase, EyeOff, ListChecks, Play, RefreshCw, Search, Sun } from 'lucide-react';
+import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useLogout, useMe } from '../api/auth';
+import { useNav } from './nav';
+import { ThemeToggle } from '../lib/theme';
+import { Logo } from '../components/Logo';
 import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
@@ -12,21 +16,32 @@ import {
 import { relTime } from '../lib/format';
 import { toast } from '../lib/toast';
 
-const NAV = [
-  { to: '/', label: 'Today', icon: Sun },
-  { to: '/jobs', label: 'Jobs', icon: Briefcase },
-  { to: '/tracker', label: 'Tracker', icon: ListChecks },
-  { to: '/system', label: 'System', icon: Activity },
-  { to: '/excluded', label: 'Excluded', icon: EyeOff },
-];
-
-function Logo() {
+function UserMenu() {
+  const me = useMe();
+  const logout = useLogout();
+  const user = me.data;
+  if (!user) return null;
   return (
-    <span className="font-mono text-lg font-semibold tracking-tight text-text">
-      wera<span className="text-accent">.</span>
-    </span>
+    <div className="flex items-center gap-2 border-t border-border px-3 py-3">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent/15 text-xs font-semibold text-accent">
+        {(user.name || user.email).slice(0, 1).toUpperCase()}
+      </span>
+      <NavLink to="/profile" className="min-w-0 flex-1 hover:opacity-80" title="Your profile">
+        <div className="truncate text-xs font-medium text-text">{user.name || user.email}</div>
+        {user.name && <div className="truncate text-[11px] text-faint">{user.email}</div>}
+      </NavLink>
+      <button
+        onClick={() => logout.mutate()}
+        aria-label="Log out"
+        title="Log out"
+        className="rounded-lg p-1.5 text-muted transition-colors duration-150 hover:bg-surface-2 hover:text-text"
+      >
+        <LogOut className="size-4" />
+      </button>
+    </div>
   );
 }
+
 
 function HealthDot({ pulse = false }: { pulse?: boolean }) {
   const health = useHealth();
@@ -87,6 +102,8 @@ function TopBarMeta() {
 
 export function AppShell() {
   const qc = useQueryClient();
+  const nav = useNav();
+  const isAdmin = useMe().data?.is_admin ?? false;
   const latest = useLatestRun();
   const location = useLocation();
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -128,7 +145,7 @@ export function AppShell() {
           <Logo />
         </div>
         <nav className="flex-1 space-y-0.5 p-3">
-          {NAV.map(({ to, label, icon: Icon }) => (
+          {nav.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -152,10 +169,11 @@ export function AppShell() {
             </NavLink>
           ))}
         </nav>
+        <UserMenu />
         <div className="flex items-center gap-2 border-t border-border px-5 py-3 text-[11px] text-faint">
           <HealthDot />
           <span>api</span>
-          <span className="ml-auto font-mono">v0.1</span>
+          <ThemeToggle className="ml-auto -my-1" />
         </div>
       </aside>
 
@@ -167,25 +185,7 @@ export function AppShell() {
             <span className="lg:hidden">
               <Logo />
             </span>
-            {/* Mobile nav */}
-            <nav className="flex flex-1 items-center gap-1 lg:hidden">
-              {NAV.map(({ to, label, icon: Icon }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end={to === '/'}
-                  aria-label={label}
-                  className={({ isActive }) =>
-                    clsx(
-                      'rounded-lg p-2 transition-colors duration-150',
-                      isActive ? 'bg-accent/10 text-accent' : 'text-muted hover:bg-surface-2',
-                    )
-                  }
-                >
-                  <Icon className="size-4" />
-                </NavLink>
-              ))}
-            </nav>
+            <span className="flex-1 lg:hidden" />
             <div className="ml-auto flex items-center gap-3">
               <button
                 onClick={() => setPaletteOpen(true)}
@@ -198,17 +198,43 @@ export function AppShell() {
               </button>
               <TopBarMeta />
               <HealthDot pulse={running} />
-              <RunNowButton />
+              <ThemeToggle className="lg:hidden" />
+              {isAdmin && <RunNowButton />}
             </div>
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 md:px-6 md:py-6">
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-24 md:px-6 md:pt-6 lg:pb-6">
           <div key={location.pathname} className="route-enter">
             <Outlet />
           </div>
         </main>
       </div>
+
+      {/* Bottom tab bar (phones and tablets) */}
+      <nav
+        aria-label="Main"
+        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      >
+        {nav
+          .filter((n) => n.mobile)
+          .map(({ to, label, icon: Icon }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={to === '/'}
+              className={({ isActive }) =>
+                clsx(
+                  'flex flex-1 flex-col items-center gap-0.5 py-2 text-[10px] font-medium transition-colors duration-150',
+                  isActive ? 'text-accent' : 'text-faint hover:text-text',
+                )
+              }
+            >
+              <Icon className="size-5" />
+              {label}
+            </NavLink>
+          ))}
+      </nav>
 
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
     </div>

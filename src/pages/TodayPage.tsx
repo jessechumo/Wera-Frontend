@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Ban, Bookmark, ExternalLink, Sun } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Ban, Bookmark, ExternalLink, LoaderCircle, Sun } from 'lucide-react';
 import { useLatestRun, useStats, useToday, useUpdateApplication } from '../api/hooks';
+import { useProfile } from '../api/profile';
 import type { AppStatus, Job } from '../api/types';
 import { JobCard } from '../components/JobCard';
 import { JobDrawer } from '../components/JobDrawer';
@@ -8,11 +9,9 @@ import { ScoreRing } from '../components/ScoreRing';
 import { StatTile } from '../components/StatTile';
 import { StatusPill } from '../components/JobBadges';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
-import { minutesUntil, relTime, shortLocation } from '../lib/format';
+import { capitalize, relTime, shortLocation, stepId } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 
-/** The next worker run is ~30 min after the previous one started. */
-const RUN_INTERVAL_MIN = 30;
 
 /** Today's best job, presented large above the grid. */
 function TopPick({
@@ -25,12 +24,12 @@ function TopPick({
   onQuickStatus: (id: number, status: AppStatus) => void;
 }) {
   const meta = [
-    job.seniority,
-    job.years_required != null ? `${job.years_required}+ yrs` : null,
     shortLocation(job),
-    job.work_mode,
+    job.work_mode ? capitalize(job.work_mode) : null,
+    job.seniority && job.seniority !== 'unknown' ? capitalize(job.seniority) : null,
+    job.years_required != null ? `${job.years_required}+ yrs` : null,
   ]
-    .filter(Boolean)
+    .filter((m) => m && m !== '—')
     .join(' · ');
   return (
     <div
@@ -43,8 +42,13 @@ function TopPick({
       aria-label={`Top pick: ${job.title} at ${job.company}`}
       className="anim-rise group cursor-pointer rounded-card border border-accent/25 bg-surface p-5 transition-colors duration-150 hover:border-accent/50"
     >
-      <div className="flex flex-wrap items-start gap-5">
-        <ScoreRing score={job.fit_score} size="lg" />
+      <div className="flex flex-wrap items-start gap-4 sm:gap-5">
+        <span className="sm:hidden">
+          <ScoreRing score={job.fit_score} size="md" />
+        </span>
+        <span className="hidden sm:block">
+          <ScoreRing score={job.fit_score} size="lg" />
+        </span>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] font-semibold tracking-widest text-accent uppercase">
@@ -52,16 +56,16 @@ function TopPick({
             </span>
             <StatusPill value={job.application_status} />
           </div>
-          <h2 className="mt-1.5 truncate text-lg font-semibold text-text">{job.title}</h2>
+          <h2 className="mt-1.5 line-clamp-2 text-lg leading-snug font-semibold text-text">{job.title}</h2>
           <div className="mt-0.5 truncate text-sm text-muted">{job.company}</div>
           {job.reason && (
             <p className="mt-2 line-clamp-3 max-w-2xl text-xs leading-relaxed text-muted">
               {job.reason}
             </p>
           )}
-          <div className="mt-2.5 font-mono text-[11px] text-faint">{meta || '—'}</div>
+          <div className="mt-2.5 text-[11px] text-faint">{meta || '—'}</div>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex w-full flex-wrap items-center gap-1.5 whitespace-nowrap sm:w-auto">
           <a
             href={job.url}
             target="_blank"
@@ -99,21 +103,29 @@ function TopPick({
 
 export default function TodayPage() {
   useDocumentTitle('Today');
-  const { data, isLoading, error, refetch } = useToday();
+  // Right after a profile save the queue fills in over a few minutes.
+  const profile = useProfile();
+  const updatedAt = profile.data?.updated_at;
+  const justSaved = updatedAt != null && Date.now() - new Date(updatedAt).getTime() < 20 * 60_000;
+  const [polling, setPolling] = useState(justSaved);
+  const { data, isLoading, error, refetch } = useToday(polling);
+  useEffect(() => {
+    if (!justSaved || (data && data.jobs.length > 0)) setPolling(false);
+  }, [justSaved, data]);
   const stats = useStats();
   const latest = useLatestRun();
   const update = useUpdateApplication();
   const [drawerId, setDrawerId] = useState<number | null>(null);
 
   const jobs: Job[] = [...(data?.jobs ?? [])].sort((a, b) => (b.fit_score ?? 0) - (a.fit_score ?? 0));
+  // /api/today is the review queue (not yet applied to or dismissed), so it
+  // includes older jobs; "new" means first seen in the last 24h.
+  const dayAgo = Date.now() - 24 * 60 * 60_000;
+  const newToday = jobs.filter((j) => new Date(j.first_seen_at).getTime() >= dayAgo).length;
   const strong = jobs.filter((j) => (j.fit_score ?? 0) >= 80).length;
   const sponsors = jobs.filter((j) => j.sponsorship === 'yes').length;
 
   const lastRun = latest.data?.runs[0];
-  const nextIn = Math.max(
-    0,
-    minutesUntil(lastRun?.started_at) + RUN_INTERVAL_MIN,
-  );
 
   const quickStatus = (id: number, status: AppStatus) => {
     update.mutate({ id, status, notes: '' });
@@ -126,7 +138,7 @@ export default function TodayPage() {
   const delta =
     yesterday != null && !stats.isLoading
       ? (() => {
-          const diff = jobs.length - yesterday;
+          const diff = newToday - yesterday;
           const sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
           return {
             text: `${sign}${Math.abs(diff)} vs yesterday`,
@@ -144,16 +156,17 @@ export default function TodayPage() {
         <div>
           <h1 className="text-[28px] leading-tight font-semibold">Today</h1>
           <p className="mt-1 text-xs text-muted">
-            {jobs.length} new scored {jobs.length === 1 ? 'job' : 'jobs'} in the last 24h
+            {jobs.length} scored {jobs.length === 1 ? 'job' : 'jobs'} to review · {newToday} new in
+            the last 24h
             {lastRun && <> · last run {relTime(lastRun.started_at)}</>}
           </p>
         </div>
       </header>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="New today" value={jobs.length} accent spark={spark} delta={delta} />
-        <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} new`} />
-        <StatTile label="Sponsors explicitly" value={sponsors} sub={`of ${jobs.length} new`} />
+        <StatTile label="New today" value={newToday} accent spark={spark} delta={delta} />
+        <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} to review`} />
+        <StatTile label="Sponsor visas" value={sponsors} sub={`of ${jobs.length} to review`} />
         <StatTile label="Applied this week" value={stats.data?.applications_per_week ?? '—'} />
       </div>
 
@@ -164,11 +177,17 @@ export default function TodayPage() {
           message={error instanceof Error ? error.message : 'unknown error'}
           onRetry={() => void refetch()}
         />
+      ) : jobs.length === 0 && justSaved ? (
+        <EmptyState
+          icon={<LoaderCircle className="size-5 animate-spin text-accent" />}
+          title="Scoring your matches"
+          hint="Wera is reading every open job that fits your preferences. The best ones appear here as they're scored."
+        />
       ) : jobs.length === 0 ? (
         <EmptyState
           icon={<Sun className="size-5 text-faint" />}
-          title="No new matches since the last run"
-          hint={`Next run in ~${nextIn} min. Come back after the worker cycles.`}
+          title="Nothing left to review"
+          hint="Every scored job is applied to or dismissed. Wera checks for new postings several times a day."
         />
       ) : (
         <>
@@ -189,7 +208,16 @@ export default function TodayPage() {
         </>
       )}
 
-      {drawerId != null && <JobDrawer jobId={drawerId} onClose={() => setDrawerId(null)} />}
+      {drawerId != null && (
+        <JobDrawer
+          jobId={drawerId}
+          onClose={() => setDrawerId(null)}
+          onNavigate={(dir) => {
+            const next = stepId(jobs.map((j) => j.id), drawerId, dir);
+            if (next != null) setDrawerId(next);
+          }}
+        />
+      )}
     </div>
   );
 }

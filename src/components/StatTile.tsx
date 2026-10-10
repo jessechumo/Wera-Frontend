@@ -99,7 +99,11 @@ export function StatTile({
             </div>
           )}
         </div>
-        {spark && <Sparkline data={spark} />}
+        {spark && (
+          <span className="hidden sm:block">
+            <Sparkline data={spark} />
+          </span>
+        )}
       </div>
     </div>
   );

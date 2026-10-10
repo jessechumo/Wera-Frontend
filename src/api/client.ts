@@ -8,16 +8,23 @@ export class ApiError extends Error {
   }
 }
 
+/** Fired when a request comes back 401: the session is gone. */
+export const UNAUTHORIZED_EVENT = 'wera:unauthorized';
+
 // Same-origin fetch wrapper: relative paths only, so it works unchanged
-// behind the Vite dev proxy and behind nginx in production.
+// behind the Vite dev proxy, nginx, and Vercel rewrites. The session is an
+// HTTP-only cookie the browser sends on its own. FormData bodies keep the
+// browser's multipart Content-Type.
 export async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  const json = init?.body != null && !(init.body instanceof FormData);
   const res = await fetch(path, {
     ...init,
-    headers:
-      init?.body != null
-        ? { 'Content-Type': 'application/json', ...init?.headers }
-        : init?.headers,
+    credentials: 'same-origin',
+    headers: json ? { 'Content-Type': 'application/json', ...init?.headers } : init?.headers,
   });
+  if (res.status === 401 && !path.startsWith('/api/auth/')) {
+    window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
+  }
   if (!res.ok) {
     let message = `${res.status} ${res.statusText}`;
     const text = await res.text();

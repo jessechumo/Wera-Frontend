@@ -1,5 +1,6 @@
 import { Badge, type BadgeVariant } from './Badge';
-import { groupLabel } from '../lib/format';
+import { useIndustryLabel } from '../api/hooks';
+import { useFamilyLabel } from '../api/profile';
 import type { AppStatus, Job } from '../api/types';
 
 export function SponsorshipBadge({ value }: { value: Job['sponsorship'] }) {
@@ -16,10 +17,9 @@ export function WorkModeBadge({ value }: { value: Job['work_mode'] }) {
   return <Badge>{label}</Badge>;
 }
 
-export function GroupBadge({ value }: { value: string }) {
-  return (
-    <Badge variant={value === 'trading' ? 'accent' : 'accent-2'}>{groupLabel(value)}</Badge>
-  );
+export function IndustryBadge({ value }: { value: string }) {
+  const label = useIndustryLabel();
+  return <Badge variant="accent-2">{label(value)}</Badge>;
 }
 
 const STATUS_META: Record<AppStatus, { variant: BadgeVariant; label: string }> = {
@@ -38,13 +38,15 @@ export function StatusPill({ value }: { value: AppStatus | null }) {
 }
 
 export function CategoryChips({ cats, className }: { cats: string[]; className?: string }) {
+  const label = useFamilyLabel();
   if (cats.length === 0) return null;
+  const labels = [...new Set(cats.map(label))];
   return (
     <div className={className}>
-      {cats.map((c) => (
+      {labels.map((c) => (
         <span
           key={c}
-          className="mr-1 inline-block rounded-md bg-surface-2 px-1.5 py-0.5 font-mono text-[10px] text-faint"
+          className="mr-1 mb-1 inline-block rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-muted"
         >
           {c}
         </span>

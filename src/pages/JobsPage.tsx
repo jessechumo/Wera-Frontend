@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useJobs, useUpdateApplication } from '../api/hooks';
 import type { AppStatus } from '../api/types';
 import { FilterBar, type FilterValues } from '../components/FilterBar';
@@ -8,14 +8,15 @@ import { JobDrawer } from '../components/JobDrawer';
 import { JobRow } from '../components/JobRow';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { stepId } from '../lib/format';
+import { ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
 
 const PAGE = 50;
 
 function valuesFromParams(sp: URLSearchParams): FilterValues {
   return {
     q: sp.get('q') ?? '',
-    group: sp.get('group') ?? '',
+    industry: sp.get('industry') ?? '',
     category: sp.get('category') ?? '',
     min_score: Number(sp.get('min_score') ?? 0) || 0,
     sponsorship: sp.get('sponsorship') ?? '',
@@ -135,6 +136,12 @@ export default function JobsPage() {
             opens · <span className="font-mono">o</span> opens posting
           </p>
         </div>
+        <Link
+          to="/excluded"
+          className="inline-flex items-center gap-1.5 self-end rounded-lg px-2 py-1 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-text"
+        >
+          <EyeOff className="size-3.5" /> Excluded jobs
+        </Link>
       </header>
 
       <FilterBar
@@ -169,7 +176,7 @@ export default function JobsPage() {
                   <th className="w-14 px-3 py-2.5">Score</th>
                   <th className="px-3 py-2.5">Title</th>
                   <th className="px-3 py-2.5">Company</th>
-                  <th className="px-3 py-2.5">Group</th>
+                  <th className="px-3 py-2.5">Industry</th>
                   <th className="px-3 py-2.5">Location</th>
                   <th className="px-3 py-2.5">Mode</th>
                   <th className="px-3 py-2.5">Sponsorship</th>
@@ -228,7 +235,19 @@ export default function JobsPage() {
         </>
       )}
 
-      {drawerId != null && <JobDrawer jobId={drawerId} onClose={closeDrawer} />}
+      {drawerId != null && (
+        <JobDrawer
+          jobId={drawerId}
+          onClose={closeDrawer}
+          onNavigate={(dir) => {
+            const next = stepId(jobs.map((j) => j.id), drawerId, dir);
+            if (next != null) {
+              setSel(jobs.findIndex((j) => j.id === next));
+              openDrawer(next);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

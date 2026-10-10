@@ -13,7 +13,7 @@ export interface Job {
   id: number;
   company_id: number;
   company: string;
-  group: string;
+  industry: string;
   source: string;
   ext_id: string;
   title: string;
@@ -68,6 +68,8 @@ export interface DeepAnalysis {
 }
 
 export interface JobDetail extends Job {
+  /** Plain text: paragraphs separated by blank lines. */
+  description: string;
   deep: DeepAnalysis | null;
 }
 
@@ -83,7 +85,7 @@ export interface DayCount {
 
 export interface Stats {
   by_stage: Record<string, number>;
-  by_group: Record<string, number>;
+  by_industry: Record<string, number>;
   by_category: Record<string, number>;
   by_status: Record<string, number>;
   new_per_day: DayCount[];
@@ -119,7 +121,7 @@ export interface Company {
   name: string;
   ats: string;
   token: string;
-  group: string;
+  industry: string;
   enabled: boolean;
   last_fetch_at: string | null;
   last_fetch_ok: boolean | null;
@@ -149,7 +151,109 @@ export interface UsageTotals {
   cached_percent: number;
 }
 
+export interface UserSpend {
+  id: number;
+  email: string;
+  name: string;
+  created_at: string;
+  last_login_at: string | null;
+  monthly_budget_usd: number;
+  month_spend_usd: number;
+  matches: number;
+  has_profile: boolean;
+}
+
 export interface Usage {
   per_day: UsageDay[];
   totals: UsageTotals;
+  /** Every user's spend this month (admin report). */
+  users: UserSpend[];
+}
+
+export interface Industry {
+  id: string;
+  label: string;
+  description: string;
+  companies: number;
+  open_jobs: number;
+  /** The user's open, scored matches. */
+  matches: number;
+  top_score: number | null;
+}
+
+export interface IndustriesList {
+  industries: Industry[];
+}
+
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  is_admin: boolean;
+  created_at: string;
+}
+
+export interface Preferences {
+  role_families: string[];
+  levels: string[];
+  max_years_required: number;
+  us_only: boolean;
+  needs_sponsorship: boolean;
+}
+
+export type WorkAuthorization =
+  | 'citizen_or_resident'
+  | 'sponsorship_now'
+  | 'sponsorship_future'
+  | 'outside_us';
+
+export interface Answers {
+  current_title?: string;
+  years_experience?: number | null;
+  work_authorization?: WorkAuthorization | '';
+  locations?: string;
+  work_modes?: ('remote' | 'hybrid' | 'onsite')[];
+  industries?: string[];
+  target_roles?: string;
+  avoid?: string;
+  notes?: string;
+}
+
+export interface Profile {
+  markdown: string;
+  preferences: Preferences;
+  answers: Answers;
+  /** Characters of resume text on file; 0 when none was uploaded. */
+  resume_chars: number;
+  /** Matching runs for this profile (text plus a family and a level). */
+  ready: boolean;
+  updated_at: string | null;
+}
+
+export interface Choice {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface ProfileOptions {
+  role_families: Choice[];
+  levels: Choice[];
+  industries: Choice[];
+}
+
+export interface MyUsage {
+  monthly_budget_usd: number;
+  month_spend_usd: number;
+  remaining_usd: number;
+}
+
+/** Preferences the AI read off the resume (POST /api/profile/suggest). */
+export interface Suggestions {
+  role_families: string[];
+  levels: string[];
+  years_experience: number | null;
+  current_title: string;
+  locations: string[];
+  target_roles: string;
 }

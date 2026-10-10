@@ -11,10 +11,10 @@ export function verdictOf(score: number | null): Verdict {
 // Verdict palette: the ember accent marks the best fits; everything below
 // desaturates toward zinc so score color signals quality without shouting.
 export const verdictHex: Record<Verdict, string> = {
-  strong: '#FF7A59',
-  good: '#7C9CFF',
-  stretch: '#8A90A2',
-  poor: '#5B6173',
+  strong: 'var(--color-accent)',
+  good: 'var(--color-accent-2)',
+  stretch: 'var(--color-muted)',
+  poor: 'var(--color-faint)',
 };
 
 export const verdictColor: Record<Verdict, string> = {
@@ -91,14 +91,8 @@ export function runDuration(started: string, finished: string | null): string {
   return `${m}m ${Math.round(sec % 60)}s`;
 }
 
-export function groupLabel(g: string): string {
-  if (g === 'ai_infra') return 'AI infra';
-  if (g === 'trading') return 'Trading';
-  return g;
-}
-
 const REASONS: Record<string, string> = {
-  'title:no_category': 'No matching role category',
+  'title:no_category': 'Not one of your roles',
   'title:senior': 'Senior title',
   'title:sr': 'Senior title',
   'title:staff': 'Staff title',
@@ -113,20 +107,44 @@ const REASONS: Record<string, string> = {
   'title:iii': 'Level III title',
   'location:non_us': 'Non-US location',
   'sponsorship:explicit_no': 'Sponsorship explicitly refused',
-  'llm:sponsorship_no': 'LLM: no sponsorship',
-  'llm:senior': 'LLM: senior role',
-  'llm:non_us': 'LLM: non-US location',
+  'llm:sponsorship_no': 'No sponsorship (AI read)',
+  'llm:senior': 'Senior role (AI read)',
+  'llm:non_us': 'Outside the US (AI read)',
 };
 
 /** Human-readable exclude reason label. */
 export function prettyReason(reason: string): string {
-  if (reason.startsWith('llm:years>')) return `LLM: needs ${reason.slice('llm:years>'.length)}+ years`;
-  return REASONS[reason] ?? reason;
+  if (reason.startsWith('llm:years>')) return `Needs more than ${reason.slice('llm:years>'.length)} years`;
+  if (REASONS[reason]) return REASONS[reason]!;
+  // Any other seniority word the title filter matched, e.g. title:engineering_manager.
+  if (reason.startsWith('title:')) return `${capitalize(reason.slice(6).replace(/_/g, ' '))} title`;
+  return reason;
 }
 
-/** Short "New York, NY" from a possibly longer location summary. */
+/**
+ * Short "New York, NY" from a possibly longer location summary: the first
+ * of several locations, without a trailing "(onsite …)" remark (the work
+ * mode is shown separately), plus "+N" when there were more.
+ */
 export function shortLocation(job: { location_summary: string | null; location_raw: string | null }): string {
   const loc = job.location_summary ?? job.location_raw;
   if (!loc) return '—';
-  return loc.split(';')[0]!.trim();
+  const parts = loc
+    .split(/;|\||\n/)
+    .map((p) => p.replace(/\s*\([^)]*\)?\s*$/, '').trim())
+    .filter(Boolean);
+  if (parts.length === 0) return '—';
+  return parts.length > 1 ? `${parts[0]} +${parts.length - 1}` : parts[0]!;
+}
+
+/** "entry" -> "Entry". */
+export function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+/** The id dir steps away from current in ids, or null at either end. */
+export function stepId(ids: number[], current: number, dir: -1 | 1): number | null {
+  const i = ids.indexOf(current);
+  if (i < 0) return null;
+  return ids[i + dir] ?? null;
 }
