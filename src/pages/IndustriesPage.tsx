@@ -69,9 +69,10 @@ export default function IndustriesPage() {
   if (all.length === 0) {
     return <EmptyState icon={<Factory className="size-5 text-faint" />} title="No industries yet" />;
   }
-  // Preferred industries first, then the rest by how many matches they hold.
-  const mine = all.filter((i) => preferred.has(i.id));
-  const rest = all.filter((i) => !preferred.has(i.id)).sort((a, b) => b.matches - a.matches);
+  // Preferred industries first, then the rest; both A to Z so any one is easy to find.
+  const az = [...all].sort((a, b) => a.label.localeCompare(b.label));
+  const mine = az.filter((i) => preferred.has(i.id));
+  const rest = az.filter((i) => !preferred.has(i.id));
   const totalCompanies = all.reduce((n, i) => n + i.companies, 0);
 
   return (
