@@ -15,9 +15,9 @@ function IndustryCard({ ind, starred }: { ind: Industry; starred: boolean }) {
       to={`/industries/${ind.id}`}
       className="anim-rise group flex flex-col rounded-card border border-border bg-surface p-4 transition-colors duration-150 hover:border-accent/40"
     >
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <IndustryIcon id={ind.id} className="transition-transform duration-200 group-hover:scale-105" />
-        <h3 className="min-w-0 flex-1 pt-0.5 text-sm leading-snug font-semibold text-text">{ind.label}</h3>
+        <h3 className="min-w-0 flex-1 text-sm leading-snug font-semibold text-text">{ind.label}</h3>
         {starred && <Star className="size-3.5 shrink-0 fill-accent text-accent" aria-label="Preferred" />}
       </div>
       <p className="mt-1 line-clamp-2 flex-1 text-xs text-muted">{ind.description}</p>
