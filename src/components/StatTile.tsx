@@ -55,6 +55,46 @@ export function Sparkline({
   );
 }
 
+const dayFmt = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', timeZone: 'UTC' });
+
+/**
+ * One bar per day, most recent last and highlighted. Bars suit sparse
+ * counts (a line through zero days only draws spikes); each bar names its
+ * day and count on hover, and days with none show a faint tick.
+ */
+export function DayBars({ data, unit = 'new matches' }: { data: { day: string; count: number }[]; unit?: string }) {
+  if (data.length < 2) return null;
+  const w = 104;
+  const h = 34;
+  const gap = data.length > 10 ? 2 : 3;
+  const bw = (w - gap * (data.length - 1)) / data.length;
+  const max = Math.max(1, ...data.map((d) => d.count));
+  const label = (d: { day: string; count: number }) => `${dayFmt.format(new Date(`${d.day}T00:00:00Z`))}: ${d.count.toLocaleString()} ${unit}`;
+  return (
+    <svg width={w} height={h} className="shrink-0" role="img" aria-label={data.map(label).join('; ')}>
+      {data.map((d, i) => {
+        const today = i === data.length - 1;
+        const bh = d.count === 0 ? 2 : Math.max(3, (d.count / max) * (h - 2));
+        return (
+          <rect
+            key={d.day}
+            x={i * (bw + gap)}
+            y={h - bh}
+            width={bw}
+            height={bh}
+            rx={Math.min(2, bw / 2)}
+            fill={d.count === 0 ? 'var(--color-border)' : 'var(--color-accent)'}
+            opacity={d.count === 0 ? 1 : today ? 1 : 0.38}
+            className="transition-opacity duration-150 hover:opacity-100"
+          >
+            <title>{label(d)}</title>
+          </rect>
+        );
+      })}
+    </svg>
+  );
+}
+
 /** Label + big mono number + optional trend chip, sparkline and sub-line. */
 export function StatTile({
   label,
@@ -62,6 +102,7 @@ export function StatTile({
   sub,
   delta,
   spark,
+  bars,
   accent,
   className,
 }: {
@@ -72,6 +113,8 @@ export function StatTile({
   delta?: { text: string; tone?: 'good' | 'bad' | 'neutral' };
   /** Sparkline drawn from the series, most recent point last. */
   spark?: number[];
+  /** Per-day bars (preferred for sparse daily counts), most recent last. */
+  bars?: { day: string; count: number }[];
   accent?: boolean;
   className?: string;
 }) {
@@ -104,10 +147,16 @@ export function StatTile({
             </div>
           )}
         </div>
-        {spark && (
-          <span className="hidden sm:block">
-            <Sparkline data={spark} />
+        {bars ? (
+          <span className="hidden self-end sm:block">
+            <DayBars data={bars} />
           </span>
+        ) : (
+          spark && (
+            <span className="hidden sm:block">
+              <Sparkline data={spark} />
+            </span>
+          )
         )}
       </div>
     </div>
