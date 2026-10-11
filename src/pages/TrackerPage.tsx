@@ -7,7 +7,8 @@ import { Skeleton } from '../components/States';
 import { relTime, verdictColor, verdictOf } from '../lib/format';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import clsx from 'clsx';
-import { ExternalLink, EyeOff } from 'lucide-react';
+import { ExternalLink, EyeOff, KanbanSquare, Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const COLUMNS: AppStatus[] = ['saved', 'applied', 'interviewing', 'offer', 'rejected'];
 
@@ -83,6 +84,31 @@ function KanbanCard({
   );
 }
 
+/** True once every column has loaded and none holds a job. */
+function useNothingTracked() {
+  // The same queries the columns make: shared from the cache, no extra requests.
+  const results = COLUMNS.map((status) => useJobs({ status, limit: 100, sort: 'newest' })); // eslint-disable-line react-hooks/rules-of-hooks -- fixed list
+  return results.every((r) => r.data && r.data.jobs.length === 0);
+}
+
+function TrackerEmpty() {
+  return (
+    <section className="relative flex flex-col items-center overflow-hidden rounded-card border border-dashed border-border bg-surface/40 px-6 py-20 text-center">
+      <KanbanSquare aria-hidden strokeWidth={1.1} className="pointer-events-none absolute top-1/2 left-1/2 size-72 -translate-x-1/2 -translate-y-1/2 text-text opacity-[0.04]" />
+      <span className="relative inline-flex size-14 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+        <KanbanSquare className="size-7" strokeWidth={1.8} />
+      </span>
+      <h2 className="relative mt-4 text-lg font-semibold">Nothing tracked yet</h2>
+      <p className="relative mt-1 max-w-md text-sm text-muted">
+        Save a job you like, or mark one as applied, and it lands here. Move it along from saved to applied, interviewing and offer as things progress.
+      </p>
+      <Link to="/" className="relative mt-5 inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg hover:bg-accent/85">
+        <Search className="size-4" /> Find jobs to track
+      </Link>
+    </section>
+  );
+}
+
 function Column({
   status,
   onOpen,
@@ -128,6 +154,7 @@ export default function TrackerPage() {
     update.mutate({ id, status, notes: '' });
 
   const columns = showNI ? [...COLUMNS, 'not_interested' as AppStatus] : COLUMNS;
+  const empty = useNothingTracked();
 
   return (
     <div className="space-y-4">
@@ -150,8 +177,10 @@ export default function TrackerPage() {
         </label>
       </header>
 
+      {empty && <TrackerEmpty />}
       <div
         className={clsx(
+          empty && 'hidden',
           'grid gap-3 sm:grid-cols-2 xl:grid-cols-5',
           showNI && 'xl:grid-cols-6',
         )}
