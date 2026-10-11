@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ChevronDown, FilterX, Search } from 'lucide-react';
 import { useIndustries, useStats } from '../api/hooks';
 import { APP_STATUSES } from './StatusSelect';
+import { useFamilyLabel } from '../api/profile';
 
 export interface FilterValues {
   q: string;
@@ -88,9 +89,11 @@ export function FilterBar({
     return () => window.clearTimeout(t);
   }, [text, values.q, onChange]);
 
-  const categories = Object.entries(stats.data?.by_category ?? {})
-    .sort((a, b) => b[1] - a[1])
-    .map(([value]) => ({ value, label: value }));
+  // Readable role names, A to Z, so a category is easy to find.
+  const familyLabel = useFamilyLabel();
+  const categories = Object.keys(stats.data?.by_category ?? {})
+    .map((value) => ({ value, label: familyLabel(value) }))
+    .sort((a, b) => a.label.localeCompare(b.label));
 
   const isDefault =
     values.q === '' &&
