@@ -31,5 +31,6 @@ export function useSponsorship(q: string) {
     queryFn: () =>
       api<{ companies: SponsorshipStat[]; h1b_period: H1BPeriod }>(`/api/sponsorship?limit=1000${q ? `&q=${encodeURIComponent(q)}` : ''}`),
     placeholderData: keepPreviousData,
+    staleTime: 10 * 60_000,
   });
 }
