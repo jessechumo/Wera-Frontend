@@ -1,4 +1,4 @@
-import { useEffect, useState, type ChangeEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { CheckCircle2, Download, Eye, FileCode2, FileText, LoaderCircle, Maximize2, SlidersHorizontal, Sparkles, Trash2, Upload, Wand2 } from 'lucide-react';
@@ -10,7 +10,6 @@ import {
 import { useProfile } from '../api/profile';
 import { ErrorState, Skeleton } from '../components/States';
 import { toast } from '../lib/toast';
-import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { hiddenCount, showAll } from '../resume/edit';
 import { ResumeForm } from '../resume/ResumeForm';
 import { ResumePreview } from '../resume/ResumePreview';
@@ -31,7 +30,7 @@ function CreateResume({ replace = false, onDone }: { replace?: boolean; onDone?:
       onSuccess: (doc) => {
         if (doc.notes.length) toast.success(`Imported. ${doc.notes.length} line${doc.notes.length === 1 ? '' : 's'} to check.`);
         if (onDone) onDone(doc);
-        else navigate(`/resume/${doc.id}`);
+        else navigate(`/profile/resume/${doc.id}`);
       },
       onError: (e) => toast.error(errorText(e)),
     });
@@ -194,7 +193,7 @@ function Workspace({ doc }: { doc: ResumeDoc }) {
           <FileCode2 className="size-3.5" /> LaTeX
         </a>
         {doc.job_id != null && (
-          <button onClick={() => window.confirm('Delete this tailored resume?') && del.mutate(doc.id, { onSuccess: () => navigate('/resume') })}
+          <button onClick={() => window.confirm('Delete this tailored resume?') && del.mutate(doc.id, { onSuccess: () => navigate('/profile/resume') })}
             className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted hover:text-bad">
             <Trash2 className="size-3.5" /> Delete
           </button>
@@ -216,46 +215,82 @@ function Workspace({ doc }: { doc: ResumeDoc }) {
   );
 }
 
-export default function ResumePage() {
-  useDocumentTitle('Resume');
+/** First open: build the resume from the one uploaded at signup. */
+function AutoImport({ filename, onFallback }: { filename: string; onFallback: () => void }) {
+  const imp = useImportResume();
+  const navigate = useNavigate();
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    imp.mutate({ source: 'profile' }, {
+      onSuccess: (doc) => {
+        toast.success(doc.notes.length ? `Built from ${filename}. ${doc.notes.length} line${doc.notes.length === 1 ? '' : 's'} to check.` : `Built from ${filename}.`);
+        navigate(`/profile/resume/${doc.id}`, { replace: true });
+      },
+      onError: (e) => {
+        toast.error(`Could not read ${filename}: ${errorText(e)}`);
+        onFallback();
+      },
+    });
+  }, [imp, filename, navigate, onFallback]);
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-card border border-border bg-surface px-6 py-16 text-center">
+      <LoaderCircle className="size-6 animate-spin text-accent" />
+      <p className="text-sm font-semibold">Building your resume from {filename}</p>
+      <p className="max-w-md text-xs text-muted">
+        Every line is copied as written into the standard one-page layout, so you can edit it, fit it to a page and tailor it to jobs. This takes a few seconds.
+      </p>
+    </div>
+  );
+}
+
+/**
+ * The Resume tab of the profile: the editable resume (prefilled from the
+ * uploaded one), its tailored copies, and the live preview.
+ */
+export function ResumeSection() {
   const params = useParams();
   const navigate = useNavigate();
   const list = useResumes();
+  const profile = useProfile();
   const [reimport, setReimport] = useState(false);
+  const [manual, setManual] = useState(false);
+  const fallback = useCallback(() => setManual(true), []);
   const base = list.data?.resumes.find((r) => r.job_id == null);
   const id = params.id ? Number(params.id) : (base?.id ?? null);
   const doc = useResume(id);
 
-  if (list.isLoading) return <Skeleton className="h-96 w-full" />;
+  if (list.isLoading || profile.isLoading) return <Skeleton className="h-96 w-full" />;
   if (list.error) return <ErrorState message={errorText(list.error)} onRetry={() => void list.refetch()} />;
   const resumes = list.data?.resumes ?? [];
+  const upload = profile.data?.resume_chars ? (profile.data.resume_file?.filename ?? 'your uploaded resume') : null;
+
+  if (resumes.length === 0 && upload && !manual) return <AutoImport filename={upload} onFallback={fallback} />;
 
   return (
-    <div className="space-y-5 pb-10">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-[28px] leading-tight font-semibold">Resume</h1>
-          <p className="mt-1 text-sm text-muted">Edit your resume, keep it to one page, and tailor a copy for any job.</p>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted">Edit your resume, keep it to one page, and tailor a copy for any job from its Resume tab.</p>
         {resumes.length > 0 && (
           <div className="flex items-center gap-2">
-            <select value={id ?? ''} onChange={(e) => navigate(`/resume/${e.target.value}`)} aria-label="Resume"
-              className="rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
+            <select value={id ?? ''} onChange={(e) => navigate(`/profile/resume/${e.target.value}`)} aria-label="Resume"
+              className="w-60 max-w-full truncate rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
               {resumes.map((r) => (
                 <option key={r.id} value={r.id}>{r.job_id == null ? 'My resume' : `Tailored: ${r.job_title} at ${r.job_company}`}</option>
               ))}
             </select>
             {id === base?.id && (
-              <button onClick={() => setReimport((v) => !v)} className="rounded-lg px-2 py-1.5 text-xs text-muted hover:text-text">Re-import</button>
+              <button onClick={() => setReimport((v) => !v)} className="rounded-lg px-2 py-1.5 text-xs text-muted hover:text-text">{reimport ? 'Cancel' : 'Re-import'}</button>
             )}
           </div>
         )}
-      </header>
+      </div>
 
       {resumes.length === 0 || reimport ? (
         <>
-          {reimport && <p className="text-xs text-warn">Importing replaces your base resume. Tailored copies stay as they are.</p>}
-          <CreateResume replace={reimport} onDone={reimport ? (d) => { setReimport(false); navigate(`/resume/${d.id}`); } : undefined} />
+          {reimport && <p className="text-xs text-warn">Importing replaces your main resume. Tailored copies stay as they are.</p>}
+          <CreateResume replace={reimport} onDone={reimport ? (d) => { setReimport(false); navigate(`/profile/resume/${d.id}`); } : undefined} />
         </>
       ) : doc.isLoading || !doc.data ? (
         doc.error ? <ErrorState message={errorText(doc.error)} /> : <Skeleton className="h-96 w-full" />

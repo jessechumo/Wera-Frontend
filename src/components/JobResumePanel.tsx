@@ -48,7 +48,7 @@ export function JobResumePanel({ job }: { job: JobDetail }) {
         <FileText className="size-5 text-accent" />
         <p className="text-sm font-semibold">Set up your resume first</p>
         <p className="max-w-sm text-xs text-muted">Import your LaTeX resume or your uploaded PDF once; then every job gets a tailored, one-page copy in a click.</p>
-        <Link to="/resume" className="mt-1 rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-accent/85">Set up my resume</Link>
+        <Link to="/profile/resume" className="mt-1 rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-bg hover:bg-accent/85">Set up my resume</Link>
       </div>
     );
   }
@@ -72,7 +72,7 @@ export function JobResumePanel({ job }: { job: JobDetail }) {
       ) : (
         <>
           <div className="flex flex-wrap gap-1.5">
-            <Link to={`/resume/${doc.id}`} className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg hover:bg-accent/85">
+            <Link to={`/profile/resume/${doc.id}`} className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg hover:bg-accent/85">
               <ExternalLink className="size-3.5" /> Edit
             </Link>
             <a href={`/api/resumes/${doc.id}/pdf?download=1`} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent/40">

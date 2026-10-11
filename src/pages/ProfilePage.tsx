@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react';
-import { Camera, Download, FileText, LoaderCircle, Save } from 'lucide-react';
+import { Link, NavLink } from 'react-router-dom';
+import clsx from 'clsx';
+import { ArrowRight, Camera, Download, FileText, LoaderCircle, Save, UserRound } from 'lucide-react';
 import { useAvatar, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useDraftProfile, useMyUsage, useProfile, useSaveProfile } from '../api/profile';
@@ -13,6 +15,7 @@ import { ProfileEditor } from '../profile/ProfileEditor';
 import { DEFAULT_PREFS, PreferencesFields, prefsProblem } from '../profile/PreferencesFields';
 import { ResumeUpload } from '../profile/ResumeUpload';
 import { ApplicationDetails } from '../profile/ApplicationDetails';
+import { ResumeSection } from '../profile/ResumeSection';
 
 function errorText(err: unknown): string | null {
   if (!err) return null;
@@ -132,6 +135,10 @@ function ResumeCard({ resumeChars, onUploaded }: { resumeChars: number; onUpload
         </div>
       )}
       <ResumeUpload resumeChars={resumeChars} onUploaded={onUploaded} />
+      <Link to="/profile/resume" className="mt-3 flex items-center gap-2 rounded-lg border border-accent/25 bg-accent/[0.06] px-3 py-2 text-xs font-medium text-accent hover:bg-accent/10">
+        <FileText className="size-3.5" /> Edit, fit to one page and tailor it
+        <ArrowRight className="ml-auto size-3.5" />
+      </Link>
       {profile.data?.resume_text && (
         <div className="mt-3">
           <button onClick={() => setShowText((v) => !v)} className="text-xs font-medium text-muted hover:text-text">
@@ -148,8 +155,39 @@ function ResumeCard({ resumeChars, onUploaded }: { resumeChars: number; onUpload
   );
 }
 
-export default function ProfilePage() {
-  useDocumentTitle('Profile');
+function ProfileTabs() {
+  const tab = ({ isActive }: { isActive: boolean }) =>
+    clsx(
+      '-mb-px inline-flex items-center gap-1.5 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors duration-150',
+      isActive ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-text',
+    );
+  return (
+    <nav aria-label="Profile sections" className="flex gap-1 border-b border-border">
+      <NavLink to="/profile" end className={tab}>
+        <UserRound className="size-4" /> Profile
+      </NavLink>
+      <NavLink to="/profile/resume" className={tab}>
+        <FileText className="size-4" /> Resume
+      </NavLink>
+    </nav>
+  );
+}
+
+export default function ProfilePage({ tab = 'profile' }: { tab?: 'profile' | 'resume' }) {
+  useDocumentTitle(tab === 'resume' ? 'Resume' : 'Profile');
+  if (tab === 'resume') {
+    return (
+      <div className="space-y-5 pb-10">
+        <ProfileHeader />
+        <ProfileTabs />
+        <ResumeSection />
+      </div>
+    );
+  }
+  return <ProfileOverview />;
+}
+
+function ProfileOverview() {
   const profile = useProfile();
   const draft = useDraftProfile();
   const save = useSaveProfile();
@@ -196,6 +234,7 @@ export default function ProfilePage() {
   return (
     <div className="space-y-5 pb-20">
       <ProfileHeader />
+      <ProfileTabs />
       <p className="-mt-2 text-xs text-muted">Changes to what you want or to the profile text rematch your jobs.</p>
 
       <div className="grid gap-5 lg:grid-cols-[1fr_320px]">

@@ -6,7 +6,7 @@ import type { JobDetail } from '../api/types';
 import { JobResumePanel } from '../components/JobResumePanel';
 import { stubApi } from '../test/fixtures';
 import { renderApp } from '../test/render';
-import ResumePage from './ResumePage';
+import { ResumeSection } from './ResumeSection';
 
 const doc = (over: Partial<ResumeDoc> = {}): ResumeDoc => ({
   id: 3, title: 'My resume', job_id: null, job_title: null, job_company: null, notes: [], updated_at: '2026-10-10T00:00:00Z',
@@ -20,11 +20,12 @@ const doc = (over: Partial<ResumeDoc> = {}): ResumeDoc => ({
 });
 const preview = () => ({ pages: ['<svg xmlns="http://www.w3.org/2000/svg"></svg>'], measure: { pages: 1, fill: 0.8 } });
 
-describe('ResumePage', () => {
+describe('ResumeSection', () => {
   it('imports a LaTeX resume on first visit', async () => {
     let imported: Record<string, unknown> = {};
     let resumes: unknown[] = [];
     stubApi({
+      'GET /api/profile': () => ({ resume_chars: 0 }),
       'GET /api/resumes': () => ({ resumes }),
       'POST /api/resumes/import': (init) => {
         imported = JSON.parse(String(init?.body));
@@ -34,7 +35,7 @@ describe('ResumePage', () => {
       'GET /api/resumes/3': () => doc(),
       'POST /api/resumes/preview': preview,
     });
-    renderApp(<ResumePage />, { path: '/resume', route: '/resume/:id?' });
+    renderApp(<ResumeSection />, { path: '/profile/resume', route: '/profile/resume/:id?' });
     const box = await screen.findByLabelText('LaTeX source');
     await userEvent.click(box);
     await userEvent.paste('\\begin{document}{\\Huge \\scshape Ada}\\end{document}');
@@ -42,11 +43,32 @@ describe('ResumePage', () => {
     await waitFor(() => expect(imported).toMatchObject({ source: 'tex', replace: false }));
   });
 
+  it('builds the resume from the uploaded one on first open', async () => {
+    let body: Record<string, unknown> = {};
+    let resumes: unknown[] = [];
+    stubApi({
+      'GET /api/profile': () => ({ resume_chars: 900, resume_file: { filename: 'Ada_CV.pdf', uploaded_at: '2026-10-01T00:00:00Z' } }),
+      'GET /api/resumes': () => ({ resumes }),
+      'POST /api/resumes/import': (init) => {
+        body = JSON.parse(String(init?.body));
+        resumes = [{ id: 3, title: 'My resume', job_id: null }];
+        return doc();
+      },
+      'GET /api/resumes/3': () => doc(),
+      'POST /api/resumes/preview': preview,
+    });
+    renderApp(<ResumeSection />, { path: '/profile/resume', route: '/profile/resume/:id?' });
+    expect(await screen.findByText(/Building your resume from Ada_CV.pdf/)).toBeInTheDocument();
+    await waitFor(() => expect(body).toEqual({ source: 'profile' }));
+    expect(await screen.findByLabelText('Name')).toHaveValue('Ada Lovelace');
+  });
+
   it('edits with autosave, shows hidden items, previews and fits', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const saves: { data: { name: string } }[] = [];
     let fitted = false;
     stubApi({
+      'GET /api/profile': () => ({ resume_chars: 900 }),
       'GET /api/resumes': () => ({ resumes: [{ id: 3, title: 'My resume', job_id: null }] }),
       'GET /api/resumes/3': () => doc(),
       'PUT /api/resumes/3': (init) => {
@@ -57,7 +79,7 @@ describe('ResumePage', () => {
       'POST /api/resumes/preview': preview,
       'POST /api/resumes/3/fit': () => ((fitted = true), doc({ fit: { layout: { font_size: 10.5, spacing: 0.9, margin: 0.45 }, hidden: [], before: { pages: 2, fill: 0.2 }, after: { pages: 1, fill: 0.97 }, one_page: true, summary: 'Fits on one page at 10.5pt with tighter spacing' } })),
     });
-    renderApp(<ResumePage />, { path: '/resume', route: '/resume/:id?' });
+    renderApp(<ResumeSection />, { path: '/profile/resume', route: '/profile/resume/:id?' });
     const name = await screen.findByLabelText('Name');
     expect(await screen.findByAltText('Resume page 1')).toBeInTheDocument();
     expect(screen.getByText('One page')).toBeInTheDocument();
@@ -85,7 +107,7 @@ describe('JobResumePanel', () => {
   it('asks to set up a resume first', async () => {
     stubApi({ 'GET /api/jobs/12/keywords': () => ({ keywords: ['Go'], coverage: null, resume_id: null }), 'GET /api/jobs/12/resume': () => new Response('{}', { status: 404 }) });
     renderApp(<JobResumePanel job={job} />);
-    expect(await screen.findByRole('link', { name: 'Set up my resume' })).toHaveAttribute('href', '/resume');
+    expect(await screen.findByRole('link', { name: 'Set up my resume' })).toHaveAttribute('href', '/profile/resume');
   });
 
   it('shows keyword coverage and tailors a copy', async () => {
@@ -104,7 +126,7 @@ describe('JobResumePanel', () => {
     expect(screen.getByText('50%')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /Tailor my resume/ }));
     expect(await screen.findByText('Led with Go')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Edit/ })).toHaveAttribute('href', '/resume/9');
+    expect(screen.getByRole('link', { name: /Edit/ })).toHaveAttribute('href', '/profile/resume/9');
     expect(screen.getByRole('link', { name: /PDF/ })).toHaveAttribute('href', '/api/resumes/9/pdf?download=1');
   });
 });
