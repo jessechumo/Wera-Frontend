@@ -220,3 +220,31 @@ a.inline-flex:active {
 /* A target jumped to from the resume review. */
 @keyframes resume-flash { 0%, 60% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 45%, transparent); } 100% { box-shadow: 0 0 0 3px transparent; } }
 .resume-flash { animation: resume-flash 1.6s ease-out; border-radius: 0.5rem; }
+
+/* ---- Landing page ---------------------------------------------------- */
+/* The spotlight radius animates (registered so it can transition). */
+@property --reveal-r {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+.reveal-field {
+  --reveal-x: 50%;
+  --reveal-y: 40%;
+  transition: --reveal-r 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.reveal-field.is-active { --reveal-r: 240px; }
+.reveal-words {
+  -webkit-mask-image: radial-gradient(circle var(--reveal-r) at var(--reveal-x) var(--reveal-y), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%);
+  mask-image: radial-gradient(circle var(--reveal-r) at var(--reveal-x) var(--reveal-y), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%);
+}
+@keyframes drift-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes drift-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.drift-left { animation: drift-left var(--drift, 90s) linear infinite; }
+.drift-right { animation: drift-right var(--drift, 90s) linear infinite; }
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.float-y { animation: float-y 6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .drift-left, .drift-right, .float-y { animation: none; }
+  .reveal-field { transition: none; }
+}
