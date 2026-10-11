@@ -17,6 +17,7 @@ import NewPostPage from './pages/NewPostPage';
 import InterviewPage from './pages/InterviewPage';
 import SponsorshipPage from './pages/SponsorshipPage';
 import { ResumeRedirect } from './profile/ResumeRedirect';
+import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './auth/EmailPages';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
@@ -45,6 +46,9 @@ createRoot(document.getElementById('root')!).render(
         <Routes>
           <Route path="login" element={<AuthPage mode="login" />} />
           <Route path="signup" element={<AuthPage mode="signup" />} />
+          <Route path="verify-email" element={<VerifyEmailPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route element={<RequireAuth />}>
             <Route path="welcome" element={<WelcomePage />} />
             <Route element={<RequireProfile />}>
