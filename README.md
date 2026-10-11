@@ -26,7 +26,13 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
 - **Today:** your review queue ranked by fit, with sponsorship and work-mode badges
 - **Jobs:** filterable, searchable table with keyboard navigation (`j`/`k` to move, `Enter` to open, `o` to open the posting)
 - **Job view:** the posting beside the fit score, reasoning, and skills you have and lack; your status and notes; a **cover letter** tab that writes, edits, copies and prints a letter for that role; a **resume** tab showing which of the posting's keywords your resume covers, with a one-click tailored, one-page copy; hide a company in one click
-- **Profile, Resume tab:** your resume as an editable document, built on first open from the resume you uploaded, beside a live preview in the classic LaTeX resume layout: import a LaTeX resume or your uploaded one, edit sections, entries and bullets (reorder, hide), autosave, fit to one page in a click, adjust size, spacing and margins, and download a PDF or `.tex`
+- **Profile, Resume tab:** your resume as an editable document, built on first open from the resume you uploaded, beside a live preview:
+  - four templates shown with your own content: Ivy (the classic LaTeX resume), Parse (ATS-maxxing), Signal (modern, with an accent color) and Ledger (refined serif); US Letter or A4
+  - drag to reorder sections, entries and bullets, hide anything, undo and redo, autosave, **bold** with double asterisks
+  - AI suggestions for any bullet (three stronger versions, with [placeholders] where a real number belongs)
+  - a review with a score: missing contact details, weak openers, first person, long bullets, few metrics, mixed date formats and more, each jumping to its bullet
+  - a LaTeX tab to edit the resume as LaTeX (the preview follows), then download the `.tex` or open it in Overleaf
+  - fit to one page in a click; download PDF, LaTeX or plain text
 - **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected
 - **Industries:** your matches in each industry, and every company Wera watches there
 - **Sponsorship:** each company's certified H-1B applications (new hires, median offered wage, and by job title, place and wage level) beside what its postings say about sponsorship; look up any employer, even ones Wera does not watch
