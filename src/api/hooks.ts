@@ -85,10 +85,19 @@ export function useJob(id: number | null) {
   });
 }
 
+/** The browser's time zone, so "today" in stats is the user's own day. */
+const TZ = (() => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+})();
+
 export function useStats() {
   return useQuery({
     queryKey: ['stats'],
-    queryFn: () => api<Stats>('/api/stats'),
+    queryFn: () => api<Stats>(`/api/stats?tz=${encodeURIComponent(TZ)}`),
     refetchInterval: 5 * 60_000,
   });
 }

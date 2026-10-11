@@ -134,21 +134,24 @@ export default function TodayPage() {
     update.mutate({ id, status, notes: '' });
   };
 
-  // Sparkline + delta from /api/stats: new jobs per day, most recent last.
+  // New matches per day in the user's own time zone, most recent last.
+  // The tile, the bars and the comparison all use this one series.
   const perDay = stats.data?.new_per_day ?? [];
-  const spark = perDay.slice(-14).map((d) => d.count);
-  const yesterday = perDay.length >= 2 ? perDay[perDay.length - 2]!.count : null;
+  const todayCount = perDay.length ? perDay[perDay.length - 1]!.count : newToday;
+  const before = perDay.slice(0, -1);
   const delta =
-    yesterday != null && !stats.isLoading
+    before.length >= 2
       ? (() => {
-          const diff = newToday - yesterday;
+          // The median day, so a one-off spike (like a big import) does not skew it.
+          const sorted = before.map((d) => d.count).sort((x, y) => x - y);
+          const mid = sorted.length / 2;
+          const usual = sorted.length % 2 ? sorted[Math.floor(mid)]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
+          const diff = Math.round(todayCount - usual);
           const sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
           return {
-            text: `${sign}${Math.abs(diff)} vs yesterday`,
-            tone: (diff > 0 ? 'good' : diff < 0 ? 'bad' : 'neutral') as
-              | 'good'
-              | 'bad'
-              | 'neutral',
+            text: `${sign}${Math.abs(diff).toLocaleString()} vs usual`,
+            // Fewer new jobs is not bad news: only more is highlighted.
+            tone: (diff > 0 ? 'good' : 'neutral') as 'good' | 'neutral',
           };
         })()
       : undefined;
@@ -181,7 +184,14 @@ export default function TodayPage() {
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <StatTile label="New today" value={newToday} accent spark={spark} delta={delta} />
+        <StatTile
+          label="New today"
+          value={todayCount}
+          accent
+          bars={perDay.length >= 2 ? perDay : undefined}
+          delta={delta}
+          sub={before.length < 2 ? 'trend shows after a few days' : undefined}
+        />
         <StatTile label="Strong fits (80+)" value={strong} sub={`of ${jobs.length} to review`} />
         <StatTile label="Sponsor visas" value={sponsors} sub={`of ${jobs.length} to review`} />
         <StatTile label="Applied this week" value={stats.data?.applications_per_week ?? '—'} />

@@ -216,3 +216,7 @@ a.inline-flex:active {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* A target jumped to from the resume review. */
+@keyframes resume-flash { 0%, 60% { box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 45%, transparent); } 100% { box-shadow: 0 0 0 3px transparent; } }
+.resume-flash { animation: resume-flash 1.6s ease-out; border-radius: 0.5rem; }

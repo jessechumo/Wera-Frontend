@@ -16,6 +16,7 @@ import PostPage from './pages/PostPage';
 import NewPostPage from './pages/NewPostPage';
 import InterviewPage from './pages/InterviewPage';
 import SponsorshipPage from './pages/SponsorshipPage';
+import { ResumeRedirect } from './profile/ResumeRedirect';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
@@ -54,6 +55,7 @@ createRoot(document.getElementById('root')!).render(
                 <Route path="industries" element={<IndustriesPage />} />
                 <Route path="industries/:id" element={<IndustryPage />} />
                 <Route path="tracker" element={<TrackerPage />} />
+                <Route path="resume/:id?" element={<ResumeRedirect />} />
                 <Route path="sponsorship" element={<SponsorshipPage />} />
                 <Route path="interview" element={<InterviewPage />} />
                 <Route path="community" element={<CommunityPage />} />
@@ -64,6 +66,7 @@ createRoot(document.getElementById('root')!).render(
                 </Route>
                 <Route path="excluded" element={<ExcludedPage />} />
                 <Route path="profile" element={<ProfilePage />} />
+                <Route path="profile/resume/:id?" element={<ProfilePage tab="resume" />} />
                 <Route path="settings" element={<SettingsPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>

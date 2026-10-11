@@ -137,21 +137,52 @@ describe('Community', () => {
 });
 
 describe('SponsorshipPage', () => {
-  it('shows signals and searches', async () => {
-    const row = (name: string, signal: string, yes: number, no: number) => ({
-      company_id: name.length, company: name, industry: 'trading', open_jobs: 10, analyzed: yes + no, yes, no,
-      unknown: 0, signal, latest_quote: signal === 'sponsors' ? 'We sponsor visas.' : null, last_seen: null,
-    });
+  const row = (name: string, signal: string, yes: number, no: number, filings: number | null = null) => ({
+    company_id: name === 'Jump' ? 4 : 5, company: name, industry: 'trading', open_jobs: 10, analyzed: yes + no, yes, no,
+    unknown: 0, signal, latest_quote: signal === 'sponsors' ? 'We sponsor visas.' : null, last_seen: null,
+    h1b_filings: filings, h1b_new_hires: filings && 5, h1b_median_wage: filings && 163000,
+  });
+  const detail = {
+    names: ['Jump Operations, LLC'], filings: 82, new_hires: 30, positions: 82, wage_p25: 150000, wage_median: 200000, wage_p75: 250000,
+    titles: [{ label: 'Software Engineer', filings: 40, median_wage: 210000, min_wage: 180000, max_wage: 300000 }],
+    places: [{ label: 'Chicago, IL', filings: 70, median_wage: 200000 }], levels: [{ label: 'II', filings: 50, median_wage: 190000 }],
+    period: { from: '2025-07-01T00:00:00Z', to: '2026-06-30T00:00:00Z' },
+  };
+
+  it('shows filings and posting signals, and searches', async () => {
     stubApi({
-      'GET /api/sponsorship': (_init, url) =>
-        url.searchParams.get('q')
-          ? { companies: [row('Jump', 'sponsors', 3, 0)] }
-          : { companies: [row('Jump', 'sponsors', 3, 0), row('Acme', 'does_not_sponsor', 0, 4)] },
+      'GET /api/sponsorship': (_init, url) => ({
+        companies: url.searchParams.get('q') ? [row('Jump', 'sponsors', 3, 0, 82)] : [row('Jump', 'sponsors', 3, 0, 82), row('Acme', 'does_not_sponsor', 0, 4)],
+        h1b_period: detail.period,
+      }),
+      'GET /api/sponsorship/4/h1b': () => detail,
     });
     renderApp(<SponsorshipPage />);
     expect(await screen.findByText('Does not sponsor')).toBeInTheDocument();
     expect(screen.getByText('“We sponsor visas.”')).toBeInTheDocument();
+    expect(screen.getByText('$163k')).toBeInTheDocument();
+    expect(screen.getByText(/Jul 2025 – Jun 2026/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByText('82'));
+    expect(await screen.findByText('Software Engineer')).toBeInTheDocument();
+    expect(screen.getByText(/Filed as Jump Operations, LLC/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByLabelText(/Only companies that file/));
+    expect(screen.queryByText('Acme')).toBeNull();
+    await userEvent.click(screen.getByLabelText(/Only companies that file/));
     await userEvent.type(screen.getByLabelText('Search companies'), 'jum');
     await waitFor(() => expect(screen.queryByText('Acme')).toBeNull());
+  });
+
+  it('looks up any employer', async () => {
+    stubApi({
+      'GET /api/sponsorship': () => ({ companies: [], h1b_period: detail.period }),
+      'GET /api/h1b/employers': () => ({ employers: [{ key: 'google', name: 'Google LLC', filings: 8229, median_wage: 193440, company_id: null }] }),
+      'GET /api/h1b/employer': (_init, url) => (url.searchParams.get('key') === 'google' ? { ...detail, names: ['Google LLC'] } : new Response('{}', { status: 404 })),
+    });
+    renderApp(<SponsorshipPage />);
+    await userEvent.type(await screen.findByLabelText('Employer name'), 'google');
+    await userEvent.click(await screen.findByRole('button', { name: /Google LLC/ }));
+    expect(await screen.findByText(/Filed as Google LLC/)).toBeInTheDocument();
   });
 });

@@ -32,3 +32,4 @@ class NoopResizeObserver {
   disconnect() {}
 }
 vi.stubGlobal('ResizeObserver', NoopResizeObserver);
+if (!URL.revokeObjectURL) URL.revokeObjectURL = () => {};
