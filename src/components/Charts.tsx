@@ -81,7 +81,7 @@ export function NewJobsChart({ data }: { data: DayCount[] }) {
             axisLine={false}
             minTickGap={16}
           />
-          <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={44} />
+          <YAxis tick={AXIS_TICK} tickLine={false} axisLine={false} width={44} tickFormatter={(v: number) => compact(v)} allowDecimals={false} />
           <Tooltip
             cursor={{ fill: 'var(--color-cursor)' }}
             content={<ChartTip format={(v) => String(v)} />}
