@@ -15,13 +15,21 @@ export interface SponsorshipStat {
   signal: SponsorSignal;
   latest_quote: string | null;
   last_seen: string | null;
+  h1b_filings: number | null;
+  h1b_new_hires: number | null;
+  h1b_median_wage: number | null;
+}
+
+export interface H1BPeriod {
+  from: string | null;
+  to: string | null;
 }
 
 export function useSponsorship(q: string) {
   return useQuery({
     queryKey: ['sponsorship', q],
     queryFn: () =>
-      api<{ companies: SponsorshipStat[] }>(`/api/sponsorship?limit=200${q ? `&q=${encodeURIComponent(q)}` : ''}`),
+      api<{ companies: SponsorshipStat[]; h1b_period: H1BPeriod }>(`/api/sponsorship?limit=1000${q ? `&q=${encodeURIComponent(q)}` : ''}`),
     placeholderData: keepPreviousData,
   });
 }

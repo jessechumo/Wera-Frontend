@@ -67,6 +67,19 @@ export function money(n: number | null | undefined): string {
   return `$${s}`;
 }
 
+/** A yearly wage, rounded: $163k, $1.2M. */
+export function wage(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  return `$${Math.round(n / 1000)}k`;
+}
+
+/** "Jul 2025 – Jun 2026" for a span of dates. */
+export function monthSpan(from: string | null | undefined, to: string | null | undefined): string {
+  const f = (iso: string) => new Date(iso).toLocaleDateString('en-US', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+  return from && to ? `${f(from)} – ${f(to)}` : '';
+}
+
 /** Compact numbers: 712.3k, 1.2M. */
 export function compact(n: number | null | undefined): string {
   if (n == null || !Number.isFinite(n)) return '—';
