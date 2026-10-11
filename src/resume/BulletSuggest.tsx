@@ -52,7 +52,7 @@ export function BulletSuggest({ text, role, jobId, onPick, onClose }: {
               </button>
             </li>
           ))}
-          <li className="px-2 pt-0.5 text-[10px] text-faint">Fill in anything in [brackets] with your real numbers, or delete it.</li>
+          <li className="px-2 pt-0.5 text-[10px] text-faint">Keep only what is true: fill [brackets] with your real numbers or delete them.</li>
         </ul>
       )}
     </div>
