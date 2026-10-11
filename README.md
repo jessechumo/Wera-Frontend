@@ -26,13 +26,13 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
 - **Today:** your review queue ranked by fit, with sponsorship and work-mode badges
 - **Jobs:** filterable, searchable table with keyboard navigation (`j`/`k` to move, `Enter` to open, `o` to open the posting)
 - **Job view:** the posting beside the fit score, reasoning, and skills you have and lack; your status and notes; a **cover letter** tab that writes, edits, copies and prints a letter for that role; a **resume** tab showing which of the posting's keywords your resume covers, with a one-click tailored, one-page copy; hide a company in one click
-- **Resume:** your resume as an editable document beside a live preview in the classic LaTeX resume layout: import a LaTeX resume or your uploaded one, edit sections, entries and bullets (reorder, hide), autosave, fit to one page in a click, adjust size, spacing and margins, and download a PDF or `.tex`
+- **Profile, Resume tab:** your resume as an editable document, built on first open from the resume you uploaded, beside a live preview in the classic LaTeX resume layout: import a LaTeX resume or your uploaded one, edit sections, entries and bullets (reorder, hide), autosave, fit to one page in a click, adjust size, spacing and margins, and download a PDF or `.tex`
 - **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected
 - **Industries:** your matches in each industry, and every company Wera watches there
-- **Sponsorship:** what each company's postings say about visa sponsorship
+- **Sponsorship:** each company's certified H-1B applications (new hires, median offered wage, and by job title, place and wage level) beside what its postings say about sponsorship; look up any employer, even ones Wera does not watch
 - **Interview prep:** quick A to D quizzes by topic and difficulty, with explanations
 - **Community:** a Medium-style blog with tags, reactions and comments; posts are reviewed by an AI moderator before they go live
-- **Profile:** photo, resume (view, download, see the extracted text), preferences and profile text
+- **Profile:** photo, uploaded resume (view, download, see the extracted text), preferences and profile text
 - **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/jessechumo/wera-extension)), password, CSV export, account deletion
 - **Application details:** what job applications ask beyond your profile (contact, links, work authorization, education, voluntary self-identification), filled into forms by the extension; can be pre-filled from your resume
 - **System (admins):** runs, company fetch status, every user's spend, tokens, cache hit rate, and cost
