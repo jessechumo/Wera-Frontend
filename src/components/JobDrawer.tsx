@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useHideCompany, useJob, useScoreJob, useUpdateApplication } from '../api/hooks';
 import { CoverLetterPanel } from './CoverLetterPanel';
+import { JobResumePanel } from './JobResumePanel';
 import { toast } from '../lib/toast';
 import type { AppStatus, DeepAnalysis, JobDetail } from '../api/types';
 import { ScoreRing } from './ScoreRing';
@@ -123,13 +124,14 @@ function DeepSection({ deep }: { deep: DeepAnalysis }) {
   );
 }
 
-function Tabs({ tab, setTab }: { tab: 'posting' | 'letter'; setTab: (t: 'posting' | 'letter') => void }) {
+function Tabs({ tab, setTab }: { tab: 'posting' | 'letter' | 'resume'; setTab: (t: 'posting' | 'letter' | 'resume') => void }) {
   return (
     <div role="tablist" className="mb-4 flex gap-1 border-b border-border">
       {(
         [
           ['posting', 'The posting'],
           ['letter', 'Cover letter'],
+          ['resume', 'Resume'],
         ] as const
       ).map(([key, label]) => (
         <button
@@ -372,7 +374,7 @@ export function JobDrawer({
 
   const setStatus = (status: AppStatus) =>
     job && update.mutate({ id: job.id, status, notes: job.application_notes ?? '' });
-  const [tab, setTab] = useState<'posting' | 'letter'>('posting');
+  const [tab, setTab] = useState<'posting' | 'letter' | 'resume'>('posting');
   const [tabJob, setTabJob] = useState(jobId);
   if (tabJob !== jobId) {
     // A different job opens on its posting.
@@ -475,6 +477,11 @@ export function JobDrawer({
               <p className="text-xs text-bad">
                 Couldn't load this job: {error instanceof Error ? error.message : 'network error'}
               </p>
+            ) : job && tab === 'resume' ? (
+              <>
+                <Tabs tab={tab} setTab={setTab} />
+                <JobResumePanel job={job} />
+              </>
             ) : job && tab === 'letter' ? (
               <>
                 <Tabs tab={tab} setTab={setTab} />
