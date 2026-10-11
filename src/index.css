@@ -248,3 +248,8 @@ a.inline-flex:active {
   .drift-left, .drift-right, .float-y { animation: none; }
   .reveal-field { transition: none; }
 }
+
+/* Tracker empty state: a card drifting from Saved toward Applied. */
+@keyframes tracker-slide { 0%, 15% { transform: translateX(0); } 55%, 85% { transform: translateX(26px); } 100% { transform: translateX(0); } }
+.tracker-slide { animation: tracker-slide 4.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .tracker-slide { animation: none; } }

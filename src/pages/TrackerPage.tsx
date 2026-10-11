@@ -91,21 +91,97 @@ function useNothingTracked() {
   return results.every((r) => r.data && r.data.jobs.length === 0);
 }
 
+const COLUMN_HINT: Record<string, string> = {
+  saved: 'Jobs you bookmark',
+  applied: 'Moves here when you submit',
+  interviewing: 'Recruiter calls, loops and onsites',
+  offer: 'The good news',
+  rejected: 'It happens; it keeps the record',
+};
+
+/** A small drawn board: a job card slides from Saved toward Applied. */
+function BoardArt() {
+  const v = (n: string) => `var(--color-${n})`;
+  const cols = [
+    { x: 8, label: 'Saved', cards: 2 },
+    { x: 88, label: 'Applied', cards: 1 },
+    { x: 168, label: 'Interview', cards: 1 },
+    { x: 248, label: 'Offer', cards: 0 },
+  ];
+  return (
+    <svg viewBox="0 0 328 168" className="h-auto w-[400px] max-w-full" aria-hidden>
+      {cols.map((c) => (
+        <g key={c.label}>
+          <rect x={c.x} y="8" width="72" height="152" rx="10" fill={v('surface-2')} opacity="0.7" />
+          <text x={c.x + 10} y="26" fontSize="9" fontWeight="600" fill={v('muted')} fontFamily="var(--font-sans)">{c.label}</text>
+          {Array.from({ length: c.cards }, (_, i) => (
+            <g key={i} transform={`translate(${c.x + 6} ${36 + i * 40})`}>
+              <rect width="60" height="32" rx="6" fill={v('surface')} stroke={v('border')} />
+              <rect x="7" y="8" width="34" height="4" rx="2" fill={v('text')} opacity="0.55" />
+              <rect x="7" y="17" width="24" height="3" rx="1.5" fill={v('text')} opacity="0.2" />
+              <circle cx="50" cy="16" r="5" fill="none" stroke={c.label === 'Offer' ? v('good') : v('accent')} strokeWidth="2" opacity="0.8" />
+            </g>
+          ))}
+        </g>
+      ))}
+      {/* The card on its way to Applied */}
+      <g className="tracker-slide">
+        <rect x="56" y="104" width="60" height="32" rx="6" fill={v('surface')} stroke={v('accent')} strokeWidth="1.5" />
+        <rect x="63" y="112" width="34" height="4" rx="2" fill={v('text')} opacity="0.6" />
+        <rect x="63" y="121" width="24" height="3" rx="1.5" fill={v('text')} opacity="0.25" />
+        <circle cx="106" cy="120" r="5" fill="none" stroke={v('good')} strokeWidth="2" />
+      </g>
+      <path d="M124 120 h18 m-5 -4 l5 4 l-5 4" stroke={v('accent')} strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.7" />
+      <g transform="translate(262 52)">
+        <circle r="13" fill={v('good')} opacity="0.12" />
+        <path d="M-5 0 l3.5 3.5 l7 -8" stroke={v('good')} strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+      </g>
+    </svg>
+  );
+}
+
+/** The tracker before anything is tracked: what it is for, and the board to come. */
 function TrackerEmpty() {
   return (
-    <section className="relative flex flex-col items-center overflow-hidden rounded-card border border-dashed border-border bg-surface/40 px-6 py-20 text-center">
-      <KanbanSquare aria-hidden strokeWidth={1.1} className="pointer-events-none absolute top-1/2 left-1/2 size-72 -translate-x-1/2 -translate-y-1/2 text-text opacity-[0.04]" />
-      <span className="relative inline-flex size-14 items-center justify-center rounded-2xl bg-accent/10 text-accent">
-        <KanbanSquare className="size-7" strokeWidth={1.8} />
-      </span>
-      <h2 className="relative mt-4 text-lg font-semibold">Nothing tracked yet</h2>
-      <p className="relative mt-1 max-w-md text-sm text-muted">
-        Save a job you like, or mark one as applied, and it lands here. Move it along from saved to applied, interviewing and offer as things progress.
-      </p>
-      <Link to="/" className="relative mt-5 inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg hover:bg-accent/85">
-        <Search className="size-4" /> Find jobs to track
-      </Link>
-    </section>
+    <div className="space-y-4">
+      <section className="anim-rise grid items-center gap-8 overflow-hidden rounded-card border border-border bg-surface p-6 md:grid-cols-[1fr_auto] md:p-8">
+        <div className="max-w-lg">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent">
+            <KanbanSquare className="size-3.5" /> Your pipeline
+          </span>
+          <h2 className="mt-3 text-xl font-semibold tracking-tight">Nothing tracked yet</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            Save a job you like, or mark one as applied, and it lands here. Move it along from saved to applied,
+            interviewing and offer as things progress, so you always know what to follow up on.
+          </p>
+          <div className="mt-5 flex flex-wrap gap-2">
+            <Link to="/" className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg hover:bg-accent/85">
+              <Search className="size-4" /> Find jobs to track
+            </Link>
+            <Link to="/jobs" className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-4 py-2 text-sm font-medium text-text hover:border-accent/40">
+              Browse all jobs
+            </Link>
+          </div>
+          <p className="mt-4 text-xs text-faint">Tip: the Chrome extension moves a job to Applied when you submit its application.</p>
+        </div>
+        <div className="hidden justify-self-center md:block"><BoardArt /></div>
+      </section>
+
+      {/* The board to come, faded, with what each column holds. */}
+      <div aria-hidden className="hidden gap-3 sm:grid sm:grid-cols-2 xl:grid-cols-5">
+        {COLUMNS.map((status) => (
+          <div key={status} className="rounded-card border border-border bg-surface/40 p-2.5">
+            <div className="mb-2 flex items-center justify-between px-1">
+              <span className="text-xs font-semibold text-muted">{COLUMN_LABEL[status]}</span>
+              <span className="font-mono text-xs text-faint">0</span>
+            </div>
+            <div className="rounded-lg border border-dashed border-border px-3 py-7 text-center text-xs leading-snug text-muted">
+              {COLUMN_HINT[status]}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
