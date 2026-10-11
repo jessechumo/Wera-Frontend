@@ -25,7 +25,8 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
 - **Instant start:** right after setup, Today lists your best matches using local estimates (a dashed ring marked "est.") and swaps in AI scores as they arrive; opening a job scores it on the spot
 - **Today:** your review queue ranked by fit, with sponsorship and work-mode badges
 - **Jobs:** filterable, searchable table with keyboard navigation (`j`/`k` to move, `Enter` to open, `o` to open the posting)
-- **Job view:** the posting beside the fit score, reasoning, and skills you have and lack; your status and notes; a **cover letter** tab that writes, edits, copies and prints a letter for that role; hide a company in one click
+- **Job view:** the posting beside the fit score, reasoning, and skills you have and lack; your status and notes; a **cover letter** tab that writes, edits, copies and prints a letter for that role; a **resume** tab showing which of the posting's keywords your resume covers, with a one-click tailored, one-page copy; hide a company in one click
+- **Resume:** your resume as an editable document beside a live preview in the classic LaTeX resume layout: import a LaTeX resume or your uploaded one, edit sections, entries and bullets (reorder, hide), autosave, fit to one page in a click, adjust size, spacing and margins, and download a PDF or `.tex`
 - **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected
 - **Industries:** your matches in each industry, and every company Wera watches there
 - **Sponsorship:** what each company's postings say about visa sponsorship
@@ -119,6 +120,7 @@ src/
 ├── lib/          Theme, toasts, formatting, count-up
 ├── pages/        Today, Jobs, Industries, Tracker, Sponsorship, Interview, Community, Profile, Settings, ...
 ├── profile/      Resume upload, preference fields, location picker, profile editor
+├── resume/       Resume editor form, live preview, editing helpers
 └── test/         Test setup, render helpers, API fixtures
 e2e/              Playwright specs and seed data
 docs/             Architecture diagram (generated from docs/diagrams)
