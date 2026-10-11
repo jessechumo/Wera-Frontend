@@ -1,4 +1,5 @@
 import { Badge, type BadgeVariant } from './Badge';
+import { IndustryIcon } from './IndustryIcon';
 import { useIndustryLabel } from '../api/hooks';
 import { useFamilyLabel } from '../api/profile';
 import type { AppStatus, Job } from '../api/types';
@@ -25,7 +26,12 @@ export function WorkModeBadge({ value }: { value: Job['work_mode'] }) {
 
 export function IndustryBadge({ value }: { value: string }) {
   const label = useIndustryLabel();
-  return <Badge variant="accent-2">{label(value)}</Badge>;
+  return (
+    <Badge variant="accent-2" className="inline-flex items-center gap-1">
+      <IndustryIcon id={value} size="xs" bare />
+      {label(value)}
+    </Badge>
+  );
 }
 
 const STATUS_META: Record<AppStatus, { variant: BadgeVariant; label: string }> = {
