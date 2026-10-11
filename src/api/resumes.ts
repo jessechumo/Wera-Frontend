@@ -37,16 +37,39 @@ export interface Section {
 }
 export interface ResumeData {
   name: string;
+  headline?: string;
   phone?: string;
   email?: string;
   location?: string;
   links?: { label: string; url: string }[];
   sections: Section[];
 }
+export type TemplateId = 'ivy' | 'parse' | 'signal' | 'ledger';
 export interface Layout {
   font_size: number;
   spacing: number;
   margin: number;
+  template?: TemplateId;
+  accent?: string;
+  paper?: 'us-letter' | 'a4';
+}
+export interface ResumeTemplate {
+  id: TemplateId;
+  name: string;
+  tagline: string;
+  description: string;
+  uses_accent: boolean;
+  ats: string;
+}
+export interface ReviewCheck {
+  id: string;
+  severity: 'fix' | 'improve' | 'tip';
+  message: string;
+  target?: string;
+}
+export interface Review {
+  score: number;
+  checks: ReviewCheck[];
 }
 export interface Measure {
   pages: number;
@@ -143,9 +166,17 @@ export function useDeleteResume() {
   });
 }
 
-/** Renders unsaved edits: SVG pages plus how full the last page is. */
+export function useTemplates() {
+  return useQuery({
+    queryKey: ['resume-templates'],
+    queryFn: () => api<{ templates: ResumeTemplate[]; default_accent: string }>('/api/resumes/templates'),
+    staleTime: Infinity,
+  });
+}
+
+/** Renders unsaved edits: SVG pages, how full the last page is, and the review. */
 export function previewResume(data: ResumeData, layout: Layout, signal?: AbortSignal) {
-  return api<{ pages: string[]; measure: Measure }>('/api/resumes/preview', {
+  return api<{ pages: string[]; measure: Measure; review?: Review }>('/api/resumes/preview', {
     method: 'POST',
     body: JSON.stringify({ data, layout }),
     signal,
@@ -183,5 +214,35 @@ export function useTailorResume(jobId: number) {
       void qc.invalidateQueries({ queryKey: ['resumes'] });
       void qc.invalidateQueries({ queryKey: ['job-keywords', jobId] });
     },
+  });
+}
+
+/** The first page of a resume in every template. */
+export function resumeThumbnails(data: ResumeData, layout: Layout, signal?: AbortSignal) {
+  return api<{ thumbnails: Partial<Record<TemplateId, string>> }>('/api/resumes/thumbnails', {
+    method: 'POST',
+    body: JSON.stringify({ data, layout }),
+    signal,
+  });
+}
+
+/** LaTeX for unsaved edits: the whole file, the template preamble, and the editable body. */
+export function resumeTeX(data: ResumeData, layout: Layout) {
+  return api<{ tex: string; preamble: string; body: string }>('/api/resumes/tex', {
+    method: 'POST',
+    body: JSON.stringify({ data, layout }),
+  });
+}
+
+/** Edited LaTeX back into a resume. */
+export function parseResumeTeX(tex: string) {
+  return api<{ data: ResumeData; warnings: string[] }>('/api/resumes/parse-tex', { method: 'POST', body: JSON.stringify({ tex }) });
+}
+
+/** Three stronger rewrites of a bullet ([placeholders] mark numbers to fill in). */
+export function suggestBullet(text: string, role: string, jobId?: number | null) {
+  return api<{ suggestions: string[] }>('/api/resumes/suggest-bullet', {
+    method: 'POST',
+    body: JSON.stringify({ text, role, job_id: jobId ?? 0 }),
   });
 }

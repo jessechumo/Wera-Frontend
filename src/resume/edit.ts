@@ -1,5 +1,11 @@
 // Pure, immutable edits on a resume document (easy to test and to undo).
-import type { Bullet, Entry, ResumeData, Section, SectionKind, SkillGroup } from '../api/resumes';
+import type { Bullet, Entry, ResumeData, ReviewCheck, Section, SectionKind, SkillGroup } from '../api/resumes';
+
+/** Review findings by the id of the bullet, entry or section they point at. */
+export type Issues = Map<string, ReviewCheck[]>;
+
+/** The DOM id of an editable target, for jumping to it from the review. */
+export const targetId = (id: string) => `resume-target-${id}`;
 
 /** A short random id, like the server's. */
 export const newId = () => Math.random().toString(16).slice(2, 12).padEnd(10, '0');
@@ -68,3 +74,14 @@ export function showAll(r: ResumeData): ResumeData {
     })),
   };
 }
+
+/** Accent colors for templates that use one. */
+export const ACCENTS: { name: string; hex: string }[] = [
+  { name: 'Cobalt', hex: '#1d4ed8' },
+  { name: 'Teal', hex: '#0f766e' },
+  { name: 'Forest', hex: '#166534' },
+  { name: 'Wine', hex: '#9f1239' },
+  { name: 'Violet', hex: '#6d28d9' },
+  { name: 'Graphite', hex: '#334155' },
+];
+
