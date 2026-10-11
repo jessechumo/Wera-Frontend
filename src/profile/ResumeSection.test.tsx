@@ -83,7 +83,7 @@ describe('ResumeSection', () => {
     const name = await screen.findByLabelText('Name');
     expect(await screen.findByAltText('Resume page 1')).toBeInTheDocument();
     expect(screen.getByText('One page')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Show 1 hidden/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /1 hidden/ })).toBeInTheDocument();
 
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     await user.clear(name);

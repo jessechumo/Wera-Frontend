@@ -1,19 +1,14 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import clsx from 'clsx';
-import { CheckCircle2, Download, Eye, FileCode2, FileText, LoaderCircle, Maximize2, SlidersHorizontal, Sparkles, Trash2, Upload, Wand2 } from 'lucide-react';
+import { FileCode2, FileText, LoaderCircle, Sparkles, Upload } from 'lucide-react';
 import { ApiError } from '../api/client';
 import {
-  useDeleteResume, useFitResume, useImportResume, useResume, useResumes, useSaveResume,
-  type Layout, type ResumeData, type ResumeDoc,
+  useImportResume, useResume, useResumes, type ResumeDoc,
 } from '../api/resumes';
 import { useProfile } from '../api/profile';
 import { ErrorState, Skeleton } from '../components/States';
 import { toast } from '../lib/toast';
-import { hiddenCount, showAll } from '../resume/edit';
-import { ResumeForm } from '../resume/ResumeForm';
-import { ResumePreview } from '../resume/ResumePreview';
-import { useLivePreview } from '../resume/useLivePreview';
+import { Workspace } from '../resume/Workspace';
 
 function errorText(e: unknown) {
   return e instanceof ApiError ? e.message : 'Something went wrong';
@@ -72,144 +67,6 @@ function CreateResume({ replace = false, onDone }: { replace?: boolean; onDone?:
           <button disabled={imp.isPending} onClick={() => run({ source: 'blank' })}
             className="mt-3 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent/40">Start</button>
         </section>
-      </div>
-    </div>
-  );
-}
-
-function LayoutControls({ layout, onChange }: { layout: Layout; onChange: (l: Layout) => void }) {
-  const slider = (label: string, key: keyof Layout, min: number, max: number, step: number, fmt: (v: number) => string) => (
-    <label className="block">
-      <span className="flex justify-between text-[11px] text-muted"><span>{label}</span><span className="font-mono">{fmt(layout[key])}</span></span>
-      <input type="range" min={min} max={max} step={step} value={layout[key]} aria-label={label}
-        onChange={(e) => onChange({ ...layout, [key]: Number(e.target.value) })} className="w-full accent-accent" />
-    </label>
-  );
-  return (
-    <div className="space-y-2 rounded-card border border-border bg-surface p-3">
-      {slider('Text size', 'font_size', 10, 11, 0.5, (v) => `${v}pt`)}
-      {slider('Spacing', 'spacing', 0.7, 1.2, 0.02, (v) => `${Math.round(v * 100)}%`)}
-      {slider('Margins', 'margin', 0.35, 0.75, 0.01, (v) => `${v.toFixed(2)}in`)}
-    </div>
-  );
-}
-
-/** Editor + live preview for one resume, autosaving as you type. */
-function Workspace({ doc }: { doc: ResumeDoc }) {
-  const save = useSaveResume(doc.id);
-  const fit = useFitResume(doc.id);
-  const del = useDeleteResume();
-  const navigate = useNavigate();
-  const [draft, setDraft] = useState<ResumeData>(doc.data);
-  const [layout, setLayout] = useState<Layout>(doc.layout);
-  const [dirty, setDirty] = useState(false);
-  const [showLayout, setShowLayout] = useState(false);
-  const [synced, setSynced] = useState(doc.updated_at);
-  // Adopt server changes (fit, tailoring) when nothing local is pending.
-  if (doc.updated_at !== synced && !dirty) {
-    setSynced(doc.updated_at);
-    setDraft(doc.data);
-    setLayout(doc.layout);
-  }
-  const preview = useLivePreview(draft, layout);
-
-  const edit = (d: ResumeData) => {
-    setDraft(d);
-    setDirty(true);
-  };
-  const editLayout = (l: Layout) => {
-    setLayout(l);
-    setDirty(true);
-  };
-  // Autosave a moment after the last change. Each change re-runs this and
-  // cancels the pending save, so the timer always saves the latest values.
-  const saveNow = save.mutate;
-  useEffect(() => {
-    if (!dirty) return;
-    const t = window.setTimeout(() => {
-      saveNow({ data: draft, layout }, {
-        onSuccess: (saved) => {
-          setSynced(saved.updated_at);
-          setDirty(false);
-        },
-        onError: (e) => toast.error(`Not saved: ${errorText(e)}`),
-      });
-    }, 1200);
-    return () => window.clearTimeout(t);
-  }, [draft, layout, dirty, saveNow]);
-
-  const fitNow = () => {
-    const go = () => fit.mutate(undefined, {
-      onSuccess: (d) => toast.success(d.fit?.summary ?? 'Fitted.'),
-      onError: (e) => toast.error(errorText(e)),
-    });
-    if (dirty) {
-      save.mutate({ data: draft, layout }, { onSuccess: () => { setDirty(false); go(); } });
-    } else go();
-  };
-  const hidden = hiddenCount(draft);
-  const status = save.isPending ? 'Saving…' : dirty ? 'Unsaved' : 'Saved';
-
-  return (
-    <div className="space-y-4">
-      {doc.job_id != null && (
-        <section className="rounded-card border border-accent/25 bg-accent/[0.05] p-4">
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <Wand2 className="size-4 text-accent" />
-            <span className="font-semibold">Tailored for {doc.job_title} at {doc.job_company}</span>
-            <Link to={`/jobs?job=${doc.job_id}`} className="text-xs text-accent hover:underline">Open the job</Link>
-          </div>
-          {doc.coverage && (
-            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px]">
-              <span className="mr-1 font-medium text-muted">Keywords {doc.coverage.percent}%</span>
-              {doc.coverage.matched.map((k) => <span key={k} className="rounded-full bg-good/10 px-2 py-0.5 text-good">{k}</span>)}
-              {doc.coverage.missing.map((k) => <span key={k} className="rounded-full bg-warn/10 px-2 py-0.5 text-warn" title="Not on your resume: add it only if it is true">{k}</span>)}
-            </div>
-          )}
-          {doc.notes.length > 0 && (
-            <ul className="mt-2 list-disc space-y-0.5 pl-5 text-xs text-muted">{doc.notes.map((n, i) => <li key={i}>{n}</li>)}</ul>
-          )}
-        </section>
-      )}
-
-      <div className="flex flex-wrap items-center gap-2">
-        <button onClick={fitNow} disabled={fit.isPending}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg hover:bg-accent/85 disabled:opacity-60">
-          {fit.isPending ? <LoaderCircle className="size-3.5 animate-spin" /> : <Maximize2 className="size-3.5" />} Fit to one page
-        </button>
-        {hidden > 0 && (
-          <button onClick={() => edit(showAll(draft))} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent/40">
-            <Eye className="size-3.5" /> Show {hidden} hidden
-          </button>
-        )}
-        <button onClick={() => setShowLayout((v) => !v)} aria-expanded={showLayout}
-          className={clsx('inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium', showLayout ? 'border-accent/40 text-accent' : 'border-border bg-surface-2 hover:border-accent/40')}>
-          <SlidersHorizontal className="size-3.5" /> Layout
-        </button>
-        <a href={`/api/resumes/${doc.id}/pdf?download=1`} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent/40">
-          <Download className="size-3.5" /> PDF
-        </a>
-        <a href={`/api/resumes/${doc.id}/tex`} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent/40">
-          <FileCode2 className="size-3.5" /> LaTeX
-        </a>
-        {doc.job_id != null && (
-          <button onClick={() => window.confirm('Delete this tailored resume?') && del.mutate(doc.id, { onSuccess: () => navigate('/profile/resume') })}
-            className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs text-muted hover:text-bad">
-            <Trash2 className="size-3.5" /> Delete
-          </button>
-        )}
-        <span className={clsx('ml-auto inline-flex items-center gap-1 text-[11px]', dirty ? 'text-faint' : 'text-good')}>
-          {!dirty && !save.isPending && <CheckCircle2 className="size-3" />} {status}
-        </span>
-      </div>
-      {doc.fit && !dirty && <p className="-mt-2 text-[11px] text-faint">{doc.fit.summary}</p>}
-
-      <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]">
-        <ResumeForm data={draft} onChange={edit} />
-        <div className="space-y-3 xl:sticky xl:top-20">
-          {showLayout && <LayoutControls layout={layout} onChange={editLayout} />}
-          <ResumePreview {...preview} />
-        </div>
       </div>
     </div>
   );
