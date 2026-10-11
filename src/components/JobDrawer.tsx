@@ -18,6 +18,7 @@ import {
 import { useHideCompany, useJob, useScoreJob, useUpdateApplication } from '../api/hooks';
 import { CoverLetterPanel } from './CoverLetterPanel';
 import { JobResumePanel } from './JobResumePanel';
+import { JobH1B } from './JobH1B';
 import { toast } from '../lib/toast';
 import type { AppStatus, DeepAnalysis, JobDetail } from '../api/types';
 import { ScoreRing } from './ScoreRing';
@@ -233,6 +234,8 @@ function Insights({ job, scoring }: { job: JobDetail; scoring: boolean }) {
         </div>
         {job.matched_categories.length > 0 && <CategoryChips cats={job.matched_categories} className="mt-3" />}
       </Section>
+
+      <JobH1B jobId={job.id} company={job.company} seniority={job.seniority} />
 
       {matched.length + missing.length > 0 && (
         <Section title="Skills">
