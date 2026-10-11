@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { IndustryIcon } from '../components/IndustryIcon';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowLeft, Briefcase, ExternalLink } from 'lucide-react';
@@ -48,11 +49,11 @@ function Matches({ industry, onOpen }: { industry: string; onOpen: (id: number) 
               <th className="w-14 px-3 py-2.5">Score</th>
               <th className="px-3 py-2.5">Title</th>
               <th className="px-3 py-2.5">Company</th>
-              <th className="px-3 py-2.5">Industry</th>
+              <th className="hidden px-3 py-2.5 2xl:table-cell">Industry</th>
               <th className="px-3 py-2.5">Location</th>
-              <th className="px-3 py-2.5">Mode</th>
+              <th className="hidden px-3 py-2.5 2xl:table-cell">Mode</th>
               <th className="px-3 py-2.5">Sponsorship</th>
-              <th className="px-3 py-2.5">First seen</th>
+              <th className="hidden px-3 py-2.5 2xl:table-cell">First seen</th>
               <th className="px-3 py-2.5">Status</th>
             </tr>
           </thead>
@@ -128,7 +129,10 @@ export default function IndustryPage() {
         <Link to="/industries" className="inline-flex items-center gap-1 text-xs text-muted hover:text-text">
           <ArrowLeft className="size-3.5" /> Industries
         </Link>
-        <h1 className="mt-2 text-[28px] leading-tight font-semibold">{ind.label}</h1>
+        <div className="mt-2 flex items-center gap-3">
+          <IndustryIcon id={ind.id} size="lg" />
+          <h1 className="text-[28px] leading-tight font-semibold">{ind.label}</h1>
+        </div>
         <p className="mt-1 text-xs text-muted">{ind.description}</p>
       </header>
 
