@@ -234,9 +234,18 @@ a.inline-flex:active {
   transition: --reveal-r 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .reveal-field.is-active { --reveal-r: 240px; }
+/* Two masks, intersected: the spotlight, and the keep-clear map drawn by
+   RevealField (soft halos around the text in front, so it stays readable). */
 .reveal-words {
-  -webkit-mask-image: radial-gradient(circle var(--reveal-r) at var(--reveal-x) var(--reveal-y), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%);
-  mask-image: radial-gradient(circle var(--reveal-r) at var(--reveal-x) var(--reveal-y), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%);
+  --spotlight: radial-gradient(circle var(--reveal-r) at var(--reveal-x) var(--reveal-y), #000 0%, rgb(0 0 0 / 0.55) 45%, transparent 100%);
+  -webkit-mask-image: var(--spotlight), var(--keep-clear, linear-gradient(#000, #000));
+  mask-image: var(--spotlight), var(--keep-clear, linear-gradient(#000, #000));
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
 }
 @keyframes drift-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 @keyframes drift-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
