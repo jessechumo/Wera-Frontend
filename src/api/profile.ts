@@ -2,10 +2,27 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
 import type { Answers, MyUsage, Preferences, Profile, ProfileOptions, Suggestions } from './types';
 
+/**
+ * Fills in lists the server may send as null (a profile started by a resume
+ * upload has no preferences yet), so pages can read them without checks.
+ */
+export function normalizeProfile(p: Profile): Profile {
+  const prefs: Partial<Preferences> = p.preferences ?? {};
+  return {
+    ...p,
+    preferences: {
+      ...prefs,
+      role_families: prefs.role_families ?? [],
+      levels: prefs.levels ?? [],
+    } as Preferences,
+    answers: p.answers ?? {},
+  };
+}
+
 export function useProfile() {
   return useQuery({
     queryKey: ['profile'],
-    queryFn: () => api<Profile>('/api/profile'),
+    queryFn: async () => normalizeProfile(await api<Profile>('/api/profile')),
     staleTime: 5 * 60_000,
   });
 }
@@ -93,7 +110,7 @@ export function useSaveProfile() {
     mutationFn: (input: Required<ProfileInput>) =>
       api<Profile>('/api/profile', { method: 'PUT', body: JSON.stringify(input) }),
     onSuccess: (profile) => {
-      qc.setQueryData(['profile'], profile);
+      qc.setQueryData(['profile'], normalizeProfile(profile));
       void qc.invalidateQueries({ predicate: (q) => q.queryKey[0] !== 'profile' });
     },
   });
