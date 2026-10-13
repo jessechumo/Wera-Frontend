@@ -53,7 +53,7 @@ export function useH1BDetail(target: { companyId: number } | { key: string } | n
     : 'companyId' in target
       ? `/api/sponsorship/${target.companyId}/h1b`
       : `/api/h1b/employer?key=${encodeURIComponent(target.key)}`;
-  return useQuery({ queryKey: ['h1b', path], queryFn: () => api<H1BDetail>(path), enabled: !!target, staleTime: 3_600_000 });
+  return useQuery({ queryKey: ['h1b', path], queryFn: () => api<H1BDetail>(path), enabled: !!target, staleTime: 3_600_000, gcTime: 3_600_000 });
 }
 
 export function useH1BEmployers(q: string) {
@@ -62,6 +62,7 @@ export function useH1BEmployers(q: string) {
     queryFn: () => api<{ employers: H1BEmployer[] }>(`/api/h1b/employers?q=${encodeURIComponent(q)}`),
     enabled: q.length >= 2,
     placeholderData: keepPreviousData,
+    staleTime: 3_600_000,
   });
 }
 

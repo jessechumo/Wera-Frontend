@@ -8,8 +8,8 @@ export function useMe() {
     queryKey: ['me'],
     queryFn: async () => {
       try {
-        const me = await api<{ user: User; avatar_version: number | null }>('/api/auth/me');
-        return { ...me.user, avatar_version: me.avatar_version };
+        const me = await api<{ user: User; avatar_version: number | null; email_verified?: boolean }>('/api/auth/me');
+        return { ...me.user, avatar_version: me.avatar_version, email_verified: me.email_verified ?? false };
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) return null;
         throw err;
@@ -91,3 +91,20 @@ export function useAvatar() {
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['me'] }),
   });
 }
+
+/** What the sign-in pages can offer (email is off until the server sets it up). */
+export function useAuthConfig() {
+  return useQuery({
+    queryKey: ['auth-config'],
+    queryFn: () => api<{ signup_enabled: boolean; mail_enabled: boolean }>('/api/auth/config'),
+    staleTime: 5 * 60_000,
+  });
+}
+
+export const sendVerification = () => api<{ sent_to?: string; verified?: boolean }>('/api/auth/verify-email/send', { method: 'POST' });
+export const verifyEmail = (token: string) =>
+  api<{ verified: boolean; email: string }>('/api/auth/verify-email', { method: 'POST', body: JSON.stringify({ token }) });
+export const forgotPassword = (email: string) =>
+  api<{ message: string }>('/api/auth/password/forgot', { method: 'POST', body: JSON.stringify({ email }) });
+export const resetPassword = (token: string, password: string) =>
+  api<{ reset: boolean }>('/api/auth/password/reset', { method: 'POST', body: JSON.stringify({ token, password }) });

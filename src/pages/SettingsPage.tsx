@@ -1,9 +1,9 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import clsx from 'clsx';
-import { Bell, Download, EyeOff, KeyRound, LoaderCircle, Palette, Puzzle, ShieldAlert, SlidersHorizontal } from 'lucide-react';
+import { Bell, Download, EyeOff, KeyRound, LoaderCircle, MailCheck, Palette, Puzzle, ShieldAlert, SlidersHorizontal } from 'lucide-react';
 import { useConnections, useDisconnect } from '../api/extension';
 import { relTime } from '../lib/format';
-import { useChangePassword, useDeleteAccount, useMe } from '../api/auth';
+import { sendVerification, useAuthConfig, useChangePassword, useDeleteAccount, useMe } from '../api/auth';
 import { api, ApiError } from '../api/client';
 import { useHideCompany, useIndustryLabel, useSaveSettings, useSettings } from '../api/hooks';
 import type { JobList, Settings } from '../api/types';
@@ -158,6 +158,29 @@ function Connections() {
   );
 }
 
+function EmailStatus({ verified }: { verified: boolean }) {
+  const [state, setState] = useState<'' | 'sending' | 'sent'>('');
+  const send = () => {
+    setState('sending');
+    sendVerification()
+      .then(() => setState('sent'))
+      .catch((e) => { setState(''); toast.error(e instanceof ApiError ? e.message : 'Could not send the link'); });
+  };
+  return (
+    <Row label="Email address" hint={verified ? 'Confirmed.' : 'Not confirmed yet: confirm it to get digests and password resets.'}>
+      {verified ? (
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-good"><MailCheck className="size-3.5" /> Confirmed</span>
+      ) : state === 'sent' ? (
+        <span className="text-xs text-muted">Link sent. Check your inbox.</span>
+      ) : (
+        <button onClick={send} disabled={state === 'sending'} className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium hover:border-accent/40 disabled:opacity-60">
+          Send confirmation link
+        </button>
+      )}
+    </Row>
+  );
+}
+
 function DeleteAccount() {
   const del = useDeleteAccount();
   const [open, setOpen] = useState(false);
@@ -198,6 +221,7 @@ function DeleteAccount() {
 export default function SettingsPage() {
   useDocumentTitle('Settings');
   const me = useMe();
+  const mailEnabled = useAuthConfig().data?.mail_enabled ?? false;
   const settings = useSettings();
   const save = useSaveSettings();
   const hide = useHideCompany();
@@ -268,7 +292,7 @@ export default function SettingsPage() {
         </div>
       </Section>
 
-      <Section icon={Bell} title="Notifications" hint="Email notifications are coming soon. Your choices are saved now and will apply when they launch.">
+      <Section icon={Bell} title="Notifications" hint={mailEnabled ? 'Sent to ' + (me.data?.email ?? 'your address') + '.' : 'Email notifications are coming soon. Your choices are saved now and will apply when they launch.'}>
         <Row label="Match digest" hint="A summary of your best new matches.">
           <Switch label="Match digest" checked={n.email_digest} onChange={(v) => setN({ email_digest: v })} />
         </Row>
@@ -309,6 +333,7 @@ export default function SettingsPage() {
       </Section>
 
       <Section icon={KeyRound} title="Account" hint={me.data?.email}>
+        {mailEnabled && <EmailStatus verified={me.data?.email_verified ?? false} />}
         <PasswordForm />
         <Row label="Export applications" hint="Every job you saved, applied to or tracked, as CSV.">
           <button onClick={() => void exportApplications()} className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-text hover:border-accent/40">

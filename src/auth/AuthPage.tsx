@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, LoaderCircle } from 'lucide-react';
-import { useAuthMutation, useMe } from '../api/auth';
+import { useAuthConfig, useAuthMutation, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ThemeToggle } from '../lib/theme';
@@ -38,6 +38,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const mailEnabled = useAuthConfig().data?.mail_enabled ?? false;
 
   if (me.data) return <Navigate to={from} replace />;
 
@@ -104,6 +105,9 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
               className={INPUT_CLS}
             />
           </Field>
+          {mode === 'login' && mailEnabled && (
+            <Link to="/forgot-password" className="-mt-2 block text-right text-[11px] text-muted hover:text-accent">Forgot password?</Link>
+          )}
           {error && (
             <p role="alert" className="rounded-lg bg-bad/10 px-3 py-2 text-xs text-bad">
               {error}

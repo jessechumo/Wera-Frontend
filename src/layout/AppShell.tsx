@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import clsx from 'clsx';
 import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
+import { useScrollRestoration } from './useScrollRestoration';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLogout, useMe } from '../api/auth';
 import { useNav } from './nav';
@@ -115,6 +117,7 @@ function TopBarMeta() {
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
 
 export function AppShell() {
+  useScrollRestoration();
   const qc = useQueryClient();
   const nav = useNav();
   const isAdmin = useMe().data?.is_admin ?? false;
@@ -223,7 +226,9 @@ export function AppShell() {
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-24 md:px-6 md:pt-6 lg:pb-6">
           <div key={location.pathname} className="route-enter">
-            <Outlet />
+            <ErrorBoundary resetKey={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>

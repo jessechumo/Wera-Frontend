@@ -17,10 +17,12 @@ import NewPostPage from './pages/NewPostPage';
 import InterviewPage from './pages/InterviewPage';
 import SponsorshipPage from './pages/SponsorshipPage';
 import { ResumeRedirect } from './profile/ResumeRedirect';
+import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './auth/EmailPages';
 import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
 import { Toasts } from './lib/toast';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import TodayPage from './pages/TodayPage';
 import JobsPage from './pages/JobsPage';
 import TrackerPage from './pages/TrackerPage';
@@ -40,41 +42,46 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="login" element={<AuthPage mode="login" />} />
-          <Route path="signup" element={<AuthPage mode="signup" />} />
-          <Route element={<RequireAuth />}>
-            <Route path="welcome" element={<WelcomePage />} />
-            <Route element={<RequireProfile />}>
-              <Route element={<AppShell />}>
-                <Route index element={<TodayPage />} />
-                <Route path="jobs" element={<JobsPage />} />
-                <Route path="jobs/:id" element={<JobsPage />} />
-                <Route path="industries" element={<IndustriesPage />} />
-                <Route path="industries/:id" element={<IndustryPage />} />
-                <Route path="tracker" element={<TrackerPage />} />
-                <Route path="resume/:id?" element={<ResumeRedirect />} />
-                <Route path="sponsorship" element={<SponsorshipPage />} />
-                <Route path="interview" element={<InterviewPage />} />
-                <Route path="community" element={<CommunityPage />} />
-                <Route path="community/new" element={<NewPostPage />} />
-                <Route path="community/:id" element={<PostPage />} />
-                <Route element={<RequireAdmin />}>
-                  <Route path="system" element={<SystemPage />} />
+    <ErrorBoundary fullPage>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="login" element={<AuthPage mode="login" />} />
+            <Route path="signup" element={<AuthPage mode="signup" />} />
+            <Route path="verify-email" element={<VerifyEmailPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
+            <Route element={<RequireAuth />}>
+              <Route path="welcome" element={<WelcomePage />} />
+              <Route element={<RequireProfile />}>
+                <Route element={<AppShell />}>
+                  <Route index element={<TodayPage />} />
+                  <Route path="jobs" element={<JobsPage />} />
+                  <Route path="jobs/:id" element={<JobsPage />} />
+                  <Route path="industries" element={<IndustriesPage />} />
+                  <Route path="industries/:id" element={<IndustryPage />} />
+                  <Route path="tracker" element={<TrackerPage />} />
+                  <Route path="resume/:id?" element={<ResumeRedirect />} />
+                  <Route path="sponsorship" element={<SponsorshipPage />} />
+                  <Route path="interview" element={<InterviewPage />} />
+                  <Route path="community" element={<CommunityPage />} />
+                  <Route path="community/new" element={<NewPostPage />} />
+                  <Route path="community/:id" element={<PostPage />} />
+                  <Route element={<RequireAdmin />}>
+                    <Route path="system" element={<SystemPage />} />
+                  </Route>
+                  <Route path="excluded" element={<ExcludedPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="profile/resume/:id?" element={<ProfilePage tab="resume" />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Route>
-                <Route path="excluded" element={<ExcludedPage />} />
-                <Route path="profile" element={<ProfilePage />} />
-                <Route path="profile/resume/:id?" element={<ProfilePage tab="resume" />} />
-                <Route path="settings" element={<SettingsPage />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
             </Route>
-          </Route>
-        </Routes>
-      </BrowserRouter>
-      <Toasts />
-    </QueryClientProvider>
+          </Routes>
+        </BrowserRouter>
+        <Toasts />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 );

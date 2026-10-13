@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EmailAdmin } from '../components/EmailAdmin';
 import { useCompanies, useIndustryLabel, useRuns, useStats, useUsage } from '../api/hooks';
 import { CostChart, NewJobsChart, TokensChart } from '../components/Charts';
 import { RunNowButton } from '../layout/AppShell';
@@ -225,6 +226,7 @@ export default function SystemPage() {
         <Card title="Tokens per day">
           {usage.isLoading ? <Skeleton className="h-56 w-full" /> : <TokensChart data={perDay} />}
         </Card>
+        <div className="xl:col-span-2"><EmailAdmin /></div>
         <Card title="Cost per day" className="xl:col-span-2">
           {usage.isLoading ? <Skeleton className="h-56 w-full" /> : <CostChart data={perDay} />}
         </Card>

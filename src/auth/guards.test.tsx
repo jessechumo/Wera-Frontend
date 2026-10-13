@@ -32,9 +32,9 @@ function app(path = '/') {
 }
 
 describe('route guards', () => {
-  it('sends signed-out visitors to login', async () => {
+  it('sends signed-out visitors to login (the front door shows the landing page)', async () => {
     stubApi({ 'GET /api/auth/me': () => jsonResponse(401, { error: 'sign in' }) });
-    app();
+    app('/system');
     expect(await screen.findByText('login page')).toBeInTheDocument();
   });
 
@@ -67,6 +67,7 @@ describe('route guards', () => {
     act(() => {
       window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
     });
-    expect(await screen.findByText('login page')).toBeInTheDocument();
+    // Signed out at the front door: the landing page, with its log in link.
+    expect(await screen.findByRole('heading', { level: 1, name: /Find the jobs that fit you/ })).toBeInTheDocument();
   });
 });

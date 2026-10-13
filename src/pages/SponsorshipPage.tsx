@@ -1,5 +1,7 @@
 import { Fragment, useDeferredValue, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { api } from '../api/client';
 import clsx from 'clsx';
 import { Building2, ChevronDown, Info, Search } from 'lucide-react';
 import { useIndustryLabel } from '../api/hooks';
@@ -75,6 +77,12 @@ export default function SponsorshipPage() {
   const query = useDeferredValue(q.trim());
   const data = useSponsorship(query);
   const industryLabel = useIndustryLabel();
+  const qc = useQueryClient();
+  // Hovering a row loads its filings, so opening it is instant.
+  const prefetch = (companyId: number) => {
+    const path = `/api/sponsorship/${companyId}/h1b`;
+    void qc.prefetchQuery({ queryKey: ['h1b', path], queryFn: () => api(path), staleTime: 3_600_000 });
+  };
   const all = data.data?.companies ?? [];
   const rows = filersOnly ? all.filter((r) => (r.h1b_filings ?? 0) > 0) : all;
   const count = (sig: SponsorSignal) => all.filter((r) => r.signal === sig).length;
@@ -144,6 +152,7 @@ export default function SponsorshipPage() {
                 return (
                   <Fragment key={s.company_id}>
                     <tr onClick={() => files && setOpen(isOpen ? null : s.company_id)}
+                      onMouseEnter={() => files && prefetch(s.company_id)}
                       className={clsx('transition-colors', files && 'cursor-pointer hover:bg-surface-2/50', isOpen && 'bg-surface-2/40')}>
                       <td className="px-4 py-3">
                         <Link to={`/jobs?q=${encodeURIComponent(s.company)}`} onClick={(e) => e.stopPropagation()} className="font-medium text-text hover:text-accent">

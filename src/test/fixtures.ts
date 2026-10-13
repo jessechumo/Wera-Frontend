@@ -72,6 +72,7 @@ type Handler = Parameters<typeof mockApi>[0][string];
 export function stubApi(overrides: Record<string, Handler> = {}) {
   return mockApi({
     'GET /api/auth/me': () => ({ user: me, avatar_version: null }),
+    'GET /api/auth/config': () => ({ signup_enabled: true, mail_enabled: false }),
     'GET /api/profile': () => profile,
     'GET /api/profile/options': () => options,
     'GET /api/industries': () => industries,
