@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://wera-api.example.com/api/:path*"
+      "destination": "https://incident-configuration-server-recreation.trycloudflare.com/api/:path*"
     },
     {
       "source": "/healthz",
-      "destination": "https://wera-api.example.com/healthz"
+      "destination": "https://incident-configuration-server-recreation.trycloudflare.com/healthz"
     },
     {
       "source": "/((?!assets/).*)",

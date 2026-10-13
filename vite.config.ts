@@ -13,7 +13,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
-    __APP_COMMIT__: JSON.stringify((process.env.APP_COMMIT ?? 'dev').slice(0, 7)),
+    __APP_COMMIT__: JSON.stringify((process.env.APP_COMMIT ?? process.env.VERCEL_GIT_COMMIT_SHA ?? 'dev').slice(0, 7)),
   },
   server: {
     proxy: {
