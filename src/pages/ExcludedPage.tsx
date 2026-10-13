@@ -130,6 +130,7 @@ export default function ExcludedPage() {
                     <td className="px-3 py-2.5">
                       <a
                         href={job.url}
+                        data-wera-job={job.id}
                         target="_blank"
                         rel="noreferrer"
                         aria-label="Open posting"
@@ -154,6 +155,7 @@ export default function ExcludedPage() {
                     </div>
                     <a
                       href={job.url}
+                      data-wera-job={job.id}
                       target="_blank"
                       rel="noreferrer"
                       aria-label="Open posting"

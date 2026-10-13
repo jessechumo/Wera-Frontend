@@ -35,6 +35,7 @@ import {
 import { StatusSelect } from './StatusSelect';
 import { Skeleton } from './States';
 import { absTime, compact, money, prettyReason, relTime, verdictLabel, verdictOf } from '../lib/format';
+import { handOffJob } from '../lib/extension';
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
@@ -356,6 +357,7 @@ export function JobDrawer({
       if (typing) return;
       if (e.key === 'o' && job?.url) {
         e.preventDefault();
+        handOffJob(job.id, job.url);
         window.open(job.url, '_blank', 'noopener');
       }
       if (onNavigate && (e.key === 'ArrowRight' || e.key === 'j')) onNavigate(1);
@@ -363,7 +365,7 @@ export function JobDrawer({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onClose, onNavigate, job?.url]);
+  }, [onClose, onNavigate, job?.id, job?.url]);
 
   // Scroll lock and initial focus while open.
   useEffect(() => {
@@ -498,7 +500,7 @@ export function JobDrawer({
             ) : job ? (
               <p className="text-sm text-muted">
                 This board didn't include a description. Read it on the{' '}
-                <a href={job.url} target="_blank" rel="noreferrer" className="text-accent-2 hover:underline">
+                <a href={job.url} data-wera-job={job.id} target="_blank" rel="noreferrer" className="text-accent-2 hover:underline">
                   original posting
                 </a>
                 .
@@ -524,6 +526,7 @@ export function JobDrawer({
           <footer className="flex shrink-0 flex-wrap items-center gap-2 border-t border-border bg-surface px-5 py-3 md:px-6">
             <a
               href={job.url}
+              data-wera-job={job.id}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-bg transition-colors duration-150 hover:bg-accent/85"

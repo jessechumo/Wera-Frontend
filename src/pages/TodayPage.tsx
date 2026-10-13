@@ -68,6 +68,7 @@ function TopPick({
         <div className="flex w-full flex-wrap items-center gap-1.5 whitespace-nowrap sm:w-auto">
           <a
             href={job.url}
+            data-wera-job={job.id}
             target="_blank"
             rel="noreferrer"
             onClick={(e) => e.stopPropagation()}

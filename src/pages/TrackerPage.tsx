@@ -72,6 +72,7 @@ function KanbanCard({
         />
         <a
           href={job.url}
+          data-wera-job={job.id}
           target="_blank"
           rel="noreferrer"
           aria-label="Open posting"

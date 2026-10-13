@@ -9,6 +9,7 @@ import { JobRow } from '../components/JobRow';
 import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { stepId } from '../lib/format';
+import { handOffJob } from '../lib/extension';
 import { ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
 
 const PAGE = 50;
@@ -123,7 +124,10 @@ export default function JobsPage() {
         if (job) openDrawer(job.id);
       } else if (e.key === 'o') {
         const job = jobs[sel];
-        if (job) window.open(job.url, '_blank', 'noopener');
+        if (job) {
+          handOffJob(job.id, job.url);
+          window.open(job.url, '_blank', 'noopener');
+        }
       }
     };
     window.addEventListener('keydown', onKey);
