@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import clsx from 'clsx';
 import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
 import { useScrollRestoration } from './useScrollRestoration';
@@ -225,7 +226,9 @@ export function AppShell() {
 
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-24 md:px-6 md:pt-6 lg:pb-6">
           <div key={location.pathname} className="route-enter">
-            <Outlet />
+            <ErrorBoundary resetKey={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         </main>
       </div>
