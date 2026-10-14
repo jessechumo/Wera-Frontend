@@ -4,7 +4,7 @@ import {
   useQueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
-import { api, ApiError } from './client';
+import { api, ApiError, errorMessage } from './client';
 import { toast } from '../lib/toast';
 import type {
   AppStatus,
@@ -190,7 +190,7 @@ export function useUpdateApplication() {
     },
     onError: (err, _v, ctx) => {
       for (const [key, data] of ctx?.prev ?? []) qc.setQueryData(key, data);
-      toast.error(`Couldn't save: ${err instanceof ApiError ? err.message : 'network error'}`);
+      toast.error(`Couldn't save: ${errorMessage(err, 'network error')}`);
     },
     // Invalidate everything so all pages settle to server truth.
     onSettled: async () => {
@@ -209,7 +209,7 @@ export function useTriggerRun() {
       void qc.invalidateQueries({ queryKey: ['runs'] });
     },
     onError: (err) => {
-      const msg = err instanceof ApiError ? err.message : 'network error';
+      const msg = errorMessage(err, 'network error');
       toast.error(
         err instanceof ApiError && err.status === 409
           ? 'A run is already in progress'

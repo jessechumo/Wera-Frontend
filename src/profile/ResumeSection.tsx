@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FileCode2, FileText, LoaderCircle, Sparkles, Upload } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import {
   useImportResume, useResume, useResumes, type ResumeDoc,
 } from '../api/resumes';
@@ -9,10 +9,6 @@ import { useProfile } from '../api/profile';
 import { ErrorState, Skeleton } from '../components/States';
 import { toast } from '../lib/toast';
 import { Workspace } from '../resume/Workspace';
-
-function errorText(e: unknown) {
-  return e instanceof ApiError ? e.message : 'Something went wrong';
-}
 
 /** First visit: three ways to start. */
 function CreateResume({ replace = false, onDone }: { replace?: boolean; onDone?: (doc: ResumeDoc) => void }) {
@@ -27,7 +23,7 @@ function CreateResume({ replace = false, onDone }: { replace?: boolean; onDone?:
         if (onDone) onDone(doc);
         else navigate(`/profile/resume/${doc.id}`);
       },
-      onError: (e) => toast.error(errorText(e)),
+      onError: (e) => toast.error(errorMessage(e, 'Something went wrong')),
     });
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -98,7 +94,7 @@ function AutoImport({ filename, onFallback }: { filename: string; onFallback: ()
         navigate(`/profile/resume/${doc.id}`, { replace: true });
       },
       onError: (e) => {
-        toast.error(`Could not read ${filename}: ${errorText(e)}`);
+        toast.error(`Could not read ${filename}: ${errorMessage(e, 'Something went wrong')}`);
         onFallback();
       },
     });
@@ -123,7 +119,7 @@ export function ResumeSection() {
   const doc = useResume(id);
 
   if (list.isLoading || profile.isLoading) return <Skeleton className="h-96 w-full" />;
-  if (list.error) return <ErrorState message={errorText(list.error)} onRetry={() => void list.refetch()} />;
+  if (list.error) return <ErrorState message={errorMessage(list.error, 'Something went wrong')} onRetry={() => void list.refetch()} />;
   const resumes = list.data?.resumes ?? [];
   const upload = profile.data?.resume_chars ? (profile.data.resume_file?.filename ?? 'your uploaded resume') : null;
   // The upload is usually turned into a resume in the background before the tab is opened.
@@ -162,7 +158,7 @@ export function ResumeSection() {
           <CreateResume replace={reimport} onDone={reimport ? (d) => { setReimport(false); navigate(`/profile/resume/${d.id}`); } : undefined} />
         </>
       ) : doc.isLoading || !doc.data ? (
-        doc.error ? <ErrorState message={errorText(doc.error)} /> : <Skeleton className="h-96 w-full" />
+        doc.error ? <ErrorState message={errorMessage(doc.error, 'Something went wrong')} /> : <Skeleton className="h-96 w-full" />
       ) : (
         <Workspace key={doc.data.id} doc={doc.data} />
       )}

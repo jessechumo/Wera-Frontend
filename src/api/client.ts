@@ -8,6 +8,16 @@ export class ApiError extends Error {
   }
 }
 
+/** The message to show for a failed request: the server's, or `fallback` when it never answered. */
+export function errorMessage(err: unknown, fallback = 'Network error'): string {
+  return err instanceof ApiError ? err.message : fallback;
+}
+
+/** Like errorMessage, but null when there is no error (for optional error slots). */
+export function errorOrNull(err: unknown): string | null {
+  return err ? errorMessage(err) : null;
+}
+
 /** Fired when a request comes back 401: the session is gone. */
 export const UNAUTHORIZED_EVENT = 'wera:unauthorized';
 

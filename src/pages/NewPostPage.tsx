@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Eye, LoaderCircle, PenLine, ShieldCheck } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorOrNull } from '../api/client';
 import { useCreatePost } from '../api/community';
 import { Prose } from '../components/Prose';
 import { toast } from '../lib/toast';
@@ -18,7 +18,7 @@ export default function NewPostPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [preview, setPreview] = useState(false);
   const words = body.trim() ? body.trim().split(/\s+/).length : 0;
-  const err = create.error instanceof ApiError ? create.error.message : create.error ? 'Network error' : null;
+  const err = errorOrNull(create.error);
 
   const submit = () =>
     create.mutate(

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { FileText, LoaderCircle, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import { useUploadResume } from '../api/profile';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { INPUT_CLS } from '../lib/styles';
 
 /** Upload a resume PDF (drag and drop or pick), or paste its text. */
@@ -33,7 +33,7 @@ export function ResumeUpload({
     if (f) send({ file: f });
   };
   const error =
-    upload.error instanceof ApiError ? upload.error.message : upload.error ? 'Upload failed' : null;
+    upload.error ? errorMessage(upload.error, 'Upload failed') : null;
 
   return (
     <div className="space-y-3">

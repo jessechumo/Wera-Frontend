@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { LoaderCircle, Sparkles, X } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { useAddJob, useIndustries, useReadPosting, type NewJob } from '../api/hooks';
 import { INPUT_CLS } from '../lib/styles';
 import { toast } from '../lib/toast';
@@ -14,10 +14,6 @@ const MODES = [
   { value: 'hybrid', label: 'Hybrid' },
   { value: 'remote', label: 'Remote' },
 ];
-
-function errorText(e: unknown) {
-  return e instanceof ApiError ? e.message : 'Something went wrong';
-}
 
 /**
  * Adds a job found anywhere on the web. Pasting the posting lets the AI
@@ -56,7 +52,7 @@ export function AddJobDialog({ onClose, onAdded }: { onClose: () => void; onAdde
           description: d.description || j.description,
         }));
       },
-      onError: (e) => toast.error(errorText(e)),
+      onError: (e) => toast.error(errorMessage(e, 'Something went wrong')),
     });
 
   const submit = (e: FormEvent) => {
@@ -66,7 +62,7 @@ export function AddJobDialog({ onClose, onAdded }: { onClose: () => void; onAdde
         toast.success(`Added ${saved.title}. Wera is scoring it and sharing it with others it suits.`);
         onAdded(saved.id);
       },
-      onError: (err) => toast.error(errorText(err)),
+      onError: (err) => toast.error(errorMessage(err, 'Something went wrong')),
     });
   };
 

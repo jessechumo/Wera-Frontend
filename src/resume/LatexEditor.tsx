@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import clsx from 'clsx';
 import { Check, ChevronDown, CircleAlert, Copy, Download, ExternalLink, LoaderCircle, RotateCcw } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { parseResumeTeX, resumeTeX, type Layout, type ResumeData } from '../api/resumes';
 import { toast } from '../lib/toast';
 
@@ -85,7 +85,7 @@ export function LatexEditor({ data, layout, filename, onApply, onPreview }: {
     let live = true;
     resumeTeX(data, layout)
       .then((r) => { if (live) { setSource(r); setBody(r.body); } })
-      .catch((e) => live && toast.error(e instanceof ApiError ? e.message : 'Could not make the LaTeX'));
+      .catch((e) => live && toast.error(errorMessage(e, 'Could not make the LaTeX')));
     return () => { live = false; };
   }, [look]); // eslint-disable-line react-hooks/exhaustive-deps -- regenerate on a new look, not on every edit
 
@@ -100,7 +100,7 @@ export function LatexEditor({ data, layout, filename, onApply, onPreview }: {
       setParsed((p) => ({ ...p, checking: true }));
       parseResumeTeX(body)
         .then((r) => { if (live) { setParsed({ data: r.data, warnings: r.warnings, error: '', checking: false }); onPreview(r.data); } })
-        .catch((e) => { if (live) setParsed({ data: null, warnings: [], error: e instanceof ApiError ? e.message : 'Could not read the LaTeX', checking: false }); });
+        .catch((e) => { if (live) setParsed({ data: null, warnings: [], error: errorMessage(e, 'Could not read the LaTeX'), checking: false }); });
     }, 600);
     return () => { live = false; window.clearTimeout(t); };
   }, [body, dirty]); // eslint-disable-line react-hooks/exhaustive-deps -- onPreview is a setter

@@ -3,7 +3,7 @@ import { Link, NavLink } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowRight, Camera, Download, FileText, LoaderCircle, Save, UserRound } from 'lucide-react';
 import { useAvatar, useMe } from '../api/auth';
-import { ApiError } from '../api/client';
+import { errorOrNull } from '../api/client';
 import { useDraftProfile, useMyUsage, useProfile, useSaveProfile } from '../api/profile';
 import type { Answers, Preferences } from '../api/types';
 import { Avatar } from '../components/Avatar';
@@ -16,11 +16,6 @@ import { DEFAULT_PREFS, PreferencesFields, prefsProblem } from '../profile/Prefe
 import { ResumeUpload } from '../profile/ResumeUpload';
 import { ApplicationDetails } from '../profile/ApplicationDetails';
 import { ResumeSection } from '../profile/ResumeSection';
-
-function errorText(err: unknown): string | null {
-  if (!err) return null;
-  return err instanceof ApiError ? err.message : 'Network error';
-}
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -89,7 +84,7 @@ function ProfileHeader() {
           className="hidden"
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) avatar.mutate(f, { onError: (err) => toast.error(errorText(err) ?? 'Upload failed') });
+            if (f) avatar.mutate(f, { onError: (err) => toast.error(errorOrNull(err) ?? 'Upload failed') });
             e.target.value = '';
           }}
         />
@@ -268,7 +263,7 @@ function ProfileOverview() {
                 )
               }
               drafting={draft.isPending}
-              draftError={errorText(draft.error)}
+              draftError={errorOrNull(draft.error)}
             />
           </Card>
         </div>
@@ -282,7 +277,7 @@ function ProfileOverview() {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/90 backdrop-blur lg:pl-56">
           <div className="mx-auto flex max-w-7xl items-center justify-end gap-3 px-4 py-3 md:px-6">
             {(problem || save.error) && (
-              <span className="text-xs text-warn">{problem ?? errorText(save.error)}</span>
+              <span className="text-xs text-warn">{problem ?? errorOrNull(save.error)}</span>
             )}
             <button
               type="button"

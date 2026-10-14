@@ -2,14 +2,13 @@ import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'rea
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, CircleAlert, LoaderCircle, MailCheck } from 'lucide-react';
 import { forgotPassword, resetPassword, verifyEmail } from '../api/auth';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { Logo } from '../components/Logo';
 import { ThemeToggle } from '../lib/theme';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { Field } from '../components/Field';
 import { INPUT_CLS } from '../lib/styles';
 
-const message = (e: unknown) => (e instanceof ApiError ? e.message : 'Network error');
 
 function Card({ title, lead, children }: { title: string; lead?: string; children: ReactNode }) {
   return (
@@ -55,7 +54,7 @@ export function VerifyEmailPage() {
     sent.current = true;
     verifyEmail(token)
       .then((r) => setState({ status: 'done', text: r.email }))
-      .catch((e) => setState({ status: 'failed', text: message(e) }));
+      .catch((e) => setState({ status: 'failed', text: errorMessage(e) }));
   }, [token]);
   return (
     <Card title="Confirm your email">
@@ -86,7 +85,7 @@ export function ForgotPasswordPage() {
     setState({ busy: true, done: '', error: '' });
     forgotPassword(email)
       .then((r) => setState({ busy: false, done: r.message, error: '' }))
-      .catch((err) => setState({ busy: false, done: '', error: message(err) }));
+      .catch((err) => setState({ busy: false, done: '', error: errorMessage(err) }));
   };
   return (
     <Card title="Reset your password" lead="Enter the email you sign in with and we will send a link to choose a new password.">
@@ -127,7 +126,7 @@ export function ResetPasswordPage() {
     setState({ busy: true, done: false, error: '' });
     resetPassword(token, pw)
       .then(() => setState({ busy: false, done: true, error: '' }))
-      .catch((err) => setState({ busy: false, done: false, error: message(err) }));
+      .catch((err) => setState({ busy: false, done: false, error: errorMessage(err) }));
   };
   if (!token) {
     return <Card title="Choose a new password"><Notice tone="bad">This link is incomplete. Open it from the email again, or <Link to="/forgot-password" className="underline">ask for a new one</Link>.</Notice></Card>;

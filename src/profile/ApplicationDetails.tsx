@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LoaderCircle, Sparkles } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { useApplicant, useSaveApplicant, useSuggestApplicant, type Applicant } from '../api/extension';
 import { INPUT_CLS } from '../lib/styles';
 import { Skeleton } from '../components/States';
@@ -112,7 +112,7 @@ export function ApplicationDetails() {
         setDraft(next);
         toast.success(n ? `Filled ${n} field${n === 1 ? '' : 's'} from your resume. Review, then save.` : 'Nothing new found in your resume.');
       },
-      onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not read your resume'),
+      onError: (e) => toast.error(errorMessage(e, 'Could not read your resume')),
     });
 
   return (
@@ -148,7 +148,7 @@ export function ApplicationDetails() {
         </fieldset>
       ))}
       <div className="flex items-center justify-end gap-3">
-        {save.error && <span className="text-xs text-bad">{save.error instanceof ApiError ? save.error.message : 'Save failed'}</span>}
+        {save.error && <span className="text-xs text-bad">{errorMessage(save.error, 'Save failed')}</span>}
         <button type="button" disabled={save.isPending}
           onClick={() => save.mutate(draft, { onSuccess: () => toast.success('Application details saved.') })}
           className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-bg hover:bg-accent/85 disabled:opacity-60">

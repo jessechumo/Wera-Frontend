@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, LoaderCircle } from 'lucide-react';
 import { useAuthConfig, useAuthMutation, useMe } from '../api/auth';
-import { ApiError } from '../api/client';
+import { errorOrNull } from '../api/client';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ThemeToggle } from '../lib/theme';
 import { Logo } from '../components/Logo';
@@ -32,7 +32,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     );
   };
   const error =
-    auth.error instanceof ApiError ? auth.error.message : auth.error ? 'Network error' : null;
+    errorOrNull(auth.error);
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-10">

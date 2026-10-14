@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, LoaderCircle, Trash2 } from 'lucide-react';
 import { useMe } from '../api/auth';
-import { ApiError } from '../api/client';
+import { ApiError, errorMessage } from '../api/client';
 import { useComment, useDeleteComment, useDeletePost, usePost } from '../api/community';
 import { Avatar } from '../components/Avatar';
 import { Prose } from '../components/Prose';
@@ -11,10 +11,6 @@ import { ErrorState, Skeleton } from '../components/States';
 import { absTime, relTime } from '../lib/format';
 import { toast } from '../lib/toast';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
-
-function errorText(err: unknown): string {
-  return err instanceof ApiError ? err.message : 'Network error';
-}
 
 function CommentBox({ postId }: { postId: number }) {
   const me = useMe();
@@ -39,7 +35,7 @@ function CommentBox({ postId }: { postId: number }) {
           aria-label="Comment"
           className="w-full resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm text-text transition-all duration-200 placeholder:text-faint focus:border-accent/60 focus:outline-none"
         />
-        {comment.error && <p className="mt-1 text-xs text-bad">{errorText(comment.error)}</p>}
+        {comment.error && <p className="mt-1 text-xs text-bad">{errorMessage(comment.error)}</p>}
         {body.trim() && (
           <div className="mt-2 flex items-center justify-end gap-2">
             <span className="text-[11px] text-faint">Reviewed before posting</span>

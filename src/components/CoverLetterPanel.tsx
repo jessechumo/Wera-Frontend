@@ -1,14 +1,10 @@
 import { useState } from 'react';
 import { Copy, Download, LoaderCircle, PenLine, RefreshCw, Sparkles } from 'lucide-react';
 import { useMe } from '../api/auth';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { useCoverLetter, useWriteCoverLetter } from '../api/hooks';
 import type { JobDetail } from '../api/types';
 import { toast } from '../lib/toast';
-
-function errorText(err: unknown): string {
-  return err instanceof ApiError ? err.message : 'Network error';
-}
 
 const today = () => new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -42,7 +38,7 @@ export function CoverLetterPanel({ job }: { job: JobDetail }) {
   const [text, setText] = useState('');
 
   const name = me.data?.name || me.data?.email || '';
-  const generate = () => write.mutate(undefined, { onError: (e) => toast.error(errorText(e)) });
+  const generate = () => write.mutate(undefined, { onError: (e) => toast.error(errorMessage(e)) });
   const writing = write.isPending && write.variables === undefined;
 
   if (letter.isLoading) return <div className="skeleton h-96 w-full" />;
@@ -77,7 +73,7 @@ export function CoverLetterPanel({ job }: { job: JobDetail }) {
                     setEditing(false);
                     toast.success('Letter saved.');
                   },
-                  onError: (e) => toast.error(errorText(e)),
+                  onError: (e) => toast.error(errorMessage(e)),
                 })
               }
               className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg hover:bg-accent/85"

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Download, ExternalLink, FileText, LoaderCircle, RefreshCw, Wand2 } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { useJobKeywords, useJobResume, useTailorResume, type Coverage } from '../api/resumes';
 import type { JobDetail } from '../api/types';
 import { ResumePreview } from '../resume/ResumePreview';
@@ -38,7 +38,7 @@ export function JobResumePanel({ job }: { job: JobDetail }) {
 
   const run = () => tailor.mutate(undefined, {
     onSuccess: (r) => toast.success(r.resume.fit?.one_page ? 'Tailored and fitted to one page.' : 'Tailored.'),
-    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not tailor'),
+    onError: (e) => toast.error(errorMessage(e, 'Could not tailor')),
   });
 
   if (kw.isLoading || tailored.isLoading) return <div className="skeleton h-72 w-full" />;
