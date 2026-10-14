@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { prefetchRoute, useWarmup } from '../lib/warmup';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import clsx from 'clsx';
 import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
@@ -118,6 +119,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigat
 
 export function AppShell() {
   useScrollRestoration();
+  useWarmup();
   const qc = useQueryClient();
   const nav = useNav();
   const isAdmin = useMe().data?.is_admin ?? false;
@@ -167,6 +169,8 @@ export function AppShell() {
               key={to}
               to={to}
               end={to === '/'}
+              onMouseEnter={() => prefetchRoute(qc, to)}
+              onFocus={() => prefetchRoute(qc, to)}
               className={({ isActive }) =>
                 clsx(
                   'relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
