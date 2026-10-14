@@ -63,6 +63,35 @@ describe('ResumeSection', () => {
     expect(await screen.findByLabelText('Name')).toHaveValue('Ada Lovelace');
   });
 
+  it('waits for the resume built in the background instead of building another', async () => {
+    let imports = 0;
+    let calls = 0;
+    stubApi({
+      'GET /api/profile': () => ({ resume_chars: 900, resume_file: { filename: 'Ada_CV.pdf', uploaded_at: '2026-10-01T00:00:00Z' } }),
+      'GET /api/resumes': () =>
+        ++calls < 2
+          ? { resumes: [], import: { status: 'running', error: '', started_at: '2026-10-14T00:00:00Z', finished_at: null } }
+          : { resumes: [{ id: 3, title: 'My resume', job_id: null }], import: { status: 'done', error: '', started_at: '2026-10-14T00:00:00Z', finished_at: '2026-10-14T00:00:09Z' } },
+      'POST /api/resumes/import': () => ((imports += 1), doc()),
+      'GET /api/resumes/3': () => doc(),
+      'POST /api/resumes/preview': preview,
+    });
+    renderApp(<ResumeSection />, { path: '/profile/resume', route: '/profile/resume/:id?' });
+    expect(await screen.findByText(/Building your resume from Ada_CV.pdf/)).toBeInTheDocument();
+    expect(await screen.findByLabelText('Name', {}, { timeout: 4000 })).toHaveValue('Ada Lovelace');
+    expect(imports).toBe(0);
+  });
+
+  it('offers the manual choices when the background build failed', async () => {
+    stubApi({
+      'GET /api/profile': () => ({ resume_chars: 900, resume_file: { filename: 'Ada_CV.pdf', uploaded_at: '2026-10-01T00:00:00Z' } }),
+      'GET /api/resumes': () => ({ resumes: [], import: { status: 'failed', error: 'the AI service did not answer; try again', started_at: '2026-10-14T00:00:00Z', finished_at: null } }),
+    });
+    renderApp(<ResumeSection />, { path: '/profile/resume', route: '/profile/resume/:id?' });
+    expect(await screen.findByText(/could not build your resume from Ada_CV.pdf/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Convert my resume/ })).toBeEnabled();
+  });
+
   it('edits with autosave, shows hidden items, previews and fits', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     const saves: { data: { name: string } }[] = [];

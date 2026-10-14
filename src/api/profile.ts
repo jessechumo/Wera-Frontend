@@ -71,7 +71,11 @@ export function useUploadResume() {
         body: form,
       });
     },
-    onSuccess: () => void qc.invalidateQueries({ queryKey: ['profile'] }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['profile'] });
+      // The server starts building the resume from it; pick up that state.
+      void qc.invalidateQueries({ queryKey: ['resumes'] });
+    },
   });
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LoaderCircle, Sparkles, X } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { suggestBullet } from '../api/resumes';
 
 /** "[X]%" style placeholders, highlighted so they get filled in. */
@@ -29,7 +29,7 @@ export function BulletSuggest({ text, role, jobId, onPick, onClose }: {
     let live = true;
     suggestBullet(text, role, jobId)
       .then((r) => live && setState({ loading: false, items: r.suggestions, error: '' }))
-      .catch((e) => live && setState({ loading: false, items: [], error: e instanceof ApiError ? e.message : 'Could not get suggestions' }));
+      .catch((e) => live && setState({ loading: false, items: [], error: errorMessage(e, 'Could not get suggestions') }));
     return () => { live = false; };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps -- only on open
   return (

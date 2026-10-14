@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Monitor, Send, Smartphone } from 'lucide-react';
-import { api, ApiError } from '../api/client';
+import { api, errorMessage } from '../api/client';
 import { relTime } from '../lib/format';
 import { toast } from '../lib/toast';
 
@@ -28,7 +28,7 @@ export function EmailAdmin() {
   const test = useMutation({
     mutationFn: () => api<{ queued_to: string }>('/api/admin/email/test', { method: 'POST', body: JSON.stringify({ to }) }),
     onSuccess: (r) => { toast.success(`Test queued to ${r.queued_to}.`); void q.refetch(); },
-    onError: (e) => toast.error(e instanceof ApiError ? e.message : 'Could not send'),
+    onError: (e) => toast.error(errorMessage(e, 'Could not send')),
   });
   useEffect(() => {
     if (format !== 'text') return;

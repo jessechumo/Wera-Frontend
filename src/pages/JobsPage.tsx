@@ -10,7 +10,8 @@ import { EmptyState, ErrorState, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { stepId } from '../lib/format';
 import { handOffJob } from '../lib/extension';
-import { ChevronLeft, ChevronRight, EyeOff } from 'lucide-react';
+import { ChevronLeft, ChevronRight, EyeOff, Plus } from 'lucide-react';
+import { AddJobDialog } from '../components/AddJobDialog';
 
 const PAGE = 50;
 
@@ -47,6 +48,7 @@ export default function JobsPage() {
   const jobs = useMemo(() => data?.jobs ?? [], [data]);
   const drawerId = Number(searchParams.get('job') ?? routeId ?? '') || null;
 
+  const [adding, setAdding] = useState(false);
   const [sel, setSel] = useState(0);
   const query = searchParams.toString();
   const [selQuery, setSelQuery] = useState(query);
@@ -111,8 +113,8 @@ export default function JobsPage() {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement).tagName;
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'A') return;
-      // While the drawer is open it owns the keyboard (esc, o).
-      if (drawerId != null) return;
+      // While the drawer or a dialog is open it owns the keyboard (esc, o).
+      if (drawerId != null || adding) return;
       if (e.key === 'j' || e.key === 'k') {
         e.preventDefault();
         setSel((s) => {
@@ -132,7 +134,7 @@ export default function JobsPage() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [jobs, sel, openDrawer, drawerId]);
+  }, [jobs, sel, openDrawer, drawerId, adding]);
 
   return (
     <div className="space-y-4">
@@ -145,13 +147,31 @@ export default function JobsPage() {
             opens · <span className="font-mono">o</span> opens posting
           </p>
         </div>
-        <Link
-          to="/excluded"
-          className="inline-flex items-center gap-1.5 self-end rounded-lg px-2 py-1 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-text"
-        >
-          <EyeOff className="size-3.5" /> Excluded jobs
-        </Link>
+        <div className="flex items-center gap-2 self-end">
+          <Link
+            to="/excluded"
+            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-muted transition-colors hover:bg-surface-2 hover:text-text"
+          >
+            <EyeOff className="size-3.5" /> Excluded jobs
+          </Link>
+          <button
+            onClick={() => setAdding(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-colors hover:bg-accent/85"
+          >
+            <Plus className="size-3.5" /> Add job
+          </button>
+        </div>
       </header>
+
+      {adding && (
+        <AddJobDialog
+          onClose={() => setAdding(false)}
+          onAdded={(id) => {
+            setAdding(false);
+            openDrawer(id);
+          }}
+        />
+      )}
 
       <FilterBar
         values={values}

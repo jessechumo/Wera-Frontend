@@ -5,7 +5,7 @@ import {
   CheckCircle2, ChevronDown, Code2, Download, Eye, FileText, LayoutTemplate, LoaderCircle, Maximize2, PenLine,
   Redo2, SlidersHorizontal, Stethoscope, Trash2, Undo2, Wand2,
 } from 'lucide-react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { useDeleteResume, useFitResume, useSaveResume, useTemplates, type Layout, type ResumeData, type ResumeDoc } from '../api/resumes';
 import { toast } from '../lib/toast';
 import { hiddenCount, showAll, targetId, type Issues } from './edit';
@@ -17,7 +17,6 @@ import { TemplatePicker } from './TemplatePicker';
 import { useHistory } from './useHistory';
 import { useLivePreview } from './useLivePreview';
 
-const errorText = (e: unknown) => (e instanceof ApiError ? e.message : 'Something went wrong');
 const BTN = 'inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-xs font-medium transition-colors hover:border-accent/40 disabled:opacity-50';
 
 /** A small popover anchored under its button; closes on outside click or Escape. */
@@ -103,7 +102,7 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
     const t = window.setTimeout(() => {
       saveNow({ data: draft, layout }, {
         onSuccess: (saved) => { setSynced(saved.updated_at); setDirty(false); },
-        onError: (e) => toast.error(`Not saved: ${errorText(e)}`),
+        onError: (e) => toast.error(`Not saved: ${errorMessage(e, 'Something went wrong')}`),
       });
     }, 1200);
     return () => window.clearTimeout(t);
@@ -131,11 +130,11 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
   /** Saves pending edits, then runs next (downloads and fitting use the saved copy). */
   const withSaved = (next: () => void) => {
     if (!dirty) return next();
-    save.mutate({ data: draft, layout }, { onSuccess: (s) => { setSynced(s.updated_at); setDirty(false); next(); }, onError: (e) => toast.error(errorText(e)) });
+    save.mutate({ data: draft, layout }, { onSuccess: (s) => { setSynced(s.updated_at); setDirty(false); next(); }, onError: (e) => toast.error(errorMessage(e, 'Something went wrong')) });
   };
   const fitNow = () => withSaved(() => fit.mutate(undefined, {
     onSuccess: (d) => toast.success(d.fit?.summary ?? 'Fitted.'),
-    onError: (e) => toast.error(errorText(e)),
+    onError: (e) => toast.error(errorMessage(e, 'Something went wrong')),
   }));
   const go = (path: string) => withSaved(() => { window.location.href = path; });
 

@@ -5,20 +5,16 @@ import { useConnections, useDisconnect } from '../api/extension';
 import { useExtension } from '../lib/extension';
 import { relTime } from '../lib/format';
 import { sendVerification, useAuthConfig, useChangePassword, useDeleteAccount, useMe } from '../api/auth';
-import { api, ApiError } from '../api/client';
+import { api, errorMessage, errorOrNull } from '../api/client';
 import { useHideCompany, useIndustryLabel, useSaveSettings, useSettings } from '../api/hooks';
 import type { JobList, Settings } from '../api/types';
-import { Field, INPUT_CLS } from '../auth/AuthPage';
+import { Field } from '../components/Field';
+import { INPUT_CLS } from '../lib/styles';
 import { ErrorState, Skeleton } from '../components/States';
 import { Switch } from '../components/Switch';
 import { ThemeChoice } from '../lib/theme';
 import { toast } from '../lib/toast';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
-
-function errorText(err: unknown): string | null {
-  if (!err) return null;
-  return err instanceof ApiError ? err.message : 'Network error';
-}
 
 function Section({ icon: Icon, title, hint, children, tone }: {
   icon: typeof Bell; title: string; hint?: string; children: ReactNode; tone?: 'danger';
@@ -103,7 +99,7 @@ function PasswordForm() {
       <button type="submit" disabled={change.isPending} className="h-9 rounded-lg border border-border bg-surface-2 px-3 text-xs font-medium text-text hover:border-accent/40 disabled:opacity-60">
         Update
       </button>
-      {change.error && <p className="text-xs text-bad sm:col-span-3">{errorText(change.error)}</p>}
+      {change.error && <p className="text-xs text-bad sm:col-span-3">{errorOrNull(change.error)}</p>}
     </form>
   );
 }
@@ -171,7 +167,7 @@ function EmailStatus({ verified }: { verified: boolean }) {
     setState('sending');
     sendVerification()
       .then(() => setState('sent'))
-      .catch((e) => { setState(''); toast.error(e instanceof ApiError ? e.message : 'Could not send the link'); });
+      .catch((e) => { setState(''); toast.error(errorMessage(e, 'Could not send the link')); });
   };
   return (
     <Row label="Email address" hint={verified ? 'Confirmed.' : 'Not confirmed yet: confirm it to get digests and password resets.'}>
@@ -212,7 +208,7 @@ function DeleteAccount() {
     >
       <p className="text-sm text-text">Enter your password to permanently delete your account.</p>
       <input type="password" required autoFocus value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" className={INPUT_CLS} />
-      {del.error && <p className="text-xs text-bad">{errorText(del.error)}</p>}
+      {del.error && <p className="text-xs text-bad">{errorOrNull(del.error)}</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={del.isPending} className="inline-flex items-center gap-1.5 rounded-lg bg-bad px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60">
           {del.isPending && <LoaderCircle className="size-3.5 animate-spin" />} Delete forever
@@ -245,7 +241,7 @@ export default function SettingsPage() {
 
   const update = (next: Settings) => {
     setDraft(next);
-    save.mutate(next, { onError: (e) => toast.error(`Couldn't save: ${errorText(e)}`) });
+    save.mutate(next, { onError: (e) => toast.error(`Couldn't save: ${errorOrNull(e)}`) });
   };
   const n = draft.notifications;
   const setN = (patch: Partial<Settings['notifications']>) => update({ ...draft, notifications: { ...n, ...patch } });

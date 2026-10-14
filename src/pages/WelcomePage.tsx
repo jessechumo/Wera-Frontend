@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowLeft, ArrowRight, Check, LoaderCircle, Sparkles } from 'lucide-react';
 import { useMe } from '../api/auth';
-import { ApiError } from '../api/client';
+import { errorOrNull } from '../api/client';
 import { useDraftProfile, useProfile, useSaveProfile, useSuggestPreferences } from '../api/profile';
 import type { Answers, Preferences, Suggestions } from '../api/types';
 import { LOCATION_SEPARATOR, toPlace } from '../profile/places';
@@ -17,11 +17,6 @@ import { ThemeToggle } from '../lib/theme';
 import { Logo } from '../components/Logo';
 
 const STEPS = ['Resume', 'What you want', 'Your profile'] as const;
-
-function errorText(err: unknown): string | null {
-  if (!err) return null;
-  return err instanceof ApiError ? err.message : 'Network error';
-}
 
 /** First-run setup: resume, preferences, then the AI-drafted profile. */
 export default function WelcomePage() {
@@ -203,7 +198,7 @@ export default function WelcomePage() {
               onChange={setMarkdown}
               onDraft={runDraft}
               drafting={draft.isPending}
-              draftError={errorText(draft.error)}
+              draftError={errorOrNull(draft.error)}
             />
           </div>
         )}
@@ -222,7 +217,7 @@ export default function WelcomePage() {
           {step === 1 && problem && <span className="text-xs text-warn">{problem}</span>}
           {step === 2 && save.error && (
             <span role="alert" className="text-xs text-bad">
-              {errorText(save.error)}
+              {errorOrNull(save.error)}
             </span>
           )}
           {step < 2 ? (

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { prefetchRoute, useWarmup } from '../lib/warmup';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import clsx from 'clsx';
 import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
@@ -18,6 +19,7 @@ import {
 } from '../api/hooks';
 import { relTime } from '../lib/format';
 import { toast } from '../lib/toast';
+import { SkeletonRows } from '../components/States';
 
 function UserMenu() {
   const me = useMe();
@@ -118,6 +120,7 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigat
 
 export function AppShell() {
   useScrollRestoration();
+  useWarmup();
   const qc = useQueryClient();
   const nav = useNav();
   const isAdmin = useMe().data?.is_admin ?? false;
@@ -167,6 +170,8 @@ export function AppShell() {
               key={to}
               to={to}
               end={to === '/'}
+              onMouseEnter={() => prefetchRoute(qc, to)}
+              onFocus={() => prefetchRoute(qc, to)}
               className={({ isActive }) =>
                 clsx(
                   'relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-150',
@@ -227,7 +232,9 @@ export function AppShell() {
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-24 md:px-6 md:pt-6 lg:pb-6">
           <div key={location.pathname} className="route-enter">
             <ErrorBoundary resetKey={location.pathname}>
-              <Outlet />
+              <Suspense fallback={<SkeletonRows rows={6} />}>
+                <Outlet />
+              </Suspense>
             </ErrorBoundary>
           </div>
         </main>

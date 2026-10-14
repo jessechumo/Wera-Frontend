@@ -1,6 +1,6 @@
 import { LoaderCircle, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
-import { INPUT_CLS } from '../auth/AuthPage';
+import { INPUT_CLS } from '../lib/styles';
 
 /** The profile text the AI scores jobs against, with an AI draft button. */
 export function ProfileEditor({

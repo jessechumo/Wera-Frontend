@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ApiError } from '../api/client';
+import { errorMessage } from '../api/client';
 import { previewResume, type Layout, type Measure, type ResumeData, type Review } from '../api/resumes';
 
 export interface LivePreview {
@@ -30,7 +30,7 @@ export function useLivePreview(data: ResumeData | null, layout: Layout | null, d
         .then((r) => setState({ pages: r.pages, measure: r.measure, review: r.review ?? null, loading: false, error: '' }))
         .catch((e) => {
           if (c.signal.aborted) return;
-          setState((s) => ({ ...s, loading: false, error: e instanceof ApiError ? e.message : 'Preview failed' }));
+          setState((s) => ({ ...s, loading: false, error: errorMessage(e, 'Preview failed') }));
         });
     }, delay);
     return () => window.clearTimeout(t);
