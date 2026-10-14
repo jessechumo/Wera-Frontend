@@ -21,7 +21,10 @@ else
   git -C "$dir" remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
 fi
 printf '{"schemaVersion":1,"label":"%s","message":"%s","color":"%s"}\n' "$name" "$message" "$color" > "$dir/$name.json"
-git -C "$dir" add "$name.json"
+# Vercel builds every branch with the config found on it; this branch holds
+# only badges, so it tells Vercel not to deploy it.
+printf '{"git":{"deploymentEnabled":false}}\n' > "$dir/vercel.json"
+git -C "$dir" add "$name.json" vercel.json
 git -C "$dir" diff --cached --quiet && exit 0
 git -C "$dir" commit --quiet -m "chore: update $name badge to $message"
 git -C "$dir" push --quiet origin badges
