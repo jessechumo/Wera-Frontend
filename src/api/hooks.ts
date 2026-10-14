@@ -18,7 +18,6 @@ import type {
   Settings,
   RunsList,
   Stats,
-  Usage,
 } from './types';
 
 export interface JobsParams {
@@ -126,14 +125,6 @@ export function useCompanies() {
   });
 }
 
-export function useUsage() {
-  return useQuery({
-    queryKey: ['usage'],
-    queryFn: () => api<Usage>('/api/usage'),
-    refetchInterval: 5 * 60_000,
-  });
-}
-
 export function useIndustries() {
   return useQuery({
     queryKey: ['industries'],
@@ -195,26 +186,6 @@ export function useUpdateApplication() {
     // Invalidate everything so all pages settle to server truth.
     onSettled: async () => {
       await qc.invalidateQueries();
-    },
-  });
-}
-
-/** POST /api/runs; surfaces the 409 "already running" case as a friendly toast. */
-export function useTriggerRun() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: () => api<{ status: string }>('/api/runs', { method: 'POST' }),
-    onSuccess: () => {
-      toast.success('Run started');
-      void qc.invalidateQueries({ queryKey: ['runs'] });
-    },
-    onError: (err) => {
-      const msg = errorMessage(err, 'network error');
-      toast.error(
-        err instanceof ApiError && err.status === 409
-          ? 'A run is already in progress'
-          : `Couldn't start a run: ${msg}`,
-      );
     },
   });
 }

@@ -138,42 +138,6 @@ export interface CompaniesList {
   companies: Company[];
 }
 
-export interface UsageDay {
-  day: string;
-  prompt_tokens: number;
-  cached_tokens: number;
-  completion_tokens: number;
-  cost_usd: number;
-}
-
-export interface UsageTotals {
-  analyses: number;
-  prompt_tokens: number;
-  cached_tokens: number;
-  completion_tokens: number;
-  cost_usd: number;
-  cached_percent: number;
-}
-
-export interface UserSpend {
-  id: number;
-  email: string;
-  name: string;
-  created_at: string;
-  last_login_at: string | null;
-  monthly_budget_usd: number;
-  month_spend_usd: number;
-  matches: number;
-  has_profile: boolean;
-}
-
-export interface Usage {
-  per_day: UsageDay[];
-  totals: UsageTotals;
-  /** Every user's spend this month (admin report). */
-  users: UserSpend[];
-}
-
 export interface Industry {
   id: string;
   label: string;

@@ -10,7 +10,6 @@ import IndustriesPage from './IndustriesPage';
 import IndustryPage from './IndustryPage';
 import JobsPage from './JobsPage';
 import ProfilePage from './ProfilePage';
-import SystemPage from './SystemPage';
 import TodayPage from './TodayPage';
 import TrackerPage from './TrackerPage';
 
@@ -117,12 +116,6 @@ describe('other pages', () => {
     expect((await screen.findAllByText(first.title)).length).toBeGreaterThan(0);
   });
 
-  it('System shows runs and companies to admins', async () => {
-    stubApi();
-    renderApp(<SystemPage />);
-    expect(await screen.findByRole('heading', { name: 'System' })).toBeInTheDocument();
-    expect((await screen.findAllByText(fixtures.companies.companies[0]!.name)).length).toBeGreaterThan(0);
-  });
 
   it('Profile shows the photo controls and the resume', async () => {
     stubApi();

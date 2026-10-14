@@ -16,15 +16,12 @@ import {
   CornerDownLeft,
   Globe,
   ListChecks,
-  Play,
   Search,
   Zap,
   type LucideIcon,
 } from 'lucide-react';
 import { api } from '../api/client';
-import { useTriggerRun } from '../api/hooks';
-import { useMe } from '../api/auth';
-import { useNav } from '../layout/nav';
+import { NAV } from '../layout/nav';
 import type { JobList } from '../api/types';
 
 interface PaletteItem {
@@ -51,10 +48,7 @@ function Kbd({ children }: { children: ReactNode }) {
  */
 export function CommandPalette({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate();
-  const trigger = useTriggerRun();
-  const navItems = useNav();
-  const isAdmin = useMe().data?.is_admin ?? false;
-  const [query, setQuery] = useState('');
+    const [query, setQuery] = useState('');
   const [sel, setSel] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -76,23 +70,14 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
 
   const items = useMemo<PaletteItem[]>(() => {
     const q = query.trim().toLowerCase();
-    const nav: PaletteItem[] = navItems.map((n) => ({
+    const nav: PaletteItem[] = NAV.map((n) => ({
       id: `nav-${n.to}`,
       label: n.label,
       group: 'Go to',
       icon: n.icon,
       run: () => navigate(n.to),
     }));
-    const runNow: PaletteItem = {
-      id: 'run',
-      label: 'Run the pipeline now',
-      hint: 'worker',
-      group: 'Actions',
-      icon: Play,
-      run: () => trigger.mutate(),
-    };
     const actions: PaletteItem[] = [
-      ...(isAdmin ? [runNow] : []),
       {
         id: 'strong',
         label: 'Strong fits (80+)',
@@ -138,7 +123,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
     return [...nav, ...actions, ...jobItems]
       .filter((it) => it.label.toLowerCase().includes(q) || it.hint?.toLowerCase().includes(q))
       .slice(0, 12);
-  }, [query, jobs.data, navigate, trigger, navItems, isAdmin]);
+  }, [query, jobs.data, navigate]);
 
   const onKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
