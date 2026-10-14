@@ -300,3 +300,45 @@ export function useWriteCoverLetter(jobId: number) {
     },
   });
 }
+
+/** A job to add by hand (POST /api/jobs). */
+export interface NewJob {
+  url: string;
+  company: string;
+  title: string;
+  location: string;
+  work_mode: string;
+  industry: string;
+  description: string;
+}
+
+/** Fields the AI read from a posting's text (POST /api/ext/extract). */
+export interface JobDraft {
+  is_job_posting: boolean;
+  company: string;
+  title: string;
+  location: string;
+  work_mode: string;
+  industry: string;
+  description: string;
+}
+
+/** Adds a job to the user's lists and tracker; the server scores it and shares it with others it suits. */
+export function useAddJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (job: NewJob) => api<JobDetail>('/api/jobs', { method: 'POST', body: JSON.stringify(job) }),
+    onSuccess: (job) => {
+      qc.setQueryData(['job', job.id], job);
+      for (const key of ['jobs', 'today', 'tracker', 'stats']) void qc.invalidateQueries({ queryKey: [key] });
+    },
+  });
+}
+
+/** Reads company, title and the rest from a posting's pasted text. */
+export function useReadPosting() {
+  return useMutation({
+    mutationFn: (v: { url: string; text: string }) =>
+      api<JobDraft>('/api/ext/extract', { method: 'POST', body: JSON.stringify({ url: v.url, title: '', text: v.text }) }),
+  });
+}
