@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { prefetchRoute, useWarmup } from '../lib/warmup';
 import { ErrorBoundary } from '../components/ErrorBoundary';
@@ -19,6 +19,7 @@ import {
 } from '../api/hooks';
 import { relTime } from '../lib/format';
 import { toast } from '../lib/toast';
+import { SkeletonRows } from '../components/States';
 
 function UserMenu() {
   const me = useMe();
@@ -231,7 +232,9 @@ export function AppShell() {
         <main className="mx-auto w-full max-w-7xl flex-1 px-4 pt-5 pb-24 md:px-6 md:pt-6 lg:pb-6">
           <div key={location.pathname} className="route-enter">
             <ErrorBoundary resetKey={location.pathname}>
-              <Outlet />
+              <Suspense fallback={<SkeletonRows rows={6} />}>
+                <Outlet />
+              </Suspense>
             </ErrorBoundary>
           </div>
         </main>

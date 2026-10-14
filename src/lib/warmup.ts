@@ -2,11 +2,12 @@ import { useEffect } from 'react';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { prefetchResumes } from '../api/resumes';
 import { prefetchSponsorship } from '../api/sponsorship';
+import { ProfilePage, SponsorshipPage } from '../pages/lazy';
 
-/** Data a page needs first, loaded ahead of a visit. */
+/** A page's code and the data it needs first, loaded ahead of a visit. */
 const PREFETCH: Record<string, (qc: QueryClient) => Promise<unknown>> = {
-  '/sponsorship': prefetchSponsorship,
-  '/profile': prefetchResumes,
+  '/sponsorship': (qc) => Promise.all([SponsorshipPage.preload(), prefetchSponsorship(qc)]),
+  '/profile': (qc) => Promise.all([ProfilePage.preload(), prefetchResumes(qc)]),
 };
 
 /** Starts loading a page's data (hovering or focusing its link). Failures are left for the page to show. */

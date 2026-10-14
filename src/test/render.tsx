@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react';
+import { Suspense, type ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
@@ -12,9 +12,11 @@ export function renderApp(ui: ReactElement, { path = '/', route = '*' }: { path?
     ...render(
       <QueryClientProvider client={client}>
         <MemoryRouter initialEntries={[path]}>
-          <Routes>
-            <Route path={route} element={ui} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path={route} element={ui} />
+            </Routes>
+          </Suspense>
         </MemoryRouter>
       </QueryClientProvider>,
     ),

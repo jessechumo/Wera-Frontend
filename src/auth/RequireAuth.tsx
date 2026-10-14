@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { signOutLocally, useMe } from '../api/auth';
 import { UNAUTHORIZED_EVENT } from '../api/client';
 import { ErrorState, Skeleton } from '../components/States';
-import LandingPage from '../landing/LandingPage';
+import { lazyPage } from '../lib/lazyPage';
+
+const LandingPage = lazyPage(() => import('../landing/LandingPage'));
 
 /** Renders its routes only with a session; otherwise sends the user to /login. */
 export function RequireAuth() {
@@ -36,7 +38,7 @@ export function RequireAuth() {
   }
   if (!me.data) {
     // Visitors at the front door see what Wera is; everywhere else asks them to log in.
-    if (location.pathname === '/') return <LandingPage />;
+    if (location.pathname === '/') return <Suspense fallback={null}><LandingPage /></Suspense>;
     return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
   return <Outlet />;
