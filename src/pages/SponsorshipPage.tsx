@@ -1,4 +1,4 @@
-import { Fragment, useDeferredValue, useState } from 'react';
+import { Fragment, useDeferredValue, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '../api/client';
@@ -69,13 +69,30 @@ function EmployerLookup() {
   );
 }
 
+/** Calls onVisible when the element scrolls into view (the next page loads before the end is reached). */
+function useOnVisible(onVisible: () => void, active: boolean) {
+  const ref = useRef<HTMLDivElement>(null);
+  const callback = useRef(onVisible);
+  useEffect(() => {
+    callback.current = onVisible;
+  });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !active || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver((entries) => entries.some((e) => e.isIntersecting) && callback.current(), { rootMargin: '600px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [active]);
+  return ref;
+}
+
 export default function SponsorshipPage() {
   useDocumentTitle('Sponsorship');
   const [q, setQ] = useState('');
   const [filersOnly, setFilersOnly] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const query = useDeferredValue(q.trim());
-  const data = useSponsorship(query);
+  const data = useSponsorship(query, filersOnly);
   const industryLabel = useIndustryLabel();
   const qc = useQueryClient();
   // Hovering a row loads its filings, so opening it is instant.
@@ -83,11 +100,14 @@ export default function SponsorshipPage() {
     const path = `/api/sponsorship/${companyId}/h1b`;
     void qc.prefetchQuery({ queryKey: ['h1b', path], queryFn: () => api(path), staleTime: 3_600_000 });
   };
-  const all = data.data?.companies ?? [];
-  const rows = filersOnly ? all.filter((r) => (r.h1b_filings ?? 0) > 0) : all;
-  const count = (sig: SponsorSignal) => all.filter((r) => r.signal === sig).length;
-  const filers = all.filter((r) => (r.h1b_filings ?? 0) > 0).length;
-  const period = monthSpan(data.data?.h1b_period?.from, data.data?.h1b_period?.to);
+  const pages = data.data?.pages ?? [];
+  const rows = pages.flatMap((p) => p.companies);
+  const first = pages[0];
+  const summary = first?.summary;
+  const total = first?.total ?? 0;
+  const period = monthSpan(first?.h1b_period?.from, first?.h1b_period?.to);
+  const more = data.hasNextPage && !data.isFetchingNextPage;
+  const sentinel = useOnVisible(() => void data.fetchNextPage(), !!more);
 
   return (
     <div className="mx-auto max-w-6xl space-y-5 pb-10">
@@ -108,10 +128,10 @@ export default function SponsorshipPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="File H-1Bs" value={filers} />
-        <StatTile label="Postings say sponsor" value={count('sponsors')} />
-        <StatTile label="Depends on role" value={count('mixed')} />
-        <StatTile label="Postings say no" value={count('does_not_sponsor')} />
+        <StatTile label="File H-1Bs" value={summary?.filers ?? '—'} />
+        <StatTile label="Postings say sponsor" value={summary?.sponsors ?? '—'} />
+        <StatTile label="Depends on role" value={summary?.mixed ?? '—'} />
+        <StatTile label="Postings say no" value={summary?.does_not_sponsor ?? '—'} />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -200,6 +220,17 @@ export default function SponsorshipPage() {
               })}
             </tbody>
           </table>
+          <div ref={sentinel} className="flex items-center justify-between gap-3 border-t border-border px-4 py-2.5 text-xs text-faint">
+            <span>
+              Showing {rows.length.toLocaleString()} of {total.toLocaleString()}
+            </span>
+            {data.hasNextPage && (
+              <button onClick={() => void data.fetchNextPage()} disabled={data.isFetchingNextPage}
+                className="rounded-md px-2 py-1 font-medium text-accent hover:bg-accent/10 disabled:opacity-60">
+                {data.isFetchingNextPage ? 'Loading…' : 'Show more'}
+              </button>
+            )}
+          </div>
         </div>
       )}
 

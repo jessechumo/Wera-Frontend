@@ -151,10 +151,14 @@ describe('SponsorshipPage', () => {
 
   it('shows filings and posting signals, and searches', async () => {
     stubApi({
-      'GET /api/sponsorship': (_init, url) => ({
-        companies: url.searchParams.get('q') ? [row('Jump', 'sponsors', 3, 0, 82)] : [row('Jump', 'sponsors', 3, 0, 82), row('Acme', 'does_not_sponsor', 0, 4)],
-        h1b_period: detail.period,
-      }),
+      'GET /api/sponsorship': (_init, url) => {
+        const all = [row('Jump', 'sponsors', 3, 0, 82), row('Acme', 'does_not_sponsor', 0, 4)];
+        const companies = url.searchParams.get('q') || url.searchParams.get('filers') ? all.slice(0, 1) : all;
+        return {
+          companies, total: companies.length, offset: 0, h1b_period: detail.period,
+          summary: { companies: 2, filers: 1, sponsors: 1, mixed: 0, does_not_sponsor: 1 },
+        };
+      },
       'GET /api/sponsorship/4/h1b': () => detail,
     });
     renderApp(<SponsorshipPage />);
@@ -162,6 +166,7 @@ describe('SponsorshipPage', () => {
     expect(screen.getByText('“We sponsor visas.”')).toBeInTheDocument();
     expect(screen.getByText('$163k')).toBeInTheDocument();
     expect(screen.getByText(/Jul 2025 – Jun 2026/)).toBeInTheDocument();
+    expect(screen.getByText('Showing 2 of 2')).toBeInTheDocument();
 
     await userEvent.click(screen.getByText('82'));
     expect(await screen.findByText('Software Engineer')).toBeInTheDocument();
@@ -176,7 +181,10 @@ describe('SponsorshipPage', () => {
 
   it('looks up any employer', async () => {
     stubApi({
-      'GET /api/sponsorship': () => ({ companies: [], h1b_period: detail.period }),
+      'GET /api/sponsorship': () => ({
+        companies: [], total: 0, offset: 0, h1b_period: detail.period,
+        summary: { companies: 0, filers: 0, sponsors: 0, mixed: 0, does_not_sponsor: 0 },
+      }),
       'GET /api/h1b/employers': () => ({ employers: [{ key: 'google', name: 'Google LLC', filings: 8229, median_wage: 193440, company_id: null }] }),
       'GET /api/h1b/employer': (_init, url) => (url.searchParams.get('key') === 'google' ? { ...detail, names: ['Google LLC'] } : new Response('{}', { status: 404 })),
     });
@@ -184,5 +192,32 @@ describe('SponsorshipPage', () => {
     await userEvent.type(await screen.findByLabelText('Employer name'), 'google');
     await userEvent.click(await screen.findByRole('button', { name: /Google LLC/ }));
     expect(await screen.findByText(/Filed as Google LLC/)).toBeInTheDocument();
+  });
+});
+
+describe('SponsorshipPage paging', () => {
+  it('loads the next page on demand', async () => {
+    const make = (i: number) => ({
+      company_id: 100 + i, company: `Co ${i}`, industry: 'trading', open_jobs: 1, analyzed: 0, yes: 0, no: 0, unknown: 0,
+      signal: 'unclear', latest_quote: null, last_seen: null, h1b_filings: 10, h1b_new_hires: 1, h1b_median_wage: 100000,
+    });
+    const offsets: string[] = [];
+    stubApi({
+      'GET /api/sponsorship': (_init, url) => {
+        const offset = Number(url.searchParams.get('offset'));
+        offsets.push(String(offset));
+        return {
+          companies: offset === 0 ? [make(1), make(2)] : [make(3)], total: 3, offset, h1b_period: { from: null, to: null },
+          summary: { companies: 3, filers: 3, sponsors: 0, mixed: 0, does_not_sponsor: 0 },
+        };
+      },
+    });
+    renderApp(<SponsorshipPage />);
+    expect(await screen.findByText('Showing 2 of 3')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Show more' }));
+    expect(await screen.findByText('Co 3')).toBeInTheDocument();
+    expect(screen.getByText('Showing 3 of 3')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Show more' })).toBeNull();
+    expect(offsets).toEqual(['0', '2']);
   });
 });
