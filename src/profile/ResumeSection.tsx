@@ -72,7 +72,19 @@ function CreateResume({ replace = false, onDone }: { replace?: boolean; onDone?:
   );
 }
 
-/** First open: build the resume from the one uploaded at signup. */
+function Building({ filename }: { filename: string }) {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-card border border-border bg-surface px-6 py-16 text-center">
+      <LoaderCircle className="size-6 animate-spin text-accent" />
+      <p className="text-sm font-semibold">Building your resume from {filename}</p>
+      <p className="max-w-md text-xs text-muted">
+        Every line is copied as written into the standard one-page layout, so you can edit it, fit it to a page and tailor it to jobs. This takes a few seconds.
+      </p>
+    </div>
+  );
+}
+
+/** First open, when nothing was built in the background: build the resume from the uploaded one now. */
 function AutoImport({ filename, onFallback }: { filename: string; onFallback: () => void }) {
   const imp = useImportResume();
   const navigate = useNavigate();
@@ -91,15 +103,7 @@ function AutoImport({ filename, onFallback }: { filename: string; onFallback: ()
       },
     });
   }, [imp, filename, navigate, onFallback]);
-  return (
-    <div className="flex flex-col items-center gap-3 rounded-card border border-border bg-surface px-6 py-16 text-center">
-      <LoaderCircle className="size-6 animate-spin text-accent" />
-      <p className="text-sm font-semibold">Building your resume from {filename}</p>
-      <p className="max-w-md text-xs text-muted">
-        Every line is copied as written into the standard one-page layout, so you can edit it, fit it to a page and tailor it to jobs. This takes a few seconds.
-      </p>
-    </div>
-  );
+  return <Building filename={filename} />;
 }
 
 /**
@@ -122,8 +126,13 @@ export function ResumeSection() {
   if (list.error) return <ErrorState message={errorText(list.error)} onRetry={() => void list.refetch()} />;
   const resumes = list.data?.resumes ?? [];
   const upload = profile.data?.resume_chars ? (profile.data.resume_file?.filename ?? 'your uploaded resume') : null;
+  // The upload is usually turned into a resume in the background before the tab is opened.
+  const background = list.data?.import;
 
-  if (resumes.length === 0 && upload && !manual) return <AutoImport filename={upload} onFallback={fallback} />;
+  if (resumes.length === 0 && upload && !manual) {
+    if (background?.status === 'running') return <Building filename={upload} />;
+    if (!background) return <AutoImport filename={upload} onFallback={fallback} />;
+  }
 
   return (
     <div className="space-y-5">
@@ -147,6 +156,9 @@ export function ResumeSection() {
       {resumes.length === 0 || reimport ? (
         <>
           {reimport && <p className="text-xs text-warn">Importing replaces your main resume. Tailored copies stay as they are.</p>}
+          {!reimport && background?.status === 'failed' && (
+            <p className="text-xs text-warn">Wera could not build your resume from {upload ?? 'your upload'}: {background.error}. Choose a way to start below.</p>
+          )}
           <CreateResume replace={reimport} onDone={reimport ? (d) => { setReimport(false); navigate(`/profile/resume/${d.id}`); } : undefined} />
         </>
       ) : doc.isLoading || !doc.data ? (

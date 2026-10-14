@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { api, ApiError } from './client';
 
 export type SectionKind = 'entries' | 'projects' | 'compact' | 'skills' | 'summary';
@@ -111,16 +111,42 @@ export interface ResumeSummary {
   updated_at: string;
 }
 
+/** The resume Wera builds in the background after an upload. */
+export interface ResumeImport {
+  status: 'running' | 'done' | 'failed';
+  error: string;
+  started_at: string;
+  finished_at: string | null;
+}
+
+export interface ResumeList {
+  resumes: ResumeSummary[];
+  import: ResumeImport | null;
+}
+
+const resumesQuery = { queryKey: ['resumes'], queryFn: () => api<ResumeList>('/api/resumes') };
+const resumeQuery = (id: number) => ({ queryKey: ['resume', id], queryFn: () => api<ResumeDoc>(`/api/resumes/${id}`) });
+
 export function useResumes() {
-  return useQuery({ queryKey: ['resumes'], queryFn: () => api<{ resumes: ResumeSummary[] }>('/api/resumes') });
+  return useQuery({
+    ...resumesQuery,
+    // While the upload is being turned into a resume, check back until it is ready.
+    refetchInterval: (q) => (q.state.data?.import?.status === 'running' ? 2_000 : false),
+  });
 }
 
 export function useResume(id: number | null) {
-  return useQuery({
-    queryKey: ['resume', id],
-    queryFn: () => api<ResumeDoc>(`/api/resumes/${id}`),
-    enabled: id != null,
-  });
+  return useQuery({ ...resumeQuery(id ?? 0), enabled: id != null });
+}
+
+/** Loads the resume list, the main resume and the templates ahead of a visit to the Resume tab. */
+export async function prefetchResumes(qc: QueryClient) {
+  const list = await qc.fetchQuery({ ...resumesQuery, staleTime: 60_000 });
+  const base = list.resumes.find((r) => r.job_id == null);
+  await Promise.all([
+    base && qc.prefetchQuery({ ...resumeQuery(base.id), staleTime: 60_000 }),
+    qc.prefetchQuery({ ...templatesQuery, staleTime: Infinity }),
+  ]);
 }
 
 export function useImportResume() {
@@ -166,12 +192,13 @@ export function useDeleteResume() {
   });
 }
 
+const templatesQuery = {
+  queryKey: ['resume-templates'],
+  queryFn: () => api<{ templates: ResumeTemplate[]; default_accent: string }>('/api/resumes/templates'),
+};
+
 export function useTemplates() {
-  return useQuery({
-    queryKey: ['resume-templates'],
-    queryFn: () => api<{ templates: ResumeTemplate[]; default_accent: string }>('/api/resumes/templates'),
-    staleTime: Infinity,
-  });
+  return useQuery({ ...templatesQuery, staleTime: Infinity });
 }
 
 /** Renders unsaved edits: SVG pages, how full the last page is, and the review. */
