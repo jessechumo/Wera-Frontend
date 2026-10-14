@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react';
 import clsx from 'clsx';
 import { Bell, Download, EyeOff, KeyRound, LoaderCircle, MailCheck, Palette, Puzzle, ShieldAlert, SlidersHorizontal } from 'lucide-react';
 import { useConnections, useDisconnect } from '../api/extension';
+import { useExtension } from '../lib/extension';
 import { relTime } from '../lib/format';
 import { sendVerification, useAuthConfig, useChangePassword, useDeleteAccount, useMe } from '../api/auth';
 import { api, ApiError } from '../api/client';
@@ -130,9 +131,15 @@ async function exportApplications() {
 function Connections() {
   const q = useConnections();
   const disconnect = useDisconnect();
+  const version = useExtension();
   const list = q.data?.connections ?? [];
   return (
     <div>
+      {version && (
+        <p className="mb-2 text-xs text-good">
+          Installed in this browser (v{version}). Opening a posting from Wera tells it which job you are applying to.
+        </p>
+      )}
       {list.length === 0 ? (
         <p className="text-xs text-faint">No browser connected. Install the Wera extension, open it on any job page and sign in.</p>
       ) : (

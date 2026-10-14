@@ -3,7 +3,7 @@ import '@fontsource-variable/geist-mono';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppShell } from './layout/AppShell';
 import { RequireAuth } from './auth/RequireAuth';
 import { RequireProfile } from './auth/RequireProfile';
@@ -22,6 +22,8 @@ import IndustriesPage from './pages/IndustriesPage';
 import IndustryPage from './pages/IndustryPage';
 import AuthPage from './auth/AuthPage';
 import { Toasts } from './lib/toast';
+import { announceChange } from './lib/extension';
+import { ExtensionBridge } from './components/ExtensionBridge';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import TodayPage from './pages/TodayPage';
 import JobsPage from './pages/JobsPage';
@@ -31,6 +33,8 @@ import ExcludedPage from './pages/ExcludedPage';
 import './index.css';
 
 const queryClient = new QueryClient({
+  // Every change here tells the Chrome extension (if installed) to refresh.
+  mutationCache: new MutationCache({ onSuccess: () => announceChange() }),
   defaultOptions: {
     queries: {
       staleTime: 60_000,
@@ -44,6 +48,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary fullPage>
       <QueryClientProvider client={queryClient}>
+        <ExtensionBridge />
         <BrowserRouter>
           <Routes>
             <Route path="login" element={<AuthPage mode="login" />} />

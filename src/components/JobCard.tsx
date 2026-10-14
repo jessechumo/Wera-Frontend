@@ -72,6 +72,7 @@ export function JobCard({
               <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100">
                 <a
                   href={job.url}
+                  data-wera-job={job.id}
                   target="_blank"
                   rel="noreferrer"
                   onClick={(e) => e.stopPropagation()}
