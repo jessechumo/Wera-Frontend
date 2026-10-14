@@ -3,7 +3,7 @@ import { FileText, LoaderCircle, Upload } from 'lucide-react';
 import clsx from 'clsx';
 import { useUploadResume } from '../api/profile';
 import { ApiError } from '../api/client';
-import { INPUT_CLS } from '../auth/AuthPage';
+import { INPUT_CLS } from '../lib/styles';
 
 /** Upload a resume PDF (drag and drop or pick), or paste its text. */
 export function ResumeUpload({

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LoaderCircle, Sparkles } from 'lucide-react';
 import { ApiError } from '../api/client';
 import { useApplicant, useSaveApplicant, useSuggestApplicant, type Applicant } from '../api/extension';
-import { INPUT_CLS } from '../auth/AuthPage';
+import { INPUT_CLS } from '../lib/styles';
 import { Skeleton } from '../components/States';
 import { toast } from '../lib/toast';
 

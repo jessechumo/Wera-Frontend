@@ -6,7 +6,8 @@ import { ApiError } from '../api/client';
 import { Logo } from '../components/Logo';
 import { ThemeToggle } from '../lib/theme';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
-import { Field, INPUT_CLS } from './AuthPage';
+import { Field } from '../components/Field';
+import { INPUT_CLS } from '../lib/styles';
 
 const message = (e: unknown) => (e instanceof ApiError ? e.message : 'Network error');
 

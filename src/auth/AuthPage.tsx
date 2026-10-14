@@ -6,27 +6,8 @@ import { ApiError } from '../api/client';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ThemeToggle } from '../lib/theme';
 import { Logo } from '../components/Logo';
-
-export const INPUT_CLS =
-  'w-full rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-text placeholder:text-faint transition-colors duration-150 hover:border-accent/40 focus:border-accent/60';
-
-export function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-medium text-muted">{label}</span>
-      {children}
-      {hint && <span className="text-[11px] text-faint">{hint}</span>}
-    </label>
-  );
-}
+import { INPUT_CLS } from '../lib/styles';
+import { Field } from '../components/Field';
 
 /** Login and signup share one card; `mode` picks the form. */
 export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {

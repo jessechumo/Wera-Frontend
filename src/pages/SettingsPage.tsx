@@ -8,7 +8,8 @@ import { sendVerification, useAuthConfig, useChangePassword, useDeleteAccount, u
 import { api, ApiError } from '../api/client';
 import { useHideCompany, useIndustryLabel, useSaveSettings, useSettings } from '../api/hooks';
 import type { JobList, Settings } from '../api/types';
-import { Field, INPUT_CLS } from '../auth/AuthPage';
+import { Field } from '../components/Field';
+import { INPUT_CLS } from '../lib/styles';
 import { ErrorState, Skeleton } from '../components/States';
 import { Switch } from '../components/Switch';
 import { ThemeChoice } from '../lib/theme';

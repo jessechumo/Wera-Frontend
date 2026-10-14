@@ -1,7 +1,8 @@
 import clsx from 'clsx';
 import { useProfileOptions } from '../api/profile';
 import type { Answers, Preferences, WorkAuthorization } from '../api/types';
-import { Field, INPUT_CLS } from '../auth/AuthPage';
+import { Field } from '../components/Field';
+import { INPUT_CLS } from '../lib/styles';
 import { Skeleton } from '../components/States';
 import { ChipSelect } from './ChipSelect';
 import { LocationPicker } from './LocationPicker';
