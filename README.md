@@ -41,13 +41,13 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
 - **Profile:** photo, uploaded resume (view, download, see the extracted text), preferences and profile text
 - **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/jessechumo/wera-extension)), password, CSV export, account deletion
 - **Application details:** what job applications ask beyond your profile (contact, links, work authorization, education, voluntary self-identification), filled into forms by the extension; can be pre-filled from your resume
-- **System (admins):** runs, company fetch status, every user's spend, tokens, cache hit rate, and cost
+- **Admins** use the separate [wera-admin](https://github.com/jessechumo/wera-admin) console: this dashboard has no admin pages
 - **Excluded:** every filtered job with the reason and evidence
 - **Polish:** a sun and moon toggle with a circular reveal between themes, a soft light palette, count-up stats, staggered entrances, all respecting reduced motion
 
 ## Stack
 
-Vite, React 18, TypeScript (strict), Tailwind CSS v4, React Router 7, TanStack Query, Recharts, Lucide icons, Geist fonts (self-hosted). Tests: Vitest, Testing Library, Playwright.
+Vite, React 18, TypeScript (strict), Tailwind CSS v4, React Router 7, TanStack Query, Lucide icons, Geist fonts (self-hosted). Tests: Vitest, Testing Library, Playwright.
 
 ## Setup
 

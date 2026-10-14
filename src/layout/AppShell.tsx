@@ -3,11 +3,11 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { prefetchRoute, useWarmup } from '../lib/warmup';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import clsx from 'clsx';
-import { LogOut, Play, RefreshCw, Search } from 'lucide-react';
+import { LogOut, Search } from 'lucide-react';
 import { useScrollRestoration } from './useScrollRestoration';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLogout, useMe } from '../api/auth';
-import { useNav } from './nav';
+import { NAV } from './nav';
 import { ThemeToggle } from '../lib/theme';
 import { Logo } from '../components/Logo';
 import { Avatar } from '../components/Avatar';
@@ -15,7 +15,6 @@ import { CommandPalette } from '../components/CommandPalette';
 import {
   useHealth,
   useLatestRun,
-  useTriggerRun,
 } from '../api/hooks';
 import { relTime } from '../lib/format';
 import { toast } from '../lib/toast';
@@ -82,26 +81,6 @@ function HealthDot({ pulse = false }: { pulse?: boolean }) {
   );
 }
 
-export function RunNowButton() {
-  const trigger = useTriggerRun();
-  const latest = useLatestRun();
-  const running = latest.data?.runs[0]?.status == null;
-  return (
-    <button
-      disabled={running || trigger.isPending}
-      onClick={() => trigger.mutate()}
-      className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-bg transition-colors duration-150 hover:bg-accent/85 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {running || trigger.isPending ? (
-        <RefreshCw className="size-3.5 animate-spin" />
-      ) : (
-        <Play className="size-3.5" />
-      )}
-      {running ? 'Running…' : 'Run now'}
-    </button>
-  );
-}
-
 function TopBarMeta() {
   const latest = useLatestRun();
   const run = latest.data?.runs[0];
@@ -122,9 +101,7 @@ export function AppShell() {
   useScrollRestoration();
   useWarmup();
   const qc = useQueryClient();
-  const nav = useNav();
-  const isAdmin = useMe().data?.is_admin ?? false;
-  const latest = useLatestRun();
+    const latest = useLatestRun();
   const location = useLocation();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const running = latest.data?.runs[0]?.status == null;
@@ -165,7 +142,7 @@ export function AppShell() {
           <Logo />
         </div>
         <nav className="flex-1 space-y-0.5 p-3">
-          {nav.map(({ to, label, icon: Icon }) => (
+          {NAV.map(({ to, label, icon: Icon }) => (
             <NavLink
               key={to}
               to={to}
@@ -224,7 +201,6 @@ export function AppShell() {
               <TopBarMeta />
               <HealthDot pulse={running} />
               <ThemeToggle className="lg:hidden" />
-              {isAdmin && <RunNowButton />}
             </div>
           </div>
         </header>
@@ -245,7 +221,7 @@ export function AppShell() {
         aria-label="Main"
         className="fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
       >
-        {nav
+        {NAV
           .filter((n) => n.mobile)
           .map(({ to, label, icon: Icon }) => (
             <NavLink

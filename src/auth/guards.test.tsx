@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest';
 import { UNAUTHORIZED_EVENT } from '../api/client';
 import { me, profile, stubApi } from '../test/fixtures';
 import { jsonResponse } from '../test/render';
-import { RequireAdmin } from './RequireAdmin';
 import { RequireAuth } from './RequireAuth';
 import { RequireProfile } from './RequireProfile';
 
@@ -20,9 +19,7 @@ function app(path = '/') {
           <Route element={<RequireAuth />}>
             <Route element={<RequireProfile />}>
               <Route path="/" element={<p>today page</p>} />
-              <Route element={<RequireAdmin />}>
-                <Route path="/system" element={<p>system page</p>} />
-              </Route>
+              <Route path="/jobs" element={<p>jobs page</p>} />
             </Route>
           </Route>
         </Routes>
@@ -34,7 +31,7 @@ function app(path = '/') {
 describe('route guards', () => {
   it('sends signed-out visitors to login (the front door shows the landing page)', async () => {
     stubApi({ 'GET /api/auth/me': () => jsonResponse(401, { error: 'sign in' }) });
-    app('/system');
+    app('/jobs');
     expect(await screen.findByText('login page')).toBeInTheDocument();
   });
 
@@ -44,16 +41,10 @@ describe('route guards', () => {
     expect(await screen.findByText('welcome page')).toBeInTheDocument();
   });
 
-  it('lets ready users in and keeps non-admins out of System', async () => {
-    stubApi({ 'GET /api/auth/me': () => ({ user: { ...me, is_admin: false }, avatar_version: null }) });
-    app('/system');
-    expect(await screen.findByText('today page')).toBeInTheDocument();
-  });
-
-  it('admins reach System', async () => {
+  it('lets ready users in', async () => {
     stubApi();
-    app('/system');
-    expect(await screen.findByText('system page')).toBeInTheDocument();
+    app('/jobs');
+    expect(await screen.findByText('jobs page')).toBeInTheDocument();
   });
 
   it('a 401 anywhere ends the session', async () => {

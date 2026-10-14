@@ -7,11 +7,10 @@ import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react
 import { AppShell } from './layout/AppShell';
 import {
   CommunityPage, ExcludedPage, IndustriesPage, IndustryPage, InterviewPage, NewPostPage, PostPage, ProfilePage,
-  SettingsPage, SponsorshipPage, SystemPage, TrackerPage, WelcomePage,
+  SettingsPage, SponsorshipPage, TrackerPage, WelcomePage,
 } from './pages/lazy';
 import { RequireAuth } from './auth/RequireAuth';
 import { RequireProfile } from './auth/RequireProfile';
-import { RequireAdmin } from './auth/RequireAdmin';
 import { ResumeRedirect } from './profile/ResumeRedirect';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './auth/EmailPages';
 import AuthPage from './auth/AuthPage';
@@ -64,9 +63,6 @@ createRoot(document.getElementById('root')!).render(
                     <Route path="community" element={<CommunityPage />} />
                     <Route path="community/new" element={<NewPostPage />} />
                     <Route path="community/:id" element={<PostPage />} />
-                    <Route element={<RequireAdmin />}>
-                      <Route path="system" element={<SystemPage />} />
-                    </Route>
                     <Route path="excluded" element={<ExcludedPage />} />
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="profile/resume/:id?" element={<ProfilePage tab="resume" />} />

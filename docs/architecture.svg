@@ -31,7 +31,7 @@
 <text x="68" y="300" font-size="11.5" fill="#57606A">Today · Jobs + job view · Industries</text>
 <text x="68" y="316" font-size="11.5" fill="#57606A">Tracker · Sponsorship · Interview prep</text>
 <text x="68" y="332" font-size="11.5" fill="#57606A">Community · Profile · Settings</text>
-<text x="68" y="348" font-size="11.5" fill="#57606A">Excluded · System (admin)</text>
+<text x="68" y="348" font-size="11.5" fill="#57606A">Excluded</text>
 <text x="68" y="364" font-size="11.5" fill="#57606A">Welcome (setup wizard)</text>
 <g filter="url(#shadow)"><rect x="419" y="242" width="345" height="156" rx="12" fill="#FFFFFF" stroke="#D8DEE4"/></g>
 <rect x="419" y="242" width="4" height="156" rx="2" fill="#2F6FEB"/>

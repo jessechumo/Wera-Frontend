@@ -7,11 +7,10 @@ import jobs from '../api/__fixtures__/jobs.json';
 import runs from '../api/__fixtures__/runs.json';
 import stats from '../api/__fixtures__/stats.json';
 import today from '../api/__fixtures__/today.json';
-import usage from '../api/__fixtures__/usage.json';
 import type { Profile, User } from '../api/types';
 import { mockApi } from './render';
 
-export const fixtures = { companies, excluded, job, jobs, runs, stats, today, usage };
+export const fixtures = { companies, excluded, job, jobs, runs, stats, today };
 
 export const me: User = {
   id: 1, email: 'ada@example.com', name: 'Ada Lovelace', is_admin: true, created_at: '2026-09-01T00:00:00Z',
@@ -81,7 +80,6 @@ export function stubApi(overrides: Record<string, Handler> = {}) {
     'GET /api/excluded': () => excluded,
     'GET /api/stats': () => stats,
     'GET /api/runs': () => runs,
-    'GET /api/usage': () => ({ ...usage, users: [] }),
     'GET /api/usage/me': () => ({ month_spend_usd: 0.42, monthly_budget_usd: 10, remaining_usd: 9.58, analyses: 120 }),
     'GET /api/companies': () => companies,
     'GET /api/settings': () => ({

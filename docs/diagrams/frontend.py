@@ -13,7 +13,7 @@ d.boundary(820, 340, 392, 238, "Backend", C["green"])
 d.card(52, 134, 712, 92, "route", "Routes and guards", ["React Router 7 · RequireAuth → RequireProfile → RequireAdmin · AppShell with sidebar,",
                                                         "phone tab bar and ⌘K command palette · pages load the user's data on entry"], C["blue"], )
 d.card(52, 242, 345, 156, "layers", "Pages", ["Today · Jobs + job view · Industries", "Tracker · Sponsorship · Interview prep", "Community · Profile · Settings",
-                                               "Excluded · System (admin)", "Welcome (setup wizard)"], C["blue"])
+                                               "Excluded", "Welcome (setup wizard)"], C["blue"])
 d.card(419, 242, 345, 156, "box", "Components", ["Job view: posting, fit, cover letter", "ScoreRing (estimate vs AI score)", "Prose: safe markdown, no HTML",
                                                   "Reactions (optimistic), FilterBar", "Switch, toasts, charts"], C["blue"])
 d.card(52, 414, 345, 140, "chart", "Server state", ["TanStack Query cache per endpoint", "polls Today while scores arrive", "optimistic updates, invalidation",
