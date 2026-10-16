@@ -1,4 +1,8 @@
 import { useState } from 'react';
+import {
+  DndContext, DragOverlay, KeyboardSensor, MouseSensor, TouchSensor, pointerWithin, rectIntersection, useDraggable,
+  useDroppable, useSensor, useSensors, type CollisionDetection, type DragEndEvent, type DragStartEvent,
+} from '@dnd-kit/core';
 import { useJobs, useUpdateApplication } from '../api/hooks';
 import type { AppStatus, Job } from '../api/types';
 import { JobDrawer } from '../components/JobDrawer';
@@ -84,6 +88,28 @@ function KanbanCard({
     </div>
   );
 }
+
+/** A card you can pick up and drop on another column, like a Jira board. */
+function DraggableCard(props: Parameters<typeof KanbanCard>[0]) {
+  const { setNodeRef, listeners, attributes, isDragging } = useDraggable({ id: props.job.id, data: { job: props.job } });
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      aria-roledescription="draggable job"
+      className={clsx('cursor-grab rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent', isDragging && 'opacity-30')}
+    >
+      <KanbanCard {...props} />
+    </div>
+  );
+}
+
+// The pointer's column when there is one; keyboard drags fall back to overlap.
+const collision: CollisionDetection = (args) => {
+  const hits = pointerWithin(args);
+  return hits.length > 0 ? hits : rectIntersection(args);
+};
 
 /** True once every column has loaded and none holds a job. */
 function useNothingTracked() {
@@ -196,9 +222,17 @@ function Column({
   onStatus: (id: number, status: AppStatus) => void;
 }) {
   const { data, isLoading } = useJobs({ status, limit: 100, sort: 'newest' });
+  const { setNodeRef, isOver } = useDroppable({ id: status });
   const jobs = data?.jobs ?? [];
   return (
-    <section className="flex min-w-0 flex-col rounded-card border border-border bg-surface/60 p-2.5">
+    <section
+      ref={setNodeRef}
+      aria-label={COLUMN_LABEL[status]}
+      className={clsx(
+        'flex min-w-0 flex-col rounded-card border p-2.5 transition-colors duration-150',
+        isOver ? 'border-accent/60 bg-accent/5' : 'border-border bg-surface/60',
+      )}
+    >
       <header className="mb-2 flex items-center justify-between px-1">
         <h3 className="text-xs font-semibold text-text">{COLUMN_LABEL[status]}</h3>
         <span className="font-mono text-xs text-faint">{jobs.length}</span>
@@ -213,7 +247,7 @@ function Column({
           <p className="px-1 py-4 text-center text-[11px] text-faint">Nothing here yet</p>
         ) : (
           jobs.map((job, i) => (
-            <KanbanCard key={job.id} job={job} index={i} onOpen={onOpen} onStatus={onStatus} />
+            <DraggableCard key={job.id} job={job} index={i} onOpen={onOpen} onStatus={onStatus} />
           ))
         )}
       </div>
@@ -226,6 +260,13 @@ export default function TrackerPage() {
   const update = useUpdateApplication();
   const [showNI, setShowNI] = useState(false);
   const [drawerId, setDrawerId] = useState<number | null>(null);
+  const [dragging, setDragging] = useState<Job | null>(null);
+  // A small move or a short press before a drag, so clicks, the status menu and scrolling keep working.
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 6 } }),
+    useSensor(KeyboardSensor),
+  );
 
   const onStatus = (id: number, status: AppStatus) =>
     update.mutate({ id, status, notes: '' });
@@ -233,13 +274,21 @@ export default function TrackerPage() {
   const columns = showNI ? [...COLUMNS, 'not_interested' as AppStatus] : COLUMNS;
   const empty = useNothingTracked();
 
+  const onDragStart = (e: DragStartEvent) => setDragging((e.active.data.current?.job as Job | undefined) ?? null);
+  const onDragEnd = (e: DragEndEvent) => {
+    setDragging(null);
+    const job = e.active.data.current?.job as Job | undefined;
+    const to = e.over?.id as AppStatus | undefined;
+    if (job && to && to !== job.application_status) onStatus(job.id, to);
+  };
+
   return (
     <div className="space-y-4">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-[28px] leading-tight font-semibold">Tracker</h1>
           <p className="mt-1 text-xs text-muted">
-            Move jobs through the pipeline with the status menu on each card.
+            Drag a card to another column to move it along, or use the status menu on the card.
           </p>
         </div>
         <label className="inline-flex cursor-pointer items-center gap-2 text-xs text-muted select-none">
@@ -255,17 +304,32 @@ export default function TrackerPage() {
       </header>
 
       {empty && <TrackerEmpty />}
-      <div
-        className={clsx(
-          empty && 'hidden',
-          'grid gap-3 sm:grid-cols-2 xl:grid-cols-5',
-          showNI && 'xl:grid-cols-6',
-        )}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={collision}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        onDragCancel={() => setDragging(null)}
       >
-        {columns.map((status) => (
-          <Column key={status} status={status} onOpen={(id) => setDrawerId(id)} onStatus={onStatus} />
-        ))}
-      </div>
+        <div
+          className={clsx(
+            empty && 'hidden',
+            'grid gap-3 sm:grid-cols-2 xl:grid-cols-5',
+            showNI && 'xl:grid-cols-6',
+          )}
+        >
+          {columns.map((status) => (
+            <Column key={status} status={status} onOpen={(id) => setDrawerId(id)} onStatus={onStatus} />
+          ))}
+        </div>
+        <DragOverlay dropAnimation={null}>
+          {dragging && (
+            <div className="rotate-2 cursor-grabbing rounded-xl shadow-2xl">
+              <KanbanCard job={dragging} onOpen={() => {}} onStatus={() => {}} />
+            </div>
+          )}
+        </DragOverlay>
+      </DndContext>
 
       {drawerId != null && <JobDrawer jobId={drawerId} onClose={() => setDrawerId(null)} />}
     </div>

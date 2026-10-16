@@ -24,6 +24,20 @@ test('a new user from sign-up to account deletion', async ({ page }) => {
   await page.goto('/tracker');
   await expect(page.getByText('Site Reliability Engineer').first()).toBeVisible();
 
+  // Drag the card from Saved to Applied, like a Jira board; it stays there after a reload.
+  const card = page.getByRole('region', { name: 'Saved' }).getByText('Site Reliability Engineer');
+  const from = (await card.boundingBox())!;
+  const to = (await page.getByRole('region', { name: 'Applied' }).boundingBox())!;
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + from.width / 2 + 20, from.y + from.height / 2, { steps: 5 });
+  await page.mouse.move(to.x + to.width / 2, to.y + 60, { steps: 15 });
+  await page.mouse.up();
+  await expect(page.getByRole('region', { name: 'Applied' }).getByText('Site Reliability Engineer')).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('region', { name: 'Applied' }).getByText('Site Reliability Engineer')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Saved' }).getByText('Site Reliability Engineer')).toHaveCount(0);
+
   // Settings persist across reloads.
   await page.goto('/settings');
   const saved = page.waitForResponse((r) => r.url().endsWith('/api/settings') && r.request().method() === 'PUT');
