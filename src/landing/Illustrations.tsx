@@ -167,7 +167,7 @@ export function ExtensionMock({ className }: { className?: string }) {
           ))}
         </div>
         <div className="border-l border-border bg-bg/60 p-3">
-          <div className="mb-2 text-[10px] font-semibold text-text">wera<span className="text-accent">.</span></div>
+          <div className="mb-2 text-[10px] font-semibold text-text">wera</div>
           <div className="rounded-lg bg-good/10 p-2 text-[10px] text-good"><Check className="mr-1 inline size-3" />Filled 11 fields</div>
           <div className="mt-2 space-y-1.5">
             {[90, 70, 80].map((w) => <div key={w} className="h-2 rounded bg-text/15" style={{ width: `${w}%` }} />)}
