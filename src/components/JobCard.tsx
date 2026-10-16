@@ -66,10 +66,10 @@ export function JobCard({
           {job.reason && (
             <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted">{job.reason}</p>
           )}
-          <div className="mt-2.5 flex min-h-6 items-end justify-between gap-2">
+          <div className="mt-2.5 flex min-h-6 flex-wrap items-end justify-between gap-2">
             <CategoryChips cats={job.matched_categories} />
             {quickActions && (
-              <div className="flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100">
+              <div className="ml-auto flex shrink-0 items-center gap-1 opacity-0 transition-opacity duration-150 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100">
                 <a
                   href={job.url}
                   data-wera-job={job.id}

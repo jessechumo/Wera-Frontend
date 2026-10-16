@@ -17,7 +17,7 @@ const JOBS = [
 export function ProductMock({ className }: { className?: string }) {
   return (
     <div className={clsx('relative', className)} aria-hidden>
-      <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-[radial-gradient(closest-side,var(--color-glow),transparent)] blur-2xl" />
+      <div className="absolute -inset-3 -z-10 rounded-[2rem] sm:-inset-6 bg-[radial-gradient(closest-side,var(--color-glow),transparent)] blur-2xl" />
       <div className="rounded-2xl border border-border bg-surface/90 p-3 shadow-[0_30px_80px_-30px_rgb(0_0_0/0.35)] backdrop-blur">
         <div className="mb-2 flex items-center justify-between px-1">
           <span className="text-xs font-semibold text-text">Today</span>
@@ -29,10 +29,10 @@ export function ProductMock({ className }: { className?: string }) {
               <ScoreRing score={j.score} />
               <div className="min-w-0 flex-1">
                 <div className="truncate text-[13px] font-semibold text-text">{j.title}</div>
-                <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted">
-                  <IndustryIcon id={j.ind} size="xs" bare /> {j.company}
+                <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[11px] whitespace-nowrap text-muted">
+                  <IndustryIcon id={j.ind} size="xs" bare /> <span className="truncate">{j.company}</span>
                   <span className="text-faint">·</span>
-                  <MapPin className="size-3 text-faint" /> {j.place}
+                  <MapPin className="size-3 shrink-0 text-faint" /> <span className="truncate">{j.place}</span>
                 </div>
               </div>
               {j.sponsor && <span className="hidden shrink-0 rounded-full bg-good/10 px-2 py-0.5 text-[10px] font-medium text-good sm:inline">Sponsors visas</span>}

@@ -61,6 +61,10 @@
 @layer base {
   html {
     color-scheme: dark;
+    overflow-x: clip;
+    /* Keep phones from enlarging text on rotation. */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   html[data-theme="light"] {
     color-scheme: light;
@@ -70,6 +74,8 @@
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* Never let a wide element slide the page sideways on phones; clip, unlike hidden, keeps sticky headers working. */
+    overflow-x: clip;
   }
   /* Subtle ember glow behind the top of every page. */
   body::before {
