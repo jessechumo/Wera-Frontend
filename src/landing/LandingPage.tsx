@@ -13,6 +13,7 @@ import { ThemeToggle } from '../lib/theme';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { ExtensionMock, H1BMock, ProductMock, ResumeMock, StepApply, StepRadar, StepUpload } from './Illustrations';
 import { RevealField } from './RevealField';
+import { SiteFooter } from './SiteFooter';
 
 interface Stats { companies: number; industries: number; open_jobs: number; h1b_filings: number; h1b_employers: number }
 
@@ -246,13 +247,7 @@ export default function LandingPage() {
         </section>
       </RevealField>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-xs text-faint sm:flex-row sm:px-6">
-          <Logo />
-          <span>Wera never applies for you. Every posting opens at its source.</span>
-          <span>H-1B data: US Department of Labor, public LCA disclosures.</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
