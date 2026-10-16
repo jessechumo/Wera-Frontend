@@ -7,11 +7,22 @@ updates:
     groups:
       production: { dependency-type: production }
       development: { dependency-type: development }
+    ignore:
+      # typescript-eslint supports TypeScript below 6.1; lift this once it supports 7.
+      - dependency-name: typescript
+        versions: [">=6.1.0"]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: weekly }
     commit-message: { prefix: "ci" }
+    # One PR for all action updates instead of one branch per action.
+    groups:
+      actions: { patterns: ["*"] }
   - package-ecosystem: docker
     directory: /
     schedule: { interval: weekly }
     commit-message: { prefix: "build(docker)" }
+    ignore:
+      # Odd Node releases never become LTS.
+      - dependency-name: node
+        versions: ["25.x", "27.x", "29.x"]

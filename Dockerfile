@@ -1,5 +1,5 @@
 # Build the dashboard, then hand the static bundle to nginx.
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci

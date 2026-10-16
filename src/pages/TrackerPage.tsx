@@ -98,9 +98,45 @@ function DraggableCard(props: Parameters<typeof KanbanCard>[0]) {
       {...listeners}
       {...attributes}
       aria-roledescription="draggable job"
-      className={clsx('cursor-grab rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent', isDragging && 'opacity-30')}
+      // No text selection or callout on a long press, which would cancel a touch drag.
+      className={clsx(
+        'cursor-grab rounded-xl outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-2 focus-visible:ring-accent',
+        isDragging && 'opacity-30',
+      )}
     >
       <KanbanCard {...props} />
+    </div>
+  );
+}
+
+/** One status in the drop bar. */
+function DropTarget({ status, current }: { status: AppStatus; current: AppStatus | null }) {
+  const { setNodeRef, isOver } = useDroppable({ id: `bar:${status}` });
+  return (
+    <div
+      ref={setNodeRef}
+      className={clsx(
+        'flex min-w-0 flex-1 items-center justify-center rounded-lg border px-1 py-3 text-center text-[11px] leading-tight font-medium transition-colors',
+        isOver ? 'border-accent bg-accent/15 text-accent' : 'border-border bg-surface text-muted',
+        status === current && 'opacity-40',
+      )}
+    >
+      {COLUMN_LABEL[status]}
+    </div>
+  );
+}
+
+/**
+ * While a card is dragged on a phone or tablet, every status sits at the bottom of the
+ * screen, so a column further down the page is one short move away.
+ */
+function DropBar({ columns, current }: { columns: AppStatus[]; current: AppStatus | null }) {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-bg/95 px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur xl:hidden">
+      <p className="mb-1.5 text-center text-[11px] text-faint">Drop on a status</p>
+      <div className="flex gap-1.5">
+        {columns.map((st) => <DropTarget key={st} status={st} current={current} />)}
+      </div>
     </div>
   );
 }
@@ -278,7 +314,8 @@ export default function TrackerPage() {
   const onDragEnd = (e: DragEndEvent) => {
     setDragging(null);
     const job = e.active.data.current?.job as Job | undefined;
-    const to = e.over?.id as AppStatus | undefined;
+    const over = e.over ? String(e.over.id) : '';
+    const to = (over.startsWith('bar:') ? over.slice(4) : over) as AppStatus | '';
     if (job && to && to !== job.application_status) onStatus(job.id, to);
   };
 
@@ -322,6 +359,7 @@ export default function TrackerPage() {
             <Column key={status} status={status} onOpen={(id) => setDrawerId(id)} onStatus={onStatus} />
           ))}
         </div>
+        {dragging && <DropBar columns={columns} current={dragging.application_status} />}
         <DragOverlay dropAnimation={null}>
           {dragging && (
             <div className="rotate-2 cursor-grabbing rounded-xl shadow-2xl">

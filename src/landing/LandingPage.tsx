@@ -68,7 +68,7 @@ export default function LandingPage() {
   const s = stats.data;
 
   return (
-    <div className="min-h-screen bg-bg text-text">
+    <div className="min-h-screen overflow-x-clip bg-bg text-text">
       {/* Nav */}
       <header className="fixed inset-x-0 top-0 z-30 border-b border-transparent bg-bg/70 backdrop-blur-md">
         <nav className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
@@ -119,7 +119,7 @@ export default function LandingPage() {
 
       {/* Product preview */}
       <section className="relative mx-auto -mt-10 max-w-5xl px-4 sm:px-6">
-        <div className="grid items-center gap-10 md:grid-cols-[1.1fr_1fr]">
+        <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-[1.1fr_1fr]">
           <ProductMock className="float-y" />
           <div>
             <h2 className="text-3xl font-semibold tracking-tight">Every morning, your best matches first.</h2>
@@ -184,7 +184,7 @@ export default function LandingPage() {
 
       {/* International students */}
       <section id="international" className="scroll-mt-16 border-y border-border bg-surface/50">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-24 sm:px-6 md:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-12 px-4 py-24 sm:px-6 md:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-accent-2/10 px-3 py-1 text-xs font-medium text-accent-2"><Globe2 className="size-3.5" /> International students</span>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Stop guessing who sponsors.</h2>
@@ -221,7 +221,7 @@ export default function LandingPage() {
 
       {/* Extension */}
       <section id="extension" className="mx-auto max-w-6xl scroll-mt-20 px-4 pb-28 sm:px-6">
-        <div className="grid items-center gap-12 md:grid-cols-[1fr_1.15fr]">
+        <div className="grid grid-cols-1 items-center gap-12 md:grid-cols-[1fr_1.15fr]">
           <div>
             <p className="text-xs font-semibold tracking-[0.2em] text-accent uppercase">Chrome extension</p>
             <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Fill the form. Keep the judgment.</h2>
