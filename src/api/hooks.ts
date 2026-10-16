@@ -167,10 +167,16 @@ export function useUpdateApplication() {
         ...qc.getQueriesData<JobList>({ queryKey: ['jobs'] }),
         ...qc.getQueriesData<JobList>({ queryKey: ['today'] }),
       ];
+      const moved = lists.flatMap(([, d]) => d?.jobs ?? []).find((j) => j.id === v.id);
       for (const [key, data] of lists) {
         if (!data) continue;
         prev.set(key, data);
-        qc.setQueryData(key, { ...data, jobs: data.jobs.map(patch) });
+        // Lists filtered by status (the tracker's columns) lose or gain the job right away.
+        const status = (key[1] as JobsParams | undefined)?.status;
+        let jobs = data.jobs.map(patch);
+        if (status && status !== v.status) jobs = jobs.filter((j) => j.id !== v.id);
+        else if (status && moved && !jobs.some((j) => j.id === v.id)) jobs = [patch(moved), ...jobs];
+        qc.setQueryData(key, { ...data, jobs });
       }
       const job = qc.getQueryData<JobDetail>(['job', v.id]);
       if (job) {
