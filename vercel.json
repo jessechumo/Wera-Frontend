@@ -11,11 +11,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://incident-configuration-server-recreation.trycloudflare.com/api/:path*"
+      "destination": "https://bailey-crossword-comm-casinos.trycloudflare.com/api/:path*"
     },
     {
       "source": "/healthz",
-      "destination": "https://incident-configuration-server-recreation.trycloudflare.com/healthz"
+      "destination": "https://bailey-crossword-comm-casinos.trycloudflare.com/healthz"
     },
     {
       "source": "/((?!assets/).*)",
