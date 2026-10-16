@@ -96,6 +96,27 @@ describe('other pages', () => {
     expect(await screen.findByRole('heading', { name: 'Tracker' })).toBeInTheDocument();
   });
 
+  it('Tracker cards can be dragged, and a moved card changes column at once', async () => {
+    const saved = { ...fixtures.jobs.jobs[0]!, application_status: 'saved' as const };
+    stubApi({
+      // Each column asks for its own status; only Saved holds a job.
+      'GET /api/jobs': (_init, url) => {
+        const jobs = url.searchParams.get('status') === 'saved' ? [saved] : [];
+        return { ...fixtures.jobs, total: jobs.length, jobs };
+      },
+      // The save never returns, so what the board shows is the optimistic move.
+      [`PUT /api/jobs/${saved.id}/application`]: () => new Promise<never>(() => {}),
+    });
+    renderApp(<TrackerPage />);
+    const savedCol = await screen.findByRole('region', { name: 'Saved' });
+    const card = await within(savedCol).findByText(saved.title);
+    expect(card.closest('[aria-roledescription="draggable job"]')).not.toBeNull();
+
+    await userEvent.selectOptions(within(savedCol).getByLabelText(`Status for ${saved.title}`), 'applied');
+    expect(await within(screen.getByRole('region', { name: 'Applied' })).findByText(saved.title)).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Saved' })).queryByText(saved.title)).toBeNull();
+  });
+
   it('Industries shows each industry with its matches', async () => {
     stubApi();
     renderApp(<IndustriesPage />);
