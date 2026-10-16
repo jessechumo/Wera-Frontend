@@ -1,9 +1,10 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { RequireAuth } from '../auth/RequireAuth';
 import { stubApi } from '../test/fixtures';
 import { renderApp } from '../test/render';
+import InfoPage from './InfoPage';
 
 describe('landing page', () => {
   it('greets signed-out visitors at the front door with live numbers', async () => {
@@ -21,6 +22,30 @@ describe('landing page', () => {
     expect(await screen.findByText('495.5k')).toBeInTheDocument();
     expect(screen.getAllByRole('link', { name: /Get started/ })[0]).toHaveAttribute('href', '/signup');
     expect(screen.getAllByRole('link', { name: /Log in/ })[0]).toHaveAttribute('href', '/login');
+  });
+
+  it('ends with a company footer linking to the company and legal pages', async () => {
+    stubApi({
+      'GET /api/auth/me': () => new Response('{}', { status: 401 }),
+      'GET /api/public/stats': () => ({ companies: 572, industries: 28, open_jobs: 43742, h1b_filings: 495460, h1b_employers: 57990 }),
+    });
+    renderApp(
+      <Routes>
+        <Route element={<RequireAuth />}><Route index element={<p>today</p>} /></Route>
+      </Routes>,
+      { path: '/' },
+    );
+    const company = await screen.findByRole('navigation', { name: 'Company' });
+    expect(within(company).getByRole('link', { name: 'Careers' })).toHaveAttribute('href', '/careers');
+    expect(screen.getByRole('link', { name: 'Privacy policy' })).toHaveAttribute('href', '/privacy');
+    expect(screen.getByText('Texas, United States')).toBeInTheDocument();
+    expect(screen.queryByText(/never applies for you/)).not.toBeInTheDocument();
+  });
+
+  it('shows a company page with the footer', () => {
+    renderApp(<Routes><Route path="careers" element={<InfoPage page="careers" />} /></Routes>, { path: '/careers' });
+    expect(screen.getByRole('heading', { level: 1, name: 'Careers' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: 'Legal' })).toBeInTheDocument();
   });
 
   it('sends signed-out visitors elsewhere to log in', async () => {

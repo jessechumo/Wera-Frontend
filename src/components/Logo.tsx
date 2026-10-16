@@ -32,7 +32,7 @@ export function LogoMark({ size = 22, className }: { size?: number; className?: 
   );
 }
 
-/** Mark plus the "wera." wordmark. */
+/** Mark plus the "wera" wordmark. */
 export function Logo({ size = 'md', className }: { size?: 'md' | 'lg'; className?: string }) {
   return (
     <span className={clsx('inline-flex items-center gap-2', className)}>
@@ -43,7 +43,7 @@ export function Logo({ size = 'md', className }: { size?: 'md' | 'lg'; className
           size === 'lg' ? 'text-2xl' : 'text-lg',
         )}
       >
-        wera<span className="text-accent">.</span>
+        wera
       </span>
     </span>
   );

@@ -14,6 +14,8 @@ import { RequireProfile } from './auth/RequireProfile';
 import { ResumeRedirect } from './profile/ResumeRedirect';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './auth/EmailPages';
 import AuthPage from './auth/AuthPage';
+import InfoPage from './landing/InfoPage';
+import { INFO_PAGES } from './landing/infoPages';
 import { Toasts } from './lib/toast';
 import { announceChange } from './lib/extension';
 import { ExtensionBridge } from './components/ExtensionBridge';
@@ -47,6 +49,7 @@ createRoot(document.getElementById('root')!).render(
               <Route path="verify-email" element={<VerifyEmailPage />} />
               <Route path="forgot-password" element={<ForgotPasswordPage />} />
               <Route path="reset-password" element={<ResetPasswordPage />} />
+              {Object.keys(INFO_PAGES).map((p) => <Route key={p} path={p} element={<InfoPage page={p} />} />)}
               <Route element={<RequireAuth />}>
                 <Route path="welcome" element={<WelcomePage />} />
                 <Route element={<RequireProfile />}>
