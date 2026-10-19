@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.1](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.2.0...wera-frontend-v0.2.1) (2026-10-19)
+
+
+### Refactoring
+
+* **drawer:** move the insights column into JobInsights ([99cf5e7](https://github.com/jessechumo/Wera-Frontend/commit/99cf5e749a3a590803b72f1aabd6a225f8b83c33))
+
+
+### Documentation
+
+* add a contributing guide and editorconfig ([9709653](https://github.com/jessechumo/Wera-Frontend/commit/9709653652409b01554b37d90af3788f0f992ec6))
+* **diagrams:** redraw the architecture diagrams in Excalidraw ([9f3326f](https://github.com/jessechumo/Wera-Frontend/commit/9f3326f9c959b3af9bc9e25ba9acbe7fe2aaf982))
+
 ## [0.2.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.1.0...wera-frontend-v0.2.0) (2026-10-16)
 
 
