@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.2](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.2.1...wera-frontend-v0.2.2) (2026-10-19)
+
+
+### Documentation
+
+* redraw architecture diagrams with logos and legends ([7bebab1](https://github.com/jessechumo/Wera-Frontend/commit/7bebab1e468b46b3d832d17ba7a119da57a61cfd))
+* redraw architecture diagrams with logos and legends ([fc19267](https://github.com/jessechumo/Wera-Frontend/commit/fc19267f1ce39c710df9e2ad32b0999c751d1901))
+
 ## [0.2.1](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.2.0...wera-frontend-v0.2.1) (2026-10-19)
 
 
