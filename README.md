@@ -18,7 +18,7 @@ Each user signs up, uploads a resume, and answers a few questions; the AI drafts
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
-  <img alt="Frontend architecture: routes and guards, pages and components, TanStack Query and the API client in the browser; nginx or Caddy in front of the Go API" src="docs/architecture.svg">
+  <img alt="Frontend architecture: in the browser, the router leads to lazy-loaded pages and Tailwind components; pages read through TanStack Query and the API client, which calls /api on nginx, which proxies to the Go API; a 401 sends the user back to sign-in; CI checks gate the Vite build that ships as an nginx image" src="docs/architecture.svg">
 </picture>
 
 A React single-page app. It calls only its own origin (`/api`), so it behaves the same behind the Vite dev proxy, nginx, or Vercel rewrites, and the session cookie never crosses sites. Server state lives in TanStack Query; route guards send signed-out users to login and users without a profile to setup.
