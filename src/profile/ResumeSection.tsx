@@ -21,7 +21,7 @@ function CreateResume({ replace = false, onDone }: { replace?: boolean; onDone?:
       onSuccess: (doc) => {
         if (doc.notes.length) toast.success(`Imported. ${doc.notes.length} line${doc.notes.length === 1 ? '' : 's'} to check.`);
         if (onDone) onDone(doc);
-        else navigate(`/profile/resume/${doc.id}`);
+        else void navigate(`/profile/resume/${doc.id}`);
       },
       onError: (e) => toast.error(errorMessage(e, 'Something went wrong')),
     });
@@ -91,7 +91,7 @@ function AutoImport({ filename, onFallback }: { filename: string; onFallback: ()
     imp.mutate({ source: 'profile' }, {
       onSuccess: (doc) => {
         toast.success(doc.notes.length ? `Built from ${filename}. ${doc.notes.length} line${doc.notes.length === 1 ? '' : 's'} to check.` : `Built from ${filename}.`);
-        navigate(`/profile/resume/${doc.id}`, { replace: true });
+        void navigate(`/profile/resume/${doc.id}`, { replace: true });
       },
       onError: (e) => {
         toast.error(`Could not read ${filename}: ${errorMessage(e, 'Something went wrong')}`);
@@ -136,7 +136,7 @@ export function ResumeSection() {
         <p className="text-sm text-muted">Edit your resume, keep it to one page, and tailor a copy for any job from its Resume tab.</p>
         {resumes.length > 0 && (
           <div className="flex items-center gap-2">
-            <select value={id ?? ''} onChange={(e) => navigate(`/profile/resume/${e.target.value}`)} aria-label="Resume"
+            <select value={id ?? ''} onChange={(e) => void navigate(`/profile/resume/${e.target.value}`)} aria-label="Resume"
               className="w-60 max-w-full truncate rounded-lg border border-border bg-surface px-3 py-1.5 text-sm">
               {resumes.map((r) => (
                 <option key={r.id} value={r.id}>{r.job_id == null ? 'My resume' : `Tailored: ${r.job_title} at ${r.job_company}`}</option>
@@ -155,7 +155,7 @@ export function ResumeSection() {
           {!reimport && background?.status === 'failed' && (
             <p className="text-xs text-warn">Wera could not build your resume from {upload ?? 'your upload'}: {background.error}. Choose a way to start below.</p>
           )}
-          <CreateResume replace={reimport} onDone={reimport ? (d) => { setReimport(false); navigate(`/profile/resume/${d.id}`); } : undefined} />
+          <CreateResume replace={reimport} onDone={reimport ? (d) => { setReimport(false); void navigate(`/profile/resume/${d.id}`); } : undefined} />
         </>
       ) : doc.isLoading || !doc.data ? (
         doc.error ? <ErrorState message={errorMessage(doc.error, 'Something went wrong')} /> : <Skeleton className="h-96 w-full" />

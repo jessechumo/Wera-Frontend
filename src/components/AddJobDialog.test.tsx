@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { stubApi } from '../test/fixtures';
-import { renderApp } from '../test/render';
+import { renderApp, jsonBody } from '../test/render';
 import { AddJobDialog } from './AddJobDialog';
 
 const posting = 'About the role: keep our robot fleet online. '.repeat(8);
@@ -17,7 +17,7 @@ describe('AddJobDialog', () => {
         work_mode: 'onsite', industry: 'robotics', description: 'About the role: keep our robot fleet online.',
       }),
       'POST /api/jobs': (init) => {
-        sent = JSON.parse(String(init?.body));
+        sent = jsonBody(init);
         return { id: 77, title: sent.title, company: sent.company };
       },
     });

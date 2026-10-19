@@ -13,7 +13,7 @@ describe('toasts', () => {
     expect(screen.getByText('Letter saved.')).toBeInTheDocument();
     expect(screen.getByText('Could not save.')).toBeInTheDocument();
     const close = screen.getAllByRole('button');
-    await userEvent.click(close[0]!);
+    await userEvent.click(close[0]);
     expect(screen.queryByText('Letter saved.')).toBeNull();
   });
 });

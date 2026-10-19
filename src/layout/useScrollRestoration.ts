@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { useLocation, useNavigationType } from 'react-router-dom';
+import { NavigationType, useLocation, useNavigationType } from 'react-router-dom';
 
 const positions = new Map<string, number>();
 
@@ -28,7 +28,7 @@ export function useScrollRestoration() {
     }
     lastPath.current = location.pathname;
     lastKey.current = location.key;
-    const saved = navType === 'POP' ? positions.get(location.key) : undefined;
+    const saved = navType === NavigationType.Pop ? positions.get(location.key) : undefined;
     if (saved == null) {
       window.scrollTo(0, 0);
       return;

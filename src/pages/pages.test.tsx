@@ -4,7 +4,7 @@ import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { fixtures, stubApi } from '../test/fixtures';
-import { renderApp } from '../test/render';
+import { renderApp, jsonBody } from '../test/render';
 import ExcludedPage from './ExcludedPage';
 import IndustriesPage from './IndustriesPage';
 import IndustryPage from './IndustryPage';
@@ -13,7 +13,7 @@ import ProfilePage from './ProfilePage';
 import TodayPage from './TodayPage';
 import TrackerPage from './TrackerPage';
 
-const firstToday = fixtures.today.jobs[0]!;
+const firstToday = fixtures.today.jobs[0];
 
 describe('TodayPage', () => {
   it('lists the review queue with the top pick first', async () => {
@@ -38,8 +38,8 @@ describe('JobsPage', () => {
   it('lists jobs and opens one in the job view', async () => {
     stubApi();
     renderApp(<JobsPage />, { path: '/jobs', route: '/jobs' });
-    const first = fixtures.jobs.jobs[0]!;
-    await userEvent.click((await screen.findAllByText(first.title))[0]!);
+    const first = fixtures.jobs.jobs[0];
+    await userEvent.click((await screen.findAllByText(first.title))[0]);
     const dialog = await screen.findByRole('dialog');
     expect(await within(dialog).findByRole('heading', { name: first.title })).toBeInTheDocument();
   });
@@ -59,7 +59,7 @@ describe('JobsPage', () => {
     let saved: unknown;
     stubApi({
       [`PUT /api/jobs/${fixtures.job.id}/application`]: (init) => {
-        saved = JSON.parse(String(init?.body));
+        saved = jsonBody(init);
         return { ...fixtures.job, application_status: 'applied' };
       },
     });
@@ -75,7 +75,7 @@ describe('JobsPage keyboard', () => {
   it('j and k move the selection; Enter opens the job', async () => {
     stubApi();
     renderApp(<JobsPage />, { path: '/jobs', route: '/jobs' });
-    const first = fixtures.jobs.jobs[0]!;
+    const first = fixtures.jobs.jobs[0];
     await screen.findAllByText(first.title);
     // Real keydown events on window, as the page listens there.
     fireEvent.keyDown(window, { key: 'j' });
@@ -83,7 +83,7 @@ describe('JobsPage keyboard', () => {
     fireEvent.keyDown(window, { key: 'k' });
     fireEvent.keyDown(window, { key: 'Enter' });
     // j, j, k lands on the second job.
-    const second = fixtures.jobs.jobs[1]!;
+    const second = fixtures.jobs.jobs[1];
     const dialog = await screen.findByRole('dialog');
     expect(await within(dialog).findByRole('heading', { name: second.title })).toBeInTheDocument();
   });
@@ -97,7 +97,7 @@ describe('other pages', () => {
   });
 
   it('Tracker cards can be dragged, and a moved card changes column at once', async () => {
-    const saved = { ...fixtures.jobs.jobs[0]!, application_status: 'saved' as const };
+    const saved = { ...fixtures.jobs.jobs[0], application_status: 'saved' as const };
     stubApi({
       // Each column asks for its own status; only Saved holds a job.
       'GET /api/jobs': (_init, url) => {
@@ -133,7 +133,7 @@ describe('other pages', () => {
   it('Excluded explains why jobs were filtered out', async () => {
     stubApi();
     renderApp(<ExcludedPage />);
-    const first = fixtures.excluded.jobs[0]!;
+    const first = fixtures.excluded.jobs[0];
     expect((await screen.findAllByText(first.title)).length).toBeGreaterThan(0);
   });
 

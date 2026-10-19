@@ -26,7 +26,7 @@ export default function NewPostPage() {
       {
         onSuccess: (p) => {
           toast.success('Published.');
-          navigate(`/community/${p.id}`);
+          void navigate(`/community/${p.id}`);
         },
       },
     );

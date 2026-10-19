@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { mockApi, renderApp } from '../test/render';
+import { mockApi, renderApp, jsonBody } from '../test/render';
 import SettingsPage from './SettingsPage';
 
 const settings = {
@@ -18,7 +18,7 @@ describe('SettingsPage', () => {
       'GET /api/settings': () => settings,
       'GET /api/industries': () => ({ industries: [{ id: 'saas', label: 'SaaS' }] }),
       'PUT /api/settings': (init) => {
-        saved.push(JSON.parse(String(init?.body)));
+        saved.push(jsonBody(init));
         return { ...settings, ...(saved.at(-1) as object) };
       },
       'DELETE /api/companies/9/hidden': () => undefined,

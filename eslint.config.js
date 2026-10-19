@@ -25,6 +25,13 @@ export default tseslint.config(
     },
   },
   {
+    // Type-aware rules for the app: un-awaited promises, promises passed
+    // where a void callback is expected, and values typed any.
+    files: ['src/**/*.{ts,tsx}'],
+    extends: [...tseslint.configs.recommendedTypeChecked],
+    languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
+  },
+  {
     files: ['e2e/**/*.ts', '*.config.ts'],
     languageOptions: { globals: globals.node },
   },

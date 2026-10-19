@@ -22,14 +22,14 @@ describe('useScrollRestoration', () => {
 
     Object.defineProperty(window, 'scrollY', { value: 1200, configurable: true });
     window.dispatchEvent(new Event('scroll'));
-    act(() => nav('/jobs'));
+    act(() => void nav('/jobs'));
     expect(scrollTo).toHaveBeenLastCalledWith(0, 0);
 
     scrollTo.mockClear();
-    act(() => nav('/jobs?q=sre', { replace: true }));
+    act(() => void nav('/jobs?q=sre', { replace: true }));
     expect(scrollTo).not.toHaveBeenCalled();
 
-    act(() => nav(-1));
+    act(() => void nav(-1));
     expect(scrollTo).toHaveBeenLastCalledWith(0, 1200);
   });
 });

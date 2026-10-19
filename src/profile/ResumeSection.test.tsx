@@ -5,7 +5,7 @@ import type { ResumeDoc } from '../api/resumes';
 import type { JobDetail } from '../api/types';
 import { JobResumePanel } from '../components/JobResumePanel';
 import { stubApi } from '../test/fixtures';
-import { renderApp } from '../test/render';
+import { renderApp, jsonBody } from '../test/render';
 import { ResumeSection } from './ResumeSection';
 
 const doc = (over: Partial<ResumeDoc> = {}): ResumeDoc => ({
@@ -28,7 +28,7 @@ describe('ResumeSection', () => {
       'GET /api/profile': () => ({ resume_chars: 0 }),
       'GET /api/resumes': () => ({ resumes }),
       'POST /api/resumes/import': (init) => {
-        imported = JSON.parse(String(init?.body));
+        imported = jsonBody(init);
         resumes = [{ id: 3, title: 'My resume', job_id: null }];
         return doc();
       },
@@ -50,7 +50,7 @@ describe('ResumeSection', () => {
       'GET /api/profile': () => ({ resume_chars: 900, resume_file: { filename: 'Ada_CV.pdf', uploaded_at: '2026-10-01T00:00:00Z' } }),
       'GET /api/resumes': () => ({ resumes }),
       'POST /api/resumes/import': (init) => {
-        body = JSON.parse(String(init?.body));
+        body = jsonBody(init);
         resumes = [{ id: 3, title: 'My resume', job_id: null }];
         return doc();
       },
@@ -94,14 +94,14 @@ describe('ResumeSection', () => {
 
   it('edits with autosave, shows hidden items, previews and fits', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
-    const saves: { data: { name: string } }[] = [];
+    const saves: { data: ResumeDoc['data'] }[] = [];
     let fitted = false;
     stubApi({
       'GET /api/profile': () => ({ resume_chars: 900 }),
       'GET /api/resumes': () => ({ resumes: [{ id: 3, title: 'My resume', job_id: null }] }),
       'GET /api/resumes/3': () => doc(),
       'PUT /api/resumes/3': (init) => {
-        const body = JSON.parse(String(init?.body));
+        const body = jsonBody<{ data: ResumeDoc['data'] }>(init);
         saves.push(body);
         return doc({ data: body.data, updated_at: `2026-10-10T00:00:0${saves.length}Z` });
       },
@@ -118,7 +118,7 @@ describe('ResumeSection', () => {
     await user.clear(name);
     await user.type(name, 'Ada King');
     expect(screen.getByText(/Unsaved/)).toBeInTheDocument();
-    await act(async () => {
+    act(() => {
       vi.advanceTimersByTime(1500);
     });
     await waitFor(() => expect(saves.at(-1)?.data.name).toBe('Ada King'));

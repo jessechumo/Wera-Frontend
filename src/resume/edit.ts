@@ -14,7 +14,7 @@ export function move<T>(list: T[], from: number, to: number): T[] {
   if (to < 0 || to >= list.length || from === to) return list;
   const next = [...list];
   const [it] = next.splice(from, 1);
-  next.splice(to, 0, it!);
+  next.splice(to, 0, it);
   return next;
 }
 

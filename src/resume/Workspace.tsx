@@ -230,7 +230,7 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
               </button>
             ))}
             {doc.job_id != null && (
-              <button type="button" onClick={() => window.confirm('Delete this tailored resume?') && del.mutate(doc.id, { onSuccess: () => navigate('/profile/resume') })}
+              <button type="button" onClick={() => window.confirm('Delete this tailored resume?') && del.mutate(doc.id, { onSuccess: () => void navigate('/profile/resume') })}
                 className="ml-auto inline-flex items-center gap-1 px-2 text-xs text-muted hover:text-bad">
                 <Trash2 className="size-3.5" /> Delete copy
               </button>

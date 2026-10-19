@@ -108,7 +108,7 @@ function PasswordForm() {
 async function exportApplications() {
   const data = await api<JobList>('/api/jobs?limit=200&include_excluded=true');
   const rows = data.jobs.filter((j) => j.application_status);
-  const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const esc = (v: string | number | null | undefined) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const csv = [
     ['company', 'title', 'status', 'fit_score', 'location', 'url', 'notes'].join(','),
     ...rows.map((j) =>

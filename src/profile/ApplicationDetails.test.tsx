@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { applicant, stubApi } from '../test/fixtures';
-import { renderApp } from '../test/render';
+import { renderApp, jsonBody } from '../test/render';
 import { Toasts } from '../lib/toast';
 import { ApplicationDetails } from './ApplicationDetails';
 
@@ -12,7 +12,7 @@ describe('ApplicationDetails', () => {
     stubApi({
       'POST /api/applicant/suggest': () => ({ suggestions: { phone: '(512) 555-0142', school: 'UT Austin', current_title: 'Should not overwrite' } }),
       'PUT /api/applicant': (init) => {
-        saved = JSON.parse(String(init?.body));
+        saved = jsonBody(init);
         return { applicant: saved, saved: true };
       },
     });

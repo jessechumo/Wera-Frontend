@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { JobDetail } from '../api/types';
-import { jsonResponse, mockApi, renderApp } from '../test/render';
+import { jsonResponse, mockApi, renderApp, jsonBody } from '../test/render';
 import { CoverLetterPanel } from './CoverLetterPanel';
 
 const job = { id: 5, company: 'Acme', title: 'Site Reliability Engineer' } as JobDetail;
@@ -15,7 +15,7 @@ describe('CoverLetterPanel', () => {
       'GET /api/auth/me': () => ({ user: { id: 1, email: 'a@example.com', name: 'Ada', is_admin: false, created_at: '' }, avatar_version: null }),
       'GET /api/jobs/5/cover-letter': () => stored ?? jsonResponse(404, { error: 'no letter' }),
       'POST /api/jobs/5/cover-letter': () => (stored = letter('Dear Hiring Team,\n\nI keep systems up.')),
-      'PUT /api/jobs/5/cover-letter': (init) => (stored = letter(JSON.parse(String(init?.body)).body, true)),
+      'PUT /api/jobs/5/cover-letter': (init) => (stored = letter(jsonBody<{ body: string }>(init).body, true)),
     });
     renderApp(<CoverLetterPanel job={job} />);
 
