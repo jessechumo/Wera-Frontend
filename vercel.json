@@ -11,11 +11,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://bailey-crossword-comm-casinos.trycloudflare.com/api/:path*"
+      "destination": "https://condos-inspection-paint-sponsor.trycloudflare.com/api/:path*"
     },
     {
       "source": "/healthz",
-      "destination": "https://bailey-crossword-comm-casinos.trycloudflare.com/healthz"
+      "destination": "https://condos-inspection-paint-sponsor.trycloudflare.com/healthz"
     },
     {
       "source": "/((?!assets/).*)",
