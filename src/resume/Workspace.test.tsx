@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import type { Layout, ResumeData, ResumeDoc } from '../api/resumes';
 import { stubApi } from '../test/fixtures';
-import { renderApp } from '../test/render';
+import { renderApp, jsonBody } from '../test/render';
 import { Workspace } from './Workspace';
 
 const data = (): ResumeData => ({
@@ -31,7 +31,7 @@ function server() {
   stubApi({
     'GET /api/resumes/templates': () => templates,
     'POST /api/resumes/preview': (init) => {
-      previews.push(JSON.parse(String(init?.body)).data);
+      previews.push(jsonBody<{ data: ResumeData }>(init).data);
       return {
         pages: [svg], measure: { pages: 1, fill: 0.8 },
         review: { score: 88, checks: [{ id: 'weak-opener', severity: 'improve', target: 'b1', message: 'Starts with "Responsible for".' }] },
@@ -39,13 +39,13 @@ function server() {
     },
     'POST /api/resumes/thumbnails': () => ({ thumbnails: { ivy: svg, parse: svg, signal: svg } }),
     'PUT /api/resumes/3': (init) => {
-      const body = JSON.parse(String(init?.body));
+      const body = jsonBody<{ data: ResumeData; layout: Layout }>(init);
       saves.push(body);
       return doc({ data: body.data, layout: body.layout, updated_at: `2026-10-11T00:00:0${saves.length}Z` });
     },
     'POST /api/resumes/tex': () => ({ tex: 'PRE\\begin{document}BODY', preamble: '\\documentclass{article}\n% Ivy\n', body: '\\resumeHeader{Ada Lovelace}{}{}' }),
     'POST /api/resumes/parse-tex': (init) => {
-      const tex = JSON.parse(String(init?.body)).tex as string;
+      const { tex } = jsonBody<{ tex: string }>(init);
       return { data: { ...data(), name: tex.includes('Ada King') ? 'Ada King' : 'Ada Lovelace' }, warnings: [] };
     },
     'POST /api/resumes/suggest-bullet': () => ({ suggestions: ['Owned the deploy pipeline, cutting release time by [X]%', 'Ran deploys for 12 services'] }),

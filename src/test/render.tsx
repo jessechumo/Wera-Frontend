@@ -23,7 +23,8 @@ export function renderApp(ui: ReactElement, { path = '/', route = '*' }: { path?
   };
 }
 
-type Handler = (init: RequestInit | undefined, url: URL) => unknown | Response;
+/** A stubbed endpoint: returns a body (sent as JSON) or a Response. */
+type Handler = (init: RequestInit | undefined, url: URL) => unknown;
 
 /**
  * Stubs fetch with a table of "METHOD /path" handlers. A handler returns a
@@ -33,7 +34,7 @@ type Handler = (init: RequestInit | undefined, url: URL) => unknown | Response;
  */
 export function mockApi(routes: Record<string, Handler>) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-    const url = new URL(String(input), 'http://localhost');
+    const url = new URL(input instanceof Request ? input.url : input.toString(), 'http://localhost');
     const key = `${(init?.method ?? 'GET').toUpperCase()} ${url.pathname}`;
     const handler = routes[key];
     if (!handler) return new Response(JSON.stringify({ error: `no stub for ${key}` }), { status: 501 });
@@ -46,6 +47,12 @@ export function mockApi(routes: Record<string, Handler>) {
   });
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
+}
+
+/** The JSON body a stubbed request sent. */
+export function jsonBody<T = Record<string, unknown>>(init: RequestInit | undefined): T {
+  if (typeof init?.body !== 'string') throw new Error('the request has no JSON body');
+  return JSON.parse(init.body) as T;
 }
 
 export function jsonResponse(status: number, body: unknown) {

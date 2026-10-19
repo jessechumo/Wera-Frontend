@@ -23,9 +23,9 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Layout APIs jsdom does not implement.
-Element.prototype.scrollTo = vi.fn() as unknown as typeof Element.prototype.scrollTo;
+Element.prototype.scrollTo = vi.fn();
 Element.prototype.scrollIntoView = vi.fn();
-window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;
+window.scrollTo = vi.fn();
 class NoopResizeObserver {
   observe() {}
   unobserve() {}

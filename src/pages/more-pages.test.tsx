@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import AuthPage from '../auth/AuthPage';
 import { AppShell } from '../layout/AppShell';
 import { me, stubApi } from '../test/fixtures';
-import { jsonResponse, renderApp } from '../test/render';
+import { jsonResponse, renderApp, jsonBody } from '../test/render';
 import CommunityPage from './CommunityPage';
 import PostPage from './PostPage';
 import SponsorshipPage from './SponsorshipPage';
@@ -38,7 +38,7 @@ describe('AuthPage', () => {
     stubApi({
       'GET /api/auth/me': signedOut,
       'POST /api/auth/signup': (init) => {
-        body = JSON.parse(String(init?.body));
+        body = jsonBody(init);
         return { user: me };
       },
     });
@@ -118,7 +118,7 @@ describe('Community', () => {
     stubApi({
       'GET /api/posts/11': () => post,
       'POST /api/posts/11/comments': (init) => {
-        post = { ...post, comments: [{ id: 1, body: JSON.parse(String(init?.body)).body, author, created_at: '2026-10-10T00:00:00Z', is_mine: true }] };
+        post = { ...post, comments: [{ id: 1, body: jsonBody(init).body, author, created_at: '2026-10-10T00:00:00Z', is_mine: true }] };
         return post;
       },
     });

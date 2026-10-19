@@ -75,7 +75,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       label: n.label,
       group: 'Go to',
       icon: n.icon,
-      run: () => navigate(n.to),
+      run: () => void navigate(n.to),
     }));
     const actions: PaletteItem[] = [
       {
@@ -84,7 +84,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         hint: 'filter',
         group: 'Actions',
         icon: Zap,
-        run: () => navigate('/jobs?min_score=80'),
+        run: () => void navigate('/jobs?min_score=80'),
       },
       {
         id: 'sponsor',
@@ -92,7 +92,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         hint: 'filter',
         group: 'Actions',
         icon: BadgeCheck,
-        run: () => navigate('/jobs?sponsorship=yes'),
+        run: () => void navigate('/jobs?sponsorship=yes'),
       },
       {
         id: 'remote',
@@ -100,7 +100,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         hint: 'filter',
         group: 'Actions',
         icon: Globe,
-        run: () => navigate('/jobs?work_mode=remote'),
+        run: () => void navigate('/jobs?work_mode=remote'),
       },
       {
         id: 'applied',
@@ -108,7 +108,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
         hint: 'filter',
         group: 'Actions',
         icon: ListChecks,
-        run: () => navigate('/jobs?status=applied'),
+        run: () => void navigate('/jobs?status=applied'),
       },
     ];
     const jobItems: PaletteItem[] = (jobs.data?.jobs ?? []).map((j) => ({
@@ -117,7 +117,7 @@ export function CommandPalette({ onClose }: { onClose: () => void }) {
       hint: `${j.company}${j.fit_score != null ? ` · ${j.fit_score}` : ''}`,
       group: 'Jobs',
       icon: Briefcase,
-      run: () => navigate(`/jobs?job=${j.id}`),
+      run: () => void navigate(`/jobs?job=${j.id}`),
     }));
     if (!q) return [...nav, ...actions, ...jobItems.slice(0, 5)];
     return [...nav, ...actions, ...jobItems]

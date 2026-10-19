@@ -93,7 +93,7 @@ export default function JobsPage() {
 
   const closeDrawer = useCallback(() => {
     if (routeId) {
-      navigate('/jobs', { replace: true });
+      void navigate('/jobs', { replace: true });
     } else {
       setSearchParams(
         (sp) => {

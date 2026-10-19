@@ -154,6 +154,6 @@ export function splitLocations(s: string | undefined): string[] {
 
 /** Maps a suggested "City, ST" to the matching metro in PLACES when there is one. */
 export function toPlace(city: string): string {
-  const first = city.split(',')[0]!.trim();
+  const first = city.split(',')[0].trim();
   return searchPlaces(first, [], 1)[0]?.name ?? city;
 }

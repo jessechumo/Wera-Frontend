@@ -28,7 +28,7 @@ export default function AuthPage({ mode }: { mode: 'login' | 'signup' }) {
     auth.mutate(
       { email, password, name: mode === 'signup' ? name : undefined },
       // New accounts go straight to profile setup.
-      { onSuccess: () => navigate(mode === 'signup' ? '/welcome' : from, { replace: true }) },
+      { onSuccess: () => void navigate(mode === 'signup' ? '/welcome' : from, { replace: true }) },
     );
   };
   const error =

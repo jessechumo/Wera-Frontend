@@ -128,7 +128,7 @@ const REASONS: Record<string, string> = {
 /** Human-readable exclude reason label. */
 export function prettyReason(reason: string): string {
   if (reason.startsWith('llm:years>')) return `Needs more than ${reason.slice('llm:years>'.length)} years`;
-  if (REASONS[reason]) return REASONS[reason]!;
+  if (REASONS[reason]) return REASONS[reason];
   // Any other seniority word the title filter matched, e.g. title:engineering_manager.
   if (reason.startsWith('title:')) return `${capitalize(reason.slice(6).replace(/_/g, ' '))} title`;
   return reason;
@@ -147,7 +147,7 @@ export function shortLocation(job: { location_summary: string | null; location_r
     .map((p) => p.replace(/\s*\([^)]*\)?\s*$/, '').trim())
     .filter(Boolean);
   if (parts.length === 0) return '—';
-  return parts.length > 1 ? `${parts[0]} +${parts.length - 1}` : parts[0]!;
+  return parts.length > 1 ? `${parts[0]} +${parts.length - 1}` : parts[0];
 }
 
 /** "entry" -> "Entry". */

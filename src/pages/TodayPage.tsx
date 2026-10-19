@@ -138,7 +138,7 @@ export default function TodayPage() {
   // New matches per day in the user's own time zone, most recent last.
   // The tile, the bars and the comparison all use this one series.
   const perDay = stats.data?.new_per_day ?? [];
-  const todayCount = perDay.length ? perDay[perDay.length - 1]!.count : newToday;
+  const todayCount = perDay.length ? perDay[perDay.length - 1].count : newToday;
   const before = perDay.slice(0, -1);
   const delta =
     before.length >= 2
@@ -146,14 +146,12 @@ export default function TodayPage() {
           // The median day, so a one-off spike (like a big import) does not skew it.
           const sorted = before.map((d) => d.count).sort((x, y) => x - y);
           const mid = sorted.length / 2;
-          const usual = sorted.length % 2 ? sorted[Math.floor(mid)]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
+          const usual = sorted.length % 2 ? sorted[Math.floor(mid)] : (sorted[mid - 1] + sorted[mid]) / 2;
           const diff = Math.round(todayCount - usual);
           const sign = diff > 0 ? '+' : diff < 0 ? '−' : '±';
-          return {
-            text: `${sign}${Math.abs(diff).toLocaleString()} vs usual`,
-            // Fewer new jobs is not bad news: only more is highlighted.
-            tone: (diff > 0 ? 'good' : 'neutral') as 'good' | 'neutral',
-          };
+          // Fewer new jobs is not bad news: only more is highlighted.
+          const tone: 'good' | 'neutral' = diff > 0 ? 'good' : 'neutral';
+          return { text: `${sign}${Math.abs(diff).toLocaleString()} vs usual`, tone };
         })()
       : undefined;
 
@@ -219,7 +217,7 @@ export default function TodayPage() {
         />
       ) : (
         <>
-          <TopPick job={jobs[0]!} onOpen={(id) => setDrawerId(id)} onQuickStatus={quickStatus} />
+          <TopPick job={jobs[0]} onOpen={(id) => setDrawerId(id)} onQuickStatus={quickStatus} />
           {jobs.length > 1 && (
             <div className="grid gap-3 xl:grid-cols-2">
               {jobs.slice(1).map((job, i) => (

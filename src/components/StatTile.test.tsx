@@ -12,8 +12,8 @@ describe('DayBars', () => {
     expect([...bars].map((b) => b.querySelector('title')?.textContent)).toEqual([
       'Oct 8: 47 new matches', 'Oct 9: 0 new matches', 'Oct 10: 30 new matches',
     ]);
-    expect(bars[1]!.getAttribute('height')).toBe('2');
-    expect(bars[2]!.getAttribute('opacity')).toBe('1'); // today stands out
+    expect(bars[1].getAttribute('height')).toBe('2');
+    expect(bars[2].getAttribute('opacity')).toBe('1'); // today stands out
     expect(screen.getByRole('img')).toHaveAttribute('aria-label', expect.stringContaining('Oct 10: 30'));
   });
 

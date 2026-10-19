@@ -2,7 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { stubApi } from '../test/fixtures';
-import { renderApp } from '../test/render';
+import { renderApp, jsonBody } from '../test/render';
 import AuthPage from './AuthPage';
 import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from './EmailPages';
 
@@ -23,7 +23,7 @@ describe('account email pages', () => {
 
   it('asks for a reset link without revealing accounts', async () => {
     let sent = '';
-    stubApi({ 'POST /api/auth/password/forgot': (init) => ((sent = JSON.parse(String(init?.body)).email), { message: 'If an account uses that address, a reset link is on its way.' }) });
+    stubApi({ 'POST /api/auth/password/forgot': (init) => ((sent = jsonBody<{ email: string }>(init).email), { message: 'If an account uses that address, a reset link is on its way.' }) });
     renderApp(<ForgotPasswordPage />, { path: '/forgot-password' });
     await userEvent.type(screen.getByLabelText('Email'), 'ada@example.com');
     await userEvent.click(screen.getByRole('button', { name: /Send the link/ }));
@@ -33,7 +33,7 @@ describe('account email pages', () => {
 
   it('sets a new password', async () => {
     let body: Record<string, string> = {};
-    stubApi({ 'POST /api/auth/password/reset': (init) => ((body = JSON.parse(String(init?.body))), { reset: true }) });
+    stubApi({ 'POST /api/auth/password/reset': (init) => ((body = jsonBody(init)), { reset: true }) });
     renderApp(<ResetPasswordPage />, { path: '/reset-password?token=t1' });
     await userEvent.type(screen.getByLabelText(/New password/), 'brand new password');
     await userEvent.type(screen.getByLabelText('Again'), 'brand new passwrd');

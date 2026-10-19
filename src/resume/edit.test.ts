@@ -15,8 +15,8 @@ describe('resume edits', () => {
   it('builds new sections of each kind', () => {
     expect(newSection('skills', 'Skills').skills).toHaveLength(1);
     expect(newSection('summary', 'Summary').text).toBe('');
-    expect(newSection('entries', 'Experience').entries![0]!.bullets).toHaveLength(1);
-    expect(newSection('compact', 'More').entries![0]!.bullets).toBeUndefined();
+    expect(newSection('entries', 'Experience').entries![0].bullets).toHaveLength(1);
+    expect(newSection('compact', 'More').entries![0].bullets).toBeUndefined();
   });
 
   it('counts hidden items and shows them all again', () => {

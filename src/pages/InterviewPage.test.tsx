@@ -42,6 +42,6 @@ describe('InterviewPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /Finish/ }));
 
     expect(await screen.findByText('1/2')).toBeInTheDocument();
-    expect(fetchMock.mock.calls.filter(([u]) => String(u).includes('/answer'))).toHaveLength(2);
+    expect(fetchMock.mock.calls.filter(([u]) => (u as string | URL).toString().includes('/answer'))).toHaveLength(2);
   });
 });

@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 import { api, ApiError, UNAUTHORIZED_EVENT } from './client';
-import { jsonResponse, mockApi } from '../test/render';
+import { jsonResponse, mockApi, jsonBody } from '../test/render';
 
 describe('api', () => {
   it('sends JSON and parses the reply', async () => {
-    const fetchMock = mockApi({ 'POST /api/things': (init) => ({ echo: JSON.parse(String(init?.body)) }) });
+    const fetchMock = mockApi({ 'POST /api/things': (init) => ({ echo: jsonBody(init) }) });
     await expect(api('/api/things', { method: 'POST', body: JSON.stringify({ a: 1 }) })).resolves.toEqual({ echo: { a: 1 } });
-    const init = fetchMock.mock.calls[0]![1]!;
+    const init = fetchMock.mock.calls[0][1]!;
     expect(init.credentials).toBe('same-origin');
     expect(init.headers).toMatchObject({ 'Content-Type': 'application/json' });
   });
@@ -18,7 +18,7 @@ describe('api', () => {
 
   it('turns error bodies into ApiError with the server message', async () => {
     mockApi({ 'GET /api/bad': () => jsonResponse(422, { error: 'Titles need 8 to 140 characters.' }) });
-    const err = await api('/api/bad').catch((e) => e);
+    const err = await api('/api/bad').catch((e: unknown) => e);
     expect(err).toBeInstanceOf(ApiError);
     expect(err).toMatchObject({ status: 422, message: 'Titles need 8 to 140 characters.' });
   });
@@ -39,6 +39,6 @@ describe('api', () => {
   it('does not set a JSON content type for FormData', async () => {
     const fetchMock = mockApi({ 'POST /api/upload': () => ({ ok: true }) });
     await api('/api/upload', { method: 'POST', body: new FormData() });
-    expect(fetchMock.mock.calls[0]![1]!.headers).toBeUndefined();
+    expect(fetchMock.mock.calls[0][1]!.headers).toBeUndefined();
   });
 });

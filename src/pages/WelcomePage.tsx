@@ -91,7 +91,7 @@ export default function WelcomePage() {
       {
         onSuccess: () => {
           toast.success('Your matches are ready. AI scores fill in as you browse.');
-          navigate('/', { replace: true });
+          void navigate('/', { replace: true });
         },
       },
     );

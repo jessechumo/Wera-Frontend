@@ -16,7 +16,7 @@ export function Description({ text }: { text: string }) {
       {blocks.map((block, i) => {
         const lines = block.split('\n').map((l) => l.replace(/^[-•*·▪●]\s*/, '').trim());
         const bulleted = /^[-•*·▪●]\s/.test(block);
-        if (lines.length === 1 && !bulleted && isHeading(lines[0]!, blocks[i + 1])) {
+        if (lines.length === 1 && !bulleted && isHeading(lines[0], blocks[i + 1])) {
           return (
             <h4 key={i} className="pt-2 text-sm font-semibold text-text first:pt-0">
               {lines[0]}
@@ -39,7 +39,7 @@ export function Description({ text }: { text: string }) {
         }
         return (
           <p key={i}>
-            <Linkify text={lines[0]!} />
+            <Linkify text={lines[0]} />
           </p>
         );
       })}

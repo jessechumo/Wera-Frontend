@@ -96,7 +96,7 @@ export default function PostPage() {
               del.mutate(p.id, {
                 onSuccess: () => {
                   toast.success('Post deleted.');
-                  navigate('/community');
+                  void navigate('/community');
                 },
               });
             }}

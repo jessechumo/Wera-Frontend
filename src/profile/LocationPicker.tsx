@@ -57,7 +57,7 @@ export function LocationPicker({
     } else if (e.key === 'Enter') {
       if (open && options[active]) {
         e.preventDefault();
-        add(options[active]!);
+        add(options[active]);
       } else if (typed) {
         e.preventDefault();
         add(typed);
@@ -65,7 +65,7 @@ export function LocationPicker({
     } else if (e.key === 'Escape') {
       setOpen(false);
     } else if (e.key === 'Backspace' && query === '' && value.length > 0) {
-      remove(value[value.length - 1]!);
+      remove(value[value.length - 1]);
     }
   };
 
