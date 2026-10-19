@@ -16,7 +16,10 @@ Each user signs up, uploads a resume, and answers a few questions; the AI drafts
 
 ## Architecture
 
-![Frontend architecture: routes and guards, pages and components, TanStack Query and the API client in the browser; nginx in front of the Go API](docs/architecture.svg)
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture-dark.svg">
+  <img alt="Frontend architecture: routes and guards, pages and components, TanStack Query and the API client in the browser; nginx or Caddy in front of the Go API" src="docs/architecture.svg">
+</picture>
 
 A React single-page app. It calls only its own origin (`/api`), so it behaves the same behind the Vite dev proxy, nginx, or Vercel rewrites, and the session cookie never crosses sites. Server state lives in TanStack Query; route guards send signed-out users to login and users without a profile to setup.
 
@@ -129,7 +132,7 @@ src/
 ├── resume/       Resume editor form, live preview, editing helpers
 └── test/         Test setup, render helpers, API fixtures
 e2e/              Playwright specs and seed data
-docs/             Architecture diagram (generated from docs/diagrams)
+docs/             Architecture diagram (Excalidraw source in docs/diagrams)
 ```
 
 Design tokens for both themes live in `src/index.css`.
