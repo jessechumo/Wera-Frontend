@@ -4,7 +4,6 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowLeft, Briefcase, ExternalLink } from 'lucide-react';
 import { useCompanies, useIndustries, useJobs } from '../api/hooks';
-import type { Company } from '../api/types';
 import { JobCard } from '../components/JobCard';
 import { JobDrawer } from '../components/JobDrawer';
 import { JobRow } from '../components/JobRow';
@@ -12,18 +11,7 @@ import { StatTile } from '../components/StatTile';
 import { EmptyState, ErrorState, Skeleton, SkeletonRows } from '../components/States';
 import { useDocumentTitle } from '../lib/useDocumentTitle';
 import { stepId } from '../lib/format';
-
-/** Public careers page for a company's job board. */
-function boardURL(c: Company): string {
-  switch (c.ats) {
-    case 'greenhouse':
-      return `https://job-boards.greenhouse.io/${c.token}`;
-    case 'lever':
-      return `https://jobs.lever.co/${c.token}`;
-    default:
-      return `https://jobs.ashbyhq.com/${c.token}`;
-  }
-}
+import { boardURL } from '../lib/boards';
 
 function Matches({ industry, onOpen }: { industry: string; onOpen: (id: number) => void }) {
   // Scored matches only (min_score 1), the same set the match count covers.
