@@ -63,6 +63,18 @@ export interface SavedAnswer {
   updated_at: string;
 }
 
+/** An application the extension helped fill. */
+export interface AutofillRun {
+  id: number;
+  job_id: number | null;
+  host: string;
+  pages: number;
+  filled: number;
+  suggested: number;
+  created_at: string;
+  updated_at: string;
+}
+
 /** A browser connected through the extension. */
 export interface Connection {
   id: number;
@@ -130,5 +142,14 @@ export function useForgetAnswer() {
   return useMutation({
     mutationFn: (id?: number) => api<void>(id == null ? '/api/applicant/answers' : `/api/applicant/answers/${id}`, { method: 'DELETE' }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['saved-answers'] }),
+  });
+}
+
+/** Applications the extension filled for one job, newest first. */
+export function useAutofillRuns(jobId: number | null) {
+  return useQuery({
+    queryKey: ['autofill-runs', jobId],
+    queryFn: () => api<{ runs: AutofillRun[] }>(`/api/autofill-runs?job_id=${jobId}`),
+    enabled: jobId != null,
   });
 }
