@@ -98,7 +98,7 @@ export default function LandingPage() {
             <span className="bg-gradient-to-r from-accent to-accent-2 bg-clip-text text-transparent">And the ones that sponsor.</span>
           </h1>
           <p className="anim-rise mt-6 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
-            Wera watches {s ? s.companies.toLocaleString() : '570+'} companies every day, scores each new posting against your resume,
+            Wera watches {s ? s.companies.toLocaleString() : '3,000+'} companies every day, scores each new posting against your resume,
             and tells you which ones file H-1Bs and what they pay. You spend your evenings applying, not scrolling.
           </p>
           <div className="anim-rise mt-8 flex flex-col gap-3 sm:flex-row">
