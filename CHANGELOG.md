@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.2.2...wera-frontend-v0.3.0) (2026-10-20)
+
+
+### Features
+
+* dashboard side of smarter autofill ([0a12fb9](https://github.com/jessechumo/Wera-Frontend/commit/0a12fb9882a0c1770d5a9004c3ba6c4ffb330e0d))
+* dashboard side of smarter autofill ([7f3a629](https://github.com/jessechumo/Wera-Frontend/commit/7f3a629c9178912ea0a27f0089caa481925b88ca))
+* **jobs:** show what the extension filled for each job ([5ca8da4](https://github.com/jessechumo/Wera-Frontend/commit/5ca8da401844e9eff97e7870a261837590b70997))
+* **profile:** ask the newer application and self-identification questions ([95c4e2e](https://github.com/jessechumo/Wera-Frontend/commit/95c4e2ed3b27db89e162ad95fde657dfd99de1b6))
+* **profile:** manage the answers the extension saved ([178e4a5](https://github.com/jessechumo/Wera-Frontend/commit/178e4a585ce55b59628b5797f3e99d80cbfc69a9))
+* **settings:** point to what the extension fills from ([cbdc1ba](https://github.com/jessechumo/Wera-Frontend/commit/cbdc1bade71a89d8a751843e68f4517be70615c9))
+
+
+### Bug Fixes
+
+* **vercel:** point /api at the new tunnel URL ([f60e313](https://github.com/jessechumo/Wera-Frontend/commit/f60e31304c00a57c460bfb230d0556ff69af9074))
+* **vercel:** point /api at the new tunnel URL ([04909b1](https://github.com/jessechumo/Wera-Frontend/commit/04909b195fa39f833ecce3135ab7e32fd64fc1ca))
+* **vercel:** point /api at the new tunnel URL ([725731e](https://github.com/jessechumo/Wera-Frontend/commit/725731e0e7ec6bbdfcc7db73bbf4e572d75bcc5c))
+
 ## [0.2.2](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.2.1...wera-frontend-v0.2.2) (2026-10-19)
 
 
