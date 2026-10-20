@@ -208,8 +208,15 @@ export interface Choice {
   description?: string;
 }
 
+/** A role family, filed under a career field ("healthcare"). */
+export interface RoleFamilyChoice extends Choice {
+  field?: string;
+}
+
 export interface ProfileOptions {
-  role_families: Choice[];
+  /** Career fields that group the role families; absent on older servers. */
+  fields?: Choice[];
+  role_families: RoleFamilyChoice[];
   levels: Choice[];
   industries: Choice[];
 }
