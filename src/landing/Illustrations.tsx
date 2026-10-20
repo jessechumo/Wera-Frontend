@@ -10,7 +10,7 @@ const v = (name: string) => `var(--color-${name})`;
 const JOBS = [
   { title: 'Machine Learning Engineer, New Grad', company: 'Frontier AI lab', place: 'San Francisco · Hybrid', score: 94, sponsor: true, ind: 'ai_ml' },
   { title: 'Software Engineer, Flight Software', company: 'Launch startup', place: 'Hawthorne, CA · Onsite', score: 88, sponsor: true, ind: 'aerospace' },
-  { title: 'Platform Engineer I', company: 'Payments company', place: 'Remote, US', score: 81, sponsor: false, ind: 'fintech' },
+  { title: 'Registered Nurse, ICU', company: 'Academic medical center', place: 'Houston, TX · Nights', score: 91, sponsor: false, ind: 'hospitals' },
 ];
 
 /** A stack of matched jobs, like Today. */
