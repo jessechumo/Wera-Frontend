@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.3.0...wera-frontend-v0.4.0) (2026-10-20)
+
+
+### Features
+
+* **landing:** show a nursing job and icons for the new industries ([c118fbe](https://github.com/jessechumo/Wera-Frontend/commit/c118fbe4b54713d41c038e7aa6cffbed745ab7b0))
+* pick roles by career field ([118e514](https://github.com/jessechumo/Wera-Frontend/commit/118e5140ac6ef342060d3518031848cfb6299717))
+* **profile:** pick roles by career field ([28609a8](https://github.com/jessechumo/Wera-Frontend/commit/28609a8083c25e3216fe01a5c6931916d37c7738))
+
+
+### Bug Fixes
+
+* **industry:** link every company to its own job board ([686de55](https://github.com/jessechumo/Wera-Frontend/commit/686de5595f6925b2adfcd18f509dce8734b72981))
+* link every company to its own board; say 3,000+ employers ([e1a3fe5](https://github.com/jessechumo/Wera-Frontend/commit/e1a3fe5a65d36f2a3ca98e1034bf7db456c017f8))
+
 ## [0.3.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.2.2...wera-frontend-v0.3.0) (2026-10-20)
 
 
