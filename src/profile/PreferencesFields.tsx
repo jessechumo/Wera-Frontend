@@ -6,6 +6,7 @@ import { INPUT_CLS } from '../lib/styles';
 import { Skeleton } from '../components/States';
 import { ChipSelect } from './ChipSelect';
 import { LocationPicker } from './LocationPicker';
+import { RoleFamilyPicker } from './RoleFamilyPicker';
 import { LOCATION_SEPARATOR, splitLocations } from './places';
 
 const WORK_AUTH: { id: WorkAuthorization; label: string }[] = [
@@ -55,7 +56,7 @@ export function PreferencesFields({
 }) {
   const options = useProfileOptions();
   if (!options.data) return <Skeleton className="h-64 w-full" />;
-  const { role_families, levels, industries } = options.data;
+  const { fields, role_families, levels, industries } = options.data;
 
   const setAuth = (auth: WorkAuthorization) => {
     onAnswers({ ...answers, work_authorization: auth });
@@ -69,9 +70,9 @@ export function PreferencesFields({
   return (
     <div className="space-y-6">
       <Section title="Roles" hint="Pick every kind of role you'd apply to. Jobs outside these are hidden.">
-        <ChipSelect
-          label="Role families"
-          options={[...role_families].sort((a, b) => a.label.localeCompare(b.label))}
+        <RoleFamilyPicker
+          fields={fields}
+          families={role_families}
           value={prefs.role_families}
           onChange={(v) => onPrefs({ ...prefs, role_families: v })}
         />
@@ -79,7 +80,7 @@ export function PreferencesFields({
           <input
             value={answers.target_roles ?? ''}
             onChange={(e) => onAnswers({ ...answers, target_roles: e.target.value })}
-            placeholder="e.g. data scientist on flight operations, ML engineer"
+            placeholder="e.g. ICU nurse, high school math teacher, ML engineer"
             className={INPUT_CLS}
           />
         </Field>
@@ -213,7 +214,7 @@ export function PreferencesFields({
             <input
               value={answers.avoid ?? ''}
               onChange={(e) => onAnswers({ ...answers, avoid: e.target.value })}
-              placeholder="e.g. defense work, on-call heavy roles"
+              placeholder="e.g. night shifts, defense work, on-call heavy roles"
               className={INPUT_CLS}
             />
           </Field>

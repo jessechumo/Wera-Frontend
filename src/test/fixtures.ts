@@ -37,10 +37,15 @@ export const applicant = {
 };
 
 export const options = {
+  fields: [
+    { id: 'tech', label: 'Technology & data' },
+    { id: 'healthcare', label: 'Healthcare & nursing' },
+  ],
   role_families: [
-    { id: 'sre', label: 'Site reliability' },
-    { id: 'platform', label: 'Platform engineering' },
-    { id: 'data_science', label: 'Data science' },
+    { id: 'sre', label: 'Site reliability', field: 'tech' },
+    { id: 'platform', label: 'Platform engineering', field: 'tech' },
+    { id: 'data_science', label: 'Data science', field: 'tech' },
+    { id: 'registered_nursing', label: 'Registered nursing (RN)', field: 'healthcare' },
   ],
   levels: [
     { id: 'entry', label: 'Entry level' },
