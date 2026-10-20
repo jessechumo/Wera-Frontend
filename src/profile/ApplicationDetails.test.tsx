@@ -28,4 +28,18 @@ describe('ApplicationDetails', () => {
     await waitFor(() => expect(saved).not.toBeNull());
     expect(saved).toMatchObject({ ...applicant, phone: '(512) 555-0142', school: 'UT Austin', willing_to_relocate: 'no' });
   });
+
+  it('asks the newer eligibility and self-identification questions', async () => {
+    let saved: Record<string, string> | null = null;
+    stubApi({ 'PUT /api/applicant': (init) => ((saved = jsonBody(init)), { applicant: saved, saved: true }) });
+    renderApp(<><ApplicationDetails /><Toasts /></>);
+    await userEvent.selectOptions(await screen.findByLabelText('At least 18 years old'), 'yes');
+    await userEvent.type(screen.getByLabelText(/Security clearance/), 'None');
+    await userEvent.selectOptions(screen.getByLabelText('Preferred work arrangement'), 'hybrid');
+    await userEvent.selectOptions(screen.getByLabelText('Transgender'), 'decline');
+    await userEvent.selectOptions(screen.getByLabelText('Sexual orientation'), 'Bisexual');
+    expect(screen.getByText(/never to the AI/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Save details' }));
+    await waitFor(() => expect(saved).toMatchObject({ over_18: 'yes', security_clearance: 'None', work_preference: 'hybrid', transgender: 'decline', sexual_orientation: 'Bisexual' }));
+  });
 });

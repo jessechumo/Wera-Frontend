@@ -10,29 +10,40 @@ type Key = keyof Applicant;
 
 const DECLINE = { value: 'decline', label: 'Prefer not to say' };
 const YES_NO = [{ value: '', label: 'Not set' }, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }];
+const opts = (...values: string[]) => values.map((v) => ({ value: v, label: v }));
 
 const GROUPS: { title: string; hint?: string; fields: { key: Key; label: string; options?: { value: string; label: string }[]; wide?: boolean }[] }[] = [
   {
     title: 'Contact',
     fields: [
-      { key: 'first_name', label: 'First name' }, { key: 'last_name', label: 'Last name' },
-      { key: 'preferred_name', label: 'Preferred name' }, { key: 'email', label: 'Email' },
-      { key: 'phone', label: 'Phone' }, { key: 'address', label: 'Street address' },
+      { key: 'first_name', label: 'First name' }, { key: 'middle_name', label: 'Middle name' },
+      { key: 'last_name', label: 'Last name' }, { key: 'preferred_name', label: 'Preferred name' },
+      { key: 'email', label: 'Email' }, { key: 'phone', label: 'Phone' },
+      { key: 'address', label: 'Street address' }, { key: 'address_line2', label: 'Apartment, suite (optional)' },
       { key: 'city', label: 'City' }, { key: 'state', label: 'State or province' },
       { key: 'postal_code', label: 'ZIP or postal code' }, { key: 'country', label: 'Country' },
     ],
   },
   {
     title: 'Links',
-    fields: [{ key: 'linkedin', label: 'LinkedIn' }, { key: 'github', label: 'GitHub' }, { key: 'portfolio', label: 'Portfolio or website', wide: true }],
+    fields: [
+      { key: 'linkedin', label: 'LinkedIn' }, { key: 'github', label: 'GitHub' },
+      { key: 'portfolio', label: 'Portfolio or website' }, { key: 'twitter', label: 'X (Twitter)' },
+      { key: 'other_link', label: 'Other link', wide: true },
+    ],
   },
   {
-    title: 'Work authorization',
+    title: 'Work authorization and eligibility',
     hint: 'Answered the way forms ask. Wera fills these only when you set them.',
     fields: [
       { key: 'authorized_to_work', label: 'Authorized to work in the US', options: YES_NO },
       { key: 'needs_sponsorship', label: 'Will need visa sponsorship', options: YES_NO },
+      { key: 'visa_status', label: 'Current visa or status (e.g. F-1 OPT, H-1B, citizen)' },
+      { key: 'citizenship', label: 'Citizenship (country)' },
+      { key: 'over_18', label: 'At least 18 years old', options: YES_NO },
+      { key: 'security_clearance', label: 'Security clearance (e.g. None, Secret)' },
       { key: 'willing_to_relocate', label: 'Willing to relocate', options: YES_NO },
+      { key: 'willing_to_travel', label: 'Willing to travel for work', options: YES_NO },
     ],
   },
   {
@@ -47,16 +58,21 @@ const GROUPS: { title: string; hint?: string; fields: { key: Key; label: string;
   {
     title: 'Other questions',
     fields: [
-      { key: 'salary_expectation', label: 'Salary expectation', }, { key: 'start_date', label: 'Earliest start date' },
-      { key: 'how_heard', label: 'How you heard about jobs', wide: true },
+      { key: 'salary_expectation', label: 'Salary expectation' }, { key: 'start_date', label: 'Earliest start date' },
+      { key: 'notice_period', label: 'Notice period (e.g. Two weeks)' },
+      { key: 'work_preference', label: 'Preferred work arrangement', options: [{ value: '', label: 'Not set' }, { value: 'remote', label: 'Remote' }, { value: 'hybrid', label: 'Hybrid' }, { value: 'onsite', label: 'Onsite' }, { value: 'any', label: 'Any' }] },
+      { key: 'languages', label: 'Languages you speak (e.g. English, Swahili)' },
+      { key: 'how_heard', label: 'How you heard about jobs' },
     ],
   },
   {
     title: 'Voluntary self-identification',
-    hint: 'US employers ask these for equal-opportunity reporting. Answering is optional; "Prefer not to say" is filled unless you choose otherwise.',
+    hint: 'US employers ask these for equal-opportunity reporting. Answering is optional; "Prefer not to say" is filled unless you choose otherwise. They go only into forms you fill, never to the AI.',
     fields: [
-      { key: 'gender', label: 'Gender', options: [DECLINE, { value: 'Male', label: 'Male' }, { value: 'Female', label: 'Female' }, { value: 'Non-binary', label: 'Non-binary' }] },
+      { key: 'gender', label: 'Gender', options: [DECLINE, ...opts('Male', 'Female', 'Non-binary')] },
       { key: 'pronouns', label: 'Pronouns' },
+      { key: 'transgender', label: 'Transgender', options: [DECLINE, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] },
+      { key: 'sexual_orientation', label: 'Sexual orientation', options: [DECLINE, ...opts('Heterosexual or straight', 'Gay or lesbian', 'Bisexual', 'Asexual', 'Pansexual', 'Queer')] },
       { key: 'hispanic', label: 'Hispanic or Latino', options: [DECLINE, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] },
       { key: 'race', label: 'Race', options: [DECLINE, ...['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White', 'Two or more races'].map((r) => ({ value: r, label: r }))] },
       { key: 'veteran', label: 'Veteran status', options: [DECLINE, { value: 'I am not a protected veteran', label: 'Not a protected veteran' }, { value: 'I am a protected veteran', label: 'Protected veteran' }] },
@@ -135,12 +151,12 @@ export function ApplicationDetails() {
             {g.fields.map((f) => (
               <Labeled key={f.key} label={f.label} wide={f.wide}>
                 {f.options ? (
-                  <select className={INPUT_CLS} value={draft[f.key]} onChange={(e) => set(f.key, e.target.value)} aria-label={f.label}>
-                    {!f.options.some((o) => o.value === draft[f.key]) && draft[f.key] && <option value={draft[f.key]}>{draft[f.key]}</option>}
+                  <select className={INPUT_CLS} value={draft[f.key] ?? ''} onChange={(e) => set(f.key, e.target.value)} aria-label={f.label}>
+                    {!f.options.some((o) => o.value === (draft[f.key] ?? '')) && draft[f.key] && <option value={draft[f.key]}>{draft[f.key]}</option>}
                     {f.options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                 ) : (
-                  <input className={INPUT_CLS} value={draft[f.key]} onChange={(e) => set(f.key, e.target.value)} aria-label={f.label} />
+                  <input className={INPUT_CLS} value={draft[f.key] ?? ''} onChange={(e) => set(f.key, e.target.value)} aria-label={f.label} />
                 )}
               </Labeled>
             ))}
