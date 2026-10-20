@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 const WORDS = [
   'International Student', 'H-1B Sponsorship', 'AI Engineer', 'New Grad 2027', 'STEM OPT', 'Site Reliability',
-  'Offer', 'Fit 94', 'Remote', 'Platform Engineer', 'Data Scientist', 'Return Offer', 'Referral', 'Cover Letter',
+  'Offer', 'Fit 94', 'Remote', 'Registered Nurse', 'Data Scientist', 'Teacher', 'Night Shift', 'Return Offer', 'Referral', 'Cover Letter',
   'Green Card', 'Quant Researcher', 'Internship', 'Kubernetes', 'Product Manager', 'Hybrid', 'Series B', 'OPT',
   'Machine Learning', 'Backend', 'Interview Loop', 'Sponsors visas', 'Entry Level', 'Tailored Resume', 'Robotics',
   'Aerospace', 'Fintech', 'Day One CPT', 'Signing Bonus', 'Full-time', 'Applied', 'Strong Match', 'One Page',

@@ -1,6 +1,6 @@
 import {
   Bitcoin, Bot, BrainCircuit, Briefcase, Building, Car, Clapperboard, Cloud, CreditCard, Cpu, Dna, Factory, Gamepad2,
-  GraduationCap, Handshake, HeartPulse, Landmark, Leaf, Plane, RadioTower, ShieldCheck, ShieldHalf, ShoppingBag,
+  GraduationCap, Handshake, HeartPulse, Hospital, Landmark, UtensilsCrossed, Leaf, Plane, RadioTower, ShieldCheck, ShieldHalf, ShoppingBag,
   Smartphone, ChartCandlestick, Truck, Umbrella, Zap, Shapes, type LucideIcon,
 } from 'lucide-react';
 
@@ -18,6 +18,7 @@ export const INDUSTRY_ICONS: Record<string, { icon: LucideIcon; color: string }>
   banking: { icon: Landmark, color: '#0d9488' },
   crypto: { icon: Bitcoin, color: '#f59e0b' },
   insurance: { icon: Umbrella, color: '#6366f1' },
+  hospitals: { icon: Hospital, color: '#dc2626' },
   healthcare: { icon: HeartPulse, color: '#ef4444' },
   biotech: { icon: Dna, color: '#22c55e' },
   aerospace: { icon: Plane, color: '#0284c7' },
@@ -28,6 +29,7 @@ export const INDUSTRY_ICONS: Record<string, { icon: LucideIcon; color: string }>
   energy: { icon: Zap, color: '#eab308' },
   logistics: { icon: Truck, color: '#d97706' },
   ecommerce: { icon: ShoppingBag, color: '#ec4899' },
+  hospitality: { icon: UtensilsCrossed, color: '#ea580c' },
   consumer: { icon: Smartphone, color: '#d946ef' },
   media: { icon: Clapperboard, color: '#e11d48' },
   gaming: { icon: Gamepad2, color: '#a855f7' },
