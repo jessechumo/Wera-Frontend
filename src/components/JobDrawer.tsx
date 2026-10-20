@@ -26,6 +26,7 @@ import { Skeleton } from './States';
 import { Insights } from './JobInsights';
 import { absTime, relTime } from '../lib/format';
 import { handOffJob } from '../lib/extension';
+import { AutofillHistory } from './AutofillHistory';
 
 function Kbd({ children }: { children: React.ReactNode }) {
   return (
@@ -294,7 +295,10 @@ export function JobDrawer({
             className="order-1 border-border bg-surface-2/35 md:order-2 md:overflow-y-auto md:border-l"
           >
             {job ? (
-              <Insights key={job.id} job={job} scoring={score.isPending && score.variables === job.id} />
+              <>
+                <Insights key={job.id} job={job} scoring={score.isPending && score.variables === job.id} />
+                <AutofillHistory jobId={job.id} />
+              </>
             ) : isLoading ? (
               <Skeleton className="m-5 h-40" />
             ) : null}

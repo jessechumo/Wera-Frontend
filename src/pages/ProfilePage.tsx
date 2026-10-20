@@ -15,6 +15,7 @@ import { ProfileEditor } from '../profile/ProfileEditor';
 import { DEFAULT_PREFS, PreferencesFields, prefsProblem } from '../profile/PreferencesFields';
 import { ResumeUpload } from '../profile/ResumeUpload';
 import { ApplicationDetails } from '../profile/ApplicationDetails';
+import { SavedAnswers } from '../profile/SavedAnswers';
 import { ResumeSection } from '../profile/ResumeSection';
 
 function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
@@ -245,6 +246,11 @@ function ProfileOverview() {
           <div id="application" className="scroll-mt-20">
             <Card title="Application details" hint="Filled into job applications by the Chrome extension.">
               <ApplicationDetails />
+            </Card>
+          </div>
+          <div id="answers" className="scroll-mt-20">
+            <Card title="Saved answers" hint="What you answered on application forms. The Chrome extension offers these when a form asks the same question.">
+              <SavedAnswers />
             </Card>
           </div>
           <Card title="Profile text">

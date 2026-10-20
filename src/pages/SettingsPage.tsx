@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import clsx from 'clsx';
+import { Link } from 'react-router-dom';
 import { Bell, Download, EyeOff, KeyRound, LoaderCircle, MailCheck, Palette, Puzzle, ShieldAlert, SlidersHorizontal } from 'lucide-react';
 import { useConnections, useDisconnect } from '../api/extension';
 import { useExtension } from '../lib/extension';
@@ -156,7 +157,11 @@ function Connections() {
           ))}
         </ul>
       )}
-      <p className="mt-2 text-xs text-faint">Changing your password disconnects every browser.</p>
+      <p className="mt-2 text-xs text-faint">
+        Changing your password disconnects every browser. What it fills comes from your{' '}
+        <Link to="/profile#application" className="text-accent-2 hover:underline">application details</Link> and{' '}
+        <Link to="/profile#answers" className="text-accent-2 hover:underline">saved answers</Link>.
+      </p>
     </div>
   );
 }
@@ -331,7 +336,7 @@ export default function SettingsPage() {
         </Row>
       </Section>
 
-      <Section icon={Puzzle} title="Chrome extension" hint="Save jobs, write cover letters, tailor your resume and fill applications from any job site.">
+      <Section icon={Puzzle} title="Chrome extension" hint="Save jobs, write cover letters, tailor your resume and fill applications from any job site: it lists every field, fills what you approve and continues page by page. It never submits.">
         <Connections />
       </Section>
 
