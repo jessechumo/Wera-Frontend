@@ -52,6 +52,17 @@ export interface Applicant {
   disability: string;
 }
 
+/** An answer the user gave on an application form (the extension reuses it). */
+export interface SavedAnswer {
+  id: number;
+  question: string;
+  answer: string;
+  kind: 'text' | 'long' | 'choice';
+  company: string;
+  uses: number;
+  updated_at: string;
+}
+
 /** A browser connected through the extension. */
 export interface Connection {
   id: number;
@@ -94,5 +105,30 @@ export function useDisconnect() {
   return useMutation({
     mutationFn: (id: number) => api<void>(`/api/ext/tokens/${id}`, { method: 'DELETE' }),
     onSuccess: () => void qc.invalidateQueries({ queryKey: ['connections'] }),
+  });
+}
+
+export function useSavedAnswers() {
+  return useQuery({
+    queryKey: ['saved-answers'],
+    queryFn: () => api<{ answers: SavedAnswer[] }>('/api/applicant/answers'),
+  });
+}
+
+export function useUpdateAnswer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, answer }: { id: number; answer: string }) =>
+      api<{ answers: SavedAnswer[] }>(`/api/applicant/answers/${id}`, { method: 'PATCH', body: JSON.stringify({ answer }) }),
+    onSuccess: (r) => qc.setQueryData(['saved-answers'], r),
+  });
+}
+
+/** Forgets one answer, or all of them (id omitted). */
+export function useForgetAnswer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id?: number) => api<void>(id == null ? '/api/applicant/answers' : `/api/applicant/answers/${id}`, { method: 'DELETE' }),
+    onSuccess: () => void qc.invalidateQueries({ queryKey: ['saved-answers'] }),
   });
 }
