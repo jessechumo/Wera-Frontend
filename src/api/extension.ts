@@ -83,17 +83,45 @@ export interface Connection {
   last_used_at: string | null;
 }
 
+/** A job from the resume, as application forms ask for it. */
+export interface ResumeJob {
+  title: string;
+  company: string;
+  location?: string;
+  start?: string;
+  end?: string;
+  current: boolean;
+}
+
+/** A school from the resume. */
+export interface ResumeSchool {
+  school: string;
+  degree?: string;
+  major?: string;
+  end?: string;
+  gpa?: string;
+}
+
+/** The details, completed from the profile and resume; sources says which came from where. */
+export interface ApplicantView {
+  applicant: Applicant;
+  saved: boolean;
+  sources?: Partial<Record<keyof Applicant, 'resume' | 'profile'>>;
+  experience?: ResumeJob[];
+  education?: ResumeSchool[];
+}
+
 export function useApplicant() {
   return useQuery({
     queryKey: ['applicant'],
-    queryFn: () => api<{ applicant: Applicant; saved: boolean }>('/api/applicant'),
+    queryFn: () => api<ApplicantView>('/api/applicant'),
   });
 }
 
 export function useSaveApplicant() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (a: Applicant) => api<{ applicant: Applicant; saved: boolean }>('/api/applicant', { method: 'PUT', body: JSON.stringify(a) }),
+    mutationFn: (a: Applicant) => api<ApplicantView>('/api/applicant', { method: 'PUT', body: JSON.stringify(a) }),
     onSuccess: (r) => qc.setQueryData(['applicant'], r),
   });
 }

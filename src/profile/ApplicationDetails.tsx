@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { LoaderCircle, Sparkles } from 'lucide-react';
 import { errorMessage } from '../api/client';
-import { useApplicant, useSaveApplicant, useSuggestApplicant, type Applicant } from '../api/extension';
+import { Link } from 'react-router-dom';
+import { useApplicant, useSaveApplicant, useSuggestApplicant, type Applicant, type ResumeJob, type ResumeSchool } from '../api/extension';
 import { INPUT_CLS } from '../lib/styles';
 import { Skeleton } from '../components/States';
 import { toast } from '../lib/toast';
@@ -81,12 +82,58 @@ const GROUPS: { title: string; hint?: string; fields: { key: Key; label: string;
   },
 ];
 
-function Labeled({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {
+function Labeled({ label, children, wide, from }: { label: string; children: ReactNode; wide?: boolean; from?: 'resume' | 'profile' }) {
   return (
     <label className={wide ? 'sm:col-span-2' : undefined}>
-      <span className="mb-1 block text-xs font-medium text-muted">{label}</span>
+      <span className="mb-1 flex items-center gap-1.5 text-xs font-medium text-muted">
+        {label}
+        {from && <span className="rounded-full bg-accent-2/10 px-1.5 text-[10px] font-medium text-accent-2" title="Wera filled this in; save to keep it">from your {from}</span>}
+      </span>
       {children}
     </label>
+  );
+}
+
+const monthYear = (d?: string) => {
+  if (!d) return '';
+  const [y, m] = d.split('-');
+  return m ? new Date(Number(y), Number(m) - 1, 1).toLocaleString('en-US', { month: 'short', year: 'numeric' }) : y;
+};
+
+/** The jobs and schools Wera reads from the resume, as it fills them into forms' Work Experience and Education blocks. */
+function FromResume({ jobs, schools }: { jobs: ResumeJob[]; schools: ResumeSchool[] }) {
+  if (!jobs.length && !schools.length) {
+    return (
+      <p className="rounded-lg border border-border bg-surface-2/40 p-3 text-xs text-muted">
+        No jobs or schools yet. <Link to="/profile/resume" className="text-accent hover:underline">Create your resume</Link> and Wera fills forms' work experience and education from it.
+      </p>
+    );
+  }
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div>
+        <h4 className="mb-1.5 text-xs font-semibold text-muted">Work experience</h4>
+        <ul className="space-y-1.5">
+          {jobs.map((j, i) => (
+            <li key={i} className="rounded-lg border border-border bg-surface-2/40 px-3 py-2 text-xs">
+              <p className="font-medium text-text">{j.title || 'Untitled role'}{j.company ? `, ${j.company}` : ''}</p>
+              <p className="text-faint">{[monthYear(j.start), j.current ? 'Present' : monthYear(j.end)].filter(Boolean).join(' – ')}{j.location ? ` · ${j.location}` : ''}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <h4 className="mb-1.5 text-xs font-semibold text-muted">Education</h4>
+        <ul className="space-y-1.5">
+          {schools.map((s, i) => (
+            <li key={i} className="rounded-lg border border-border bg-surface-2/40 px-3 py-2 text-xs">
+              <p className="font-medium text-text">{s.school}</p>
+              <p className="text-faint">{[s.degree, s.major].filter(Boolean).join(', ')}{s.end ? ` · ${monthYear(s.end)}` : ''}{s.gpa ? ` · GPA ${s.gpa}` : ''}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
@@ -136,7 +183,7 @@ export function ApplicationDetails() {
       <div className="flex flex-wrap items-center gap-2">
         <p className="mr-auto max-w-xl text-xs text-muted">
           The Wera Chrome extension fills these into application forms. It never submits; you review every form.
-          {!q.data?.saved && ' These start from your account and profile until you save them.'}
+          {' Blanks are filled from your profile and resume (marked "from your resume"); save to keep or change them.'}
         </p>
         <button type="button" onClick={fromResume} disabled={suggest.isPending}
           className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-xs font-medium text-text hover:border-accent/40 disabled:opacity-60">
@@ -149,7 +196,7 @@ export function ApplicationDetails() {
           {g.hint && <p className="mt-0.5 text-xs text-faint">{g.hint}</p>}
           <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
             {g.fields.map((f) => (
-              <Labeled key={f.key} label={f.label} wide={f.wide}>
+              <Labeled key={f.key} label={f.label} wide={f.wide} from={draft[f.key] && draft[f.key] === q.data?.applicant[f.key] ? q.data?.sources?.[f.key] : undefined}>
                 {f.options ? (
                   <select className={INPUT_CLS} value={draft[f.key] ?? ''} onChange={(e) => set(f.key, e.target.value)} aria-label={f.label}>
                     {!f.options.some((o) => o.value === (draft[f.key] ?? '')) && draft[f.key] && <option value={draft[f.key]}>{draft[f.key]}</option>}
@@ -163,6 +210,11 @@ export function ApplicationDetails() {
           </div>
         </fieldset>
       ))}
+      <fieldset>
+        <legend className="text-sm font-semibold text-text">From your resume</legend>
+        <p className="mt-0.5 text-xs text-faint">Forms that ask for each job or school (Workday, iCIMS and others) get these, most recent first. Change them by editing your resume.</p>
+        <div className="mt-2.5"><FromResume jobs={q.data?.experience ?? []} schools={q.data?.education ?? []} /></div>
+      </fieldset>
       <div className="flex items-center justify-end gap-3">
         {save.error && <span className="text-xs text-bad">{errorMessage(save.error, 'Save failed')}</span>}
         <button type="button" disabled={save.isPending}

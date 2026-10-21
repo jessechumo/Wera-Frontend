@@ -42,4 +42,26 @@ describe('ApplicationDetails', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Save details' }));
     await waitFor(() => expect(saved).toMatchObject({ over_18: 'yes', security_clearance: 'None', work_preference: 'hybrid', transgender: 'decline', sexual_orientation: 'Bisexual' }));
   });
+
+  it('marks details filled in from the resume and profile, and lists the jobs and schools it reads', async () => {
+    stubApi({
+      'GET /api/applicant': () => ({
+        applicant: { ...applicant, school: 'UT Dallas', degree: 'Master of Science' }, saved: false,
+        sources: { school: 'resume', degree: 'resume', current_title: 'profile' },
+        experience: [{ title: 'Data Scientist', company: 'Globex', start: '2024-06', current: true, location: 'Dallas, TX' }],
+        education: [{ school: 'UT Dallas', degree: 'Master of Science', major: 'Business Analytics', end: '2024-05', gpa: '3.9' }],
+      }),
+    });
+    renderApp(<ApplicationDetails />);
+    expect(await screen.findByLabelText('School')).toHaveValue('UT Dallas');
+    expect(screen.getAllByText('from your resume')).toHaveLength(2);
+    expect(screen.getByText('from your profile')).toBeInTheDocument();
+    expect(screen.getByText('Data Scientist, Globex')).toBeInTheDocument();
+    expect(screen.getByText(/Jun 2024 – Present/)).toBeInTheDocument();
+    expect(screen.getByText(/Master of Science, Business Analytics · May 2024 · GPA 3.9/)).toBeInTheDocument();
+    // Edited, it is the user's own.
+    await userEvent.clear(screen.getByLabelText('School'));
+    await userEvent.type(screen.getByLabelText('School'), 'SMU');
+    expect(screen.getAllByText('from your resume')).toHaveLength(1);
+  });
 });
