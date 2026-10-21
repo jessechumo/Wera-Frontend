@@ -8,7 +8,7 @@ import { useUpdateApplication } from '../api/hooks';
 import type { AppStatus, DeepAnalysis, JobDetail } from '../api/types';
 import { absTime, compact, money, prettyReason, relTime, verdictLabel, verdictOf } from '../lib/format';
 import { Badge } from './Badge';
-import { AddedBadge, CategoryChips, SponsorshipBadge, WorkModeBadge } from './JobBadges';
+import { AddedBadge, AutofilledBadge, CategoryChips, SponsorshipBadge, WorkModeBadge } from './JobBadges';
 import { JobH1B } from './JobH1B';
 import { ScoreRing } from './ScoreRing';
 import { StatusSelect } from './StatusSelect';
@@ -171,6 +171,7 @@ export function Insights({ job, scoring }: { job: JobDetail; scoring: boolean })
           </Fact>
           <Fact label="Source">
             {job.source === 'manual' ? <AddedBadge source={job.source} /> : <span className="font-mono">{job.source}</span>}
+            <AutofilledBadge at={job.autofilled_at} />
           </Fact>
         </div>
         {job.matched_categories.length > 0 && <CategoryChips cats={job.matched_categories} className="mt-3" />}
