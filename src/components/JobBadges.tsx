@@ -1,4 +1,6 @@
+import { Wand2 } from 'lucide-react';
 import { Badge, type BadgeVariant } from './Badge';
+import { relTime } from '../lib/format';
 import { IndustryIcon } from './IndustryIcon';
 import { useIndustryLabel } from '../api/hooks';
 import { useFamilyLabel } from '../api/profile';
@@ -16,6 +18,19 @@ export function SponsorshipBadge({ value }: { value: Job['sponsorship'] }) {
 export function AddedBadge({ source }: { source: string }) {
   if (source !== 'manual') return null;
   return <Badge variant="accent">Added by you</Badge>;
+}
+
+/** Marks a job whose application the Chrome extension filled. */
+export function AutofilledBadge({ at }: { at?: string | null }) {
+  if (!at) return null;
+  return (
+    <span title={`Filled with the Wera extension ${relTime(at)}`}>
+      <Badge variant="accent-2">
+        <Wand2 className="size-3" aria-hidden />
+        Autofilled
+      </Badge>
+    </span>
+  );
 }
 
 export function WorkModeBadge({ value }: { value: Job['work_mode'] }) {

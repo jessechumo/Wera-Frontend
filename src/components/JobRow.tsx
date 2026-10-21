@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import { absTime, relTime, shortLocation, verdictColor, verdictOf } from '../lib/format';
-import { IndustryBadge, SponsorshipBadge, StatusPill, WorkModeBadge, AddedBadge } from './JobBadges';
+import { IndustryBadge, SponsorshipBadge, StatusPill, WorkModeBadge, AddedBadge, AutofilledBadge } from './JobBadges';
 import type { Job } from '../api/types';
 
 /** Dense table row for the Jobs page. */
@@ -60,7 +60,10 @@ export function JobRow({
         {relTime(job.first_seen_at)}
       </td>
       <td className="px-3 py-2.5">
-        <StatusPill value={job.application_status} />
+        <span className="inline-flex items-center gap-1">
+          <StatusPill value={job.application_status} />
+          <AutofilledBadge at={job.autofilled_at} />
+        </span>
       </td>
     </tr>
   );
