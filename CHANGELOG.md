@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.4.0...wera-frontend-v0.5.0) (2026-10-21)
+
+
+### Features
+
+* mark jobs the extension filled ([cc76843](https://github.com/jessechumo/Wera-Frontend/commit/cc76843df625ccc40e6e79d8e2071b839b6249e3))
+
 ## [0.4.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.3.0...wera-frontend-v0.4.0) (2026-10-20)
 
 
