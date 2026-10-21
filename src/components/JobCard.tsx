@@ -1,7 +1,7 @@
 import { Ban, Bookmark, ExternalLink } from 'lucide-react';
 import { ScoreRing } from './ScoreRing';
 import { Badge } from './Badge';
-import { CategoryChips, StatusPill } from './JobBadges';
+import { AutofilledBadge, CategoryChips, StatusPill } from './JobBadges';
 import { capitalize, relTime, shortLocation } from '../lib/format';
 import type { AppStatus, Job } from '../api/types';
 
@@ -50,7 +50,10 @@ export function JobCard({
               <h3 className="truncate text-sm font-semibold text-text">{job.title}</h3>
               <div className="mt-0.5 truncate text-xs text-muted">{job.company}</div>
             </div>
-            <StatusPill value={job.application_status} />
+            <span className="flex shrink-0 flex-col items-end gap-1">
+              <StatusPill value={job.application_status} />
+              <AutofilledBadge at={job.autofilled_at} />
+            </span>
           </div>
           <div className="mt-2 flex min-w-0 items-center gap-2 text-[11px] text-faint">
             <span className="min-w-0 truncate">{meta || '—'}</span>

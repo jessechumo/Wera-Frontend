@@ -41,6 +41,8 @@ export interface Job {
   application_notes: string | null;
   /** Local relevance estimate (35..85) until the AI fit score arrives. */
   estimated_score: number | null;
+  /** When the Chrome extension last filled an application for it (absent on older servers). */
+  autofilled_at?: string | null;
 }
 
 export interface DeepGap {
