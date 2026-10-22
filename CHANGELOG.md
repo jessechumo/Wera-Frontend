@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.5.0...wera-frontend-v0.6.0) (2026-10-22)
+
+
+### Features
+
+* show the application details Wera fills from the resume ([0cb5032](https://github.com/jessechumo/Wera-Frontend/commit/0cb503241426e87efd620110bc044d4588842f0e))
+
 ## [0.5.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.4.0...wera-frontend-v0.5.0) (2026-10-21)
 
 
