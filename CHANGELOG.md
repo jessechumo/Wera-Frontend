@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.1](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.0...wera-frontend-v0.6.1) (2026-10-22)
+
+
+### Bug Fixes
+
+* recover when a deploy replaces a page's code ([b580847](https://github.com/jessechumo/Wera-Frontend/commit/b580847f9463382e169ed0392e8d11b952cee954))
+* self-identification shows "Not set" until chosen ([2466742](https://github.com/jessechumo/Wera-Frontend/commit/2466742ec4fca1d41eb2403fc7d8a4c49a35e97a))
+* self-identification shows "Not set" until chosen ([171e245](https://github.com/jessechumo/Wera-Frontend/commit/171e24504c6ae84a632be56a7ffb76a4051e0d8b))
+
 ## [0.6.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.5.0...wera-frontend-v0.6.0) (2026-10-22)
 
 
