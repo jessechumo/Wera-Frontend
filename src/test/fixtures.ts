@@ -32,8 +32,8 @@ export const applicant = {
   city: '', state: '', postal_code: '', country: '', linkedin: '', github: '', portfolio: '', current_company: '',
   current_title: 'SRE intern', years_experience: '', school: '', degree: '', major: '', graduation_year: '', gpa: '',
   authorized_to_work: 'yes', needs_sponsorship: 'yes', willing_to_relocate: '', salary_expectation: '', start_date: '',
-  how_heard: 'Company website', gender: 'decline', pronouns: '', race: 'decline', hispanic: 'decline', veteran: 'decline',
-  disability: 'decline',
+  how_heard: 'Company website', gender: '', pronouns: '', race: '', hispanic: '', veteran: '',
+  disability: '',
 };
 
 export const options = {

@@ -22,7 +22,14 @@ import { ExtensionBridge } from './components/ExtensionBridge';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import TodayPage from './pages/TodayPage';
 import JobsPage from './pages/JobsPage';
+import { reloadForNewVersion } from './lib/lazyPage';
 import './index.css';
+
+// A deploy replaced code this tab still links to (a page's shared chunk or
+// stylesheet): load the new version rather than break.
+window.addEventListener('vite:preloadError', (e) => {
+  if (reloadForNewVersion()) e.preventDefault();
+});
 
 const queryClient = new QueryClient({
   // Every change here tells the Chrome extension (if installed) to refresh.

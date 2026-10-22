@@ -36,6 +36,8 @@ describe('ApplicationDetails', () => {
     await userEvent.selectOptions(await screen.findByLabelText('At least 18 years old'), 'yes');
     await userEvent.type(screen.getByLabelText(/Security clearance/), 'None');
     await userEvent.selectOptions(screen.getByLabelText('Preferred work arrangement'), 'hybrid');
+    // Unanswered is its own choice, never a silent "Prefer not to say".
+    expect(screen.getByLabelText('Race')).toHaveDisplayValue('Not set: ask me on the form');
     await userEvent.selectOptions(screen.getByLabelText('Transgender'), 'decline');
     await userEvent.selectOptions(screen.getByLabelText('Sexual orientation'), 'Bisexual');
     expect(screen.getByText(/never to the AI/)).toBeInTheDocument();
