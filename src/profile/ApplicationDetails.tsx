@@ -10,6 +10,7 @@ import { toast } from '../lib/toast';
 type Key = keyof Applicant;
 
 const DECLINE = { value: 'decline', label: 'Prefer not to say' };
+const NOT_SET = { value: '', label: 'Not set: ask me on the form' };
 const YES_NO = [{ value: '', label: 'Not set' }, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }];
 const opts = (...values: string[]) => values.map((v) => ({ value: v, label: v }));
 
@@ -68,16 +69,16 @@ const GROUPS: { title: string; hint?: string; fields: { key: Key; label: string;
   },
   {
     title: 'Voluntary self-identification',
-    hint: 'US employers ask these for equal-opportunity reporting. Answering is optional; "Prefer not to say" is filled unless you choose otherwise. They go only into forms you fill, never to the AI.',
+    hint: 'US employers ask these for equal-opportunity reporting, and answering is optional. Wera fills what you set here; while one is not set, the extension asks you on the form and saves your answer here. They go only into forms you fill, never to the AI.',
     fields: [
-      { key: 'gender', label: 'Gender', options: [DECLINE, ...opts('Male', 'Female', 'Non-binary')] },
+      { key: 'gender', label: 'Gender', options: [NOT_SET, ...opts('Male', 'Female', 'Non-binary'), DECLINE] },
       { key: 'pronouns', label: 'Pronouns' },
-      { key: 'transgender', label: 'Transgender', options: [DECLINE, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] },
-      { key: 'sexual_orientation', label: 'Sexual orientation', options: [DECLINE, ...opts('Heterosexual or straight', 'Gay or lesbian', 'Bisexual', 'Asexual', 'Pansexual', 'Queer')] },
-      { key: 'hispanic', label: 'Hispanic or Latino', options: [DECLINE, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }] },
-      { key: 'race', label: 'Race', options: [DECLINE, ...['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White', 'Two or more races'].map((r) => ({ value: r, label: r }))] },
-      { key: 'veteran', label: 'Veteran status', options: [DECLINE, { value: 'I am not a protected veteran', label: 'Not a protected veteran' }, { value: 'I am a protected veteran', label: 'Protected veteran' }] },
-      { key: 'disability', label: 'Disability', options: [DECLINE, { value: 'No, I do not have a disability', label: 'No' }, { value: 'Yes, I have a disability', label: 'Yes' }] },
+      { key: 'transgender', label: 'Transgender', options: [NOT_SET, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, DECLINE] },
+      { key: 'sexual_orientation', label: 'Sexual orientation', options: [NOT_SET, ...opts('Heterosexual or straight', 'Gay or lesbian', 'Bisexual', 'Asexual', 'Pansexual', 'Queer'), DECLINE] },
+      { key: 'hispanic', label: 'Hispanic or Latino', options: [NOT_SET, { value: 'yes', label: 'Yes' }, { value: 'no', label: 'No' }, DECLINE] },
+      { key: 'race', label: 'Race', options: [NOT_SET, ...['American Indian or Alaska Native', 'Asian', 'Black or African American', 'Native Hawaiian or Other Pacific Islander', 'White', 'Two or more races'].map((r) => ({ value: r, label: r })), DECLINE] },
+      { key: 'veteran', label: 'Veteran status', options: [NOT_SET, { value: 'I am not a protected veteran', label: 'Not a protected veteran' }, { value: 'I am a protected veteran', label: 'Protected veteran' }, DECLINE] },
+      { key: 'disability', label: 'Disability', options: [NOT_SET, { value: 'No, I do not have a disability', label: 'No' }, { value: 'Yes, I have a disability', label: 'Yes' }, DECLINE] },
     ],
   },
 ];
