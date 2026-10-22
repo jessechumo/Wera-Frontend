@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { ErrorState } from './States';
+import { isStaleChunk } from '../lib/lazyPage';
 
 /**
  * Catches render errors below it and shows what failed instead of an empty
@@ -34,7 +35,7 @@ export class ErrorBoundary extends Component<
     if (!error) return this.props.children;
     const state = (
       <ErrorState
-        message={`This page hit an error: ${error.message || String(error)}`}
+        message={isStaleChunk(error) ? 'Wera was updated since this tab opened. Reload to get the new version.' : `This page hit an error: ${error.message || String(error)}`}
         onRetry={() => window.location.reload()}
       />
     );
