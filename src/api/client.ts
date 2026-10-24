@@ -18,6 +18,26 @@ export function errorOrNull(err: unknown): string | null {
   return err ? errorMessage(err) : null;
 }
 
+/**
+ * What a failed response says: the API's own error, a short plain-text
+ * reason, or (for a proxy's HTML error page when the API is down) what
+ * happened in words, never the page itself.
+ */
+export function failureMessage(res: { status: number; statusText: string }, text: string): string {
+  try {
+    const parsed = JSON.parse(text) as { error?: unknown };
+    if (typeof parsed.error === 'string' && parsed.error) return parsed.error;
+  } catch {
+    // not JSON
+  }
+  const plain = text.trim();
+  if (plain && plain.length <= 200 && !/^</.test(plain)) return plain;
+  if ((res.status >= 502 && res.status <= 504) || res.status >= 520) {
+    return `Wera's server isn't answering (error ${res.status}). It may be restarting; try again in a minute.`;
+  }
+  return `${res.status} ${res.statusText}`.trim();
+}
+
 /** Fired when a request comes back 401: the session is gone. */
 export const UNAUTHORIZED_EVENT = 'wera:unauthorized';
 
@@ -35,19 +55,7 @@ export async function api<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 401 && !path.startsWith('/api/auth/')) {
     window.dispatchEvent(new Event(UNAUTHORIZED_EVENT));
   }
-  if (!res.ok) {
-    let message = `${res.status} ${res.statusText}`;
-    const text = await res.text();
-    if (text) {
-      try {
-        const parsed = JSON.parse(text) as { error?: string };
-        message = parsed.error ?? message;
-      } catch {
-        message = text;
-      }
-    }
-    throw new ApiError(res.status, message);
-  }
+  if (!res.ok) throw new ApiError(res.status, failureMessage(res, await res.text().catch(() => '')));
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }
