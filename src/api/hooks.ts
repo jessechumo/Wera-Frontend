@@ -108,13 +108,18 @@ export function useRuns(limit = 10) {
   });
 }
 
-/** Latest run; polls every 5s while a run is in flight (status is null). */
+/**
+ * Latest run; polls every 5s while a run is in flight (it has no status
+ * yet). No runs at all, or a failed request, is not a run in flight.
+ */
 export function useLatestRun() {
   return useQuery({
     queryKey: ['runs', 'latest'],
     queryFn: () => api<RunsList>('/api/runs?limit=1'),
-    refetchInterval: (query) =>
-      query.state.data?.runs[0]?.status == null ? 5_000 : false,
+    refetchInterval: (query) => {
+      const run = query.state.data?.runs[0];
+      return run && run.status == null ? 5_000 : false;
+    },
   });
 }
 
