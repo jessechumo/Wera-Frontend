@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.2...wera-frontend-v0.6.3) (2026-10-24)
+
+
+### Bug Fixes
+
+* **deploy:** point Vercel rewrites at the new tunnel URL ([#62](https://github.com/jessechumo/Wera-Frontend/issues/62)) ([02374df](https://github.com/jessechumo/Wera-Frontend/commit/02374dfb33e35283bd9d3cdde06678a5343be0b2))
+
 ## [0.6.2](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.1...wera-frontend-v0.6.2) (2026-10-24)
 
 
