@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.2](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.1...wera-frontend-v0.6.2) (2026-10-24)
+
+
+### Bug Fixes
+
+* **deploy:** point Vercel rewrites at the new tunnel URL ([05a9e54](https://github.com/jessechumo/Wera-Frontend/commit/05a9e54473bc2a7175454e05b51585847fa7ed22))
+* **deploy:** point Vercel rewrites at the new tunnel URL ([#57](https://github.com/jessechumo/Wera-Frontend/issues/57)) ([2da8147](https://github.com/jessechumo/Wera-Frontend/commit/2da814755cb8d7e4ee7cd827df6a20d64367b16d))
+* **deps:** bump the production group with 2 updates ([#47](https://github.com/jessechumo/Wera-Frontend/issues/47)) ([f1be23e](https://github.com/jessechumo/Wera-Frontend/commit/f1be23e05550357ee9efbae3b6c8eae84fe4d331))
+* tracker erasing notes, lost resume edits, endless polling, proxy error pages ([#60](https://github.com/jessechumo/Wera-Frontend/issues/60)) ([4866388](https://github.com/jessechumo/Wera-Frontend/commit/4866388d37ff340353d73186a1cd97b3babbdb25))
+
 ## [0.6.1](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.0...wera-frontend-v0.6.1) (2026-10-22)
 
 
