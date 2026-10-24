@@ -109,3 +109,31 @@ describe('resume workspace', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('Ada King');
   });
 });
+
+describe('autosave', () => {
+  it('saves edits made while an earlier save is still on its way', async () => {
+    server();
+    // The first save is slow: the user keeps typing meanwhile.
+    const saved: string[] = [];
+    let release = () => {};
+    stubApi({
+      'GET /api/resumes/templates': () => templates,
+      'POST /api/resumes/preview': () => ({ pages: [svg], measure: { pages: 1, fill: 0.8 }, review: { score: 90, checks: [] } }),
+      'PUT /api/resumes/3': async (init) => {
+        const body = jsonBody<{ data: ResumeData }>(init);
+        saved.push(body.data.name);
+        if (saved.length === 1) await new Promise<void>((r) => (release = r));
+        return doc({ data: body.data, updated_at: `2026-10-11T00:00:0${saved.length}Z` });
+      },
+    });
+    renderApp(<Workspace doc={doc()} />);
+    const name = await screen.findByLabelText('Name');
+    await userEvent.clear(name);
+    await userEvent.type(name, 'Ada King');
+    await waitFor(() => expect(saved).toEqual(['Ada King']), { timeout: 3000 });
+    await userEvent.type(name, ' Byron');
+    release();
+    await waitFor(() => expect(saved).toEqual(['Ada King', 'Ada King Byron']), { timeout: 4000 });
+    await waitFor(() => expect(screen.getByText('Saved')).toBeInTheDocument());
+  });
+});

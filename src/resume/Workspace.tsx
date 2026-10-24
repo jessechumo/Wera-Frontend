@@ -90,23 +90,33 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
     setLayout(doc.layout);
   }
 
-  const edit = useCallback((d: ResumeData) => { history.set(d); setDirty(true); }, [history]);
-  const editLayout = (l: Layout) => { setLayout(l); setDirty(true); };
-  const undo = () => { history.undo(); setDirty(true); };
-  const redo = () => { history.redo(); setDirty(true); };
+  // Counts local changes: a save clears "dirty" only if nothing changed while it was in flight
+  // (else the edits made meanwhile would never be saved, though the page said "Saved").
+  const edits = useRef(0);
+  const changed = useCallback(() => { edits.current++; setDirty(true); }, []);
+  const edit = useCallback((d: ResumeData) => { history.set(d); changed(); }, [history, changed]);
+  const editLayout = (l: Layout) => { setLayout(l); changed(); };
+  const undo = () => { history.undo(); changed(); };
+  const redo = () => { history.redo(); changed(); };
+  /** After a save of the copy as it was at `at` edits: synced, and clean unless edited since. */
+  const savedAt = useCallback((at: number, s: ResumeDoc) => {
+    setSynced(s.updated_at);
+    if (edits.current === at) setDirty(false);
+  }, []);
 
   // Autosave a moment after the last change.
   const saveNow = save.mutate;
   useEffect(() => {
     if (!dirty) return;
     const t = window.setTimeout(() => {
+      const at = edits.current;
       saveNow({ data: draft, layout }, {
-        onSuccess: (saved) => { setSynced(saved.updated_at); setDirty(false); },
+        onSuccess: (saved) => savedAt(at, saved),
         onError: (e) => toast.error(`Not saved: ${errorMessage(e, 'Something went wrong')}`),
       });
     }, 1200);
     return () => window.clearTimeout(t);
-  }, [draft, layout, dirty, saveNow]);
+  }, [draft, layout, dirty, saveNow, savedAt]);
 
   // Undo and redo from the keyboard, outside text fields (they keep their own).
   useEffect(() => {
@@ -130,7 +140,8 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
   /** Saves pending edits, then runs next (downloads and fitting use the saved copy). */
   const withSaved = (next: () => void) => {
     if (!dirty) return next();
-    save.mutate({ data: draft, layout }, { onSuccess: (s) => { setSynced(s.updated_at); setDirty(false); next(); }, onError: (e) => toast.error(errorMessage(e, 'Something went wrong')) });
+    const at = edits.current;
+    save.mutate({ data: draft, layout }, { onSuccess: (s) => { savedAt(at, s); next(); }, onError: (e) => toast.error(errorMessage(e, 'Something went wrong')) });
   };
   const fitNow = () => withSaved(() => fit.mutate(undefined, {
     onSuccess: (d) => toast.success(d.fit?.summary ?? 'Fitted.'),
