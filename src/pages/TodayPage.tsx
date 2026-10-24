@@ -132,7 +132,7 @@ export default function TodayPage() {
   const lastRun = latest.data?.runs[0];
 
   const quickStatus = (id: number, status: AppStatus) => {
-    update.mutate({ id, status, notes: '' });
+    update.mutate({ id, status });
   };
 
   // New matches per day in the user's own time zone, most recent last.

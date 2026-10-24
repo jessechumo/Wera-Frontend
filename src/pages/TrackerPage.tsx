@@ -309,7 +309,7 @@ export default function TrackerPage() {
   );
 
   const onStatus = (id: number, status: AppStatus) =>
-    update.mutate({ id, status, notes: '' });
+    update.mutate({ id, status });
 
   const columns = showNI ? [...COLUMNS, 'not_interested' as AppStatus] : COLUMNS;
   const empty = useNothingTracked();
