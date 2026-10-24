@@ -23,6 +23,17 @@ describe('api', () => {
     expect(err).toMatchObject({ status: 422, message: 'Titles need 8 to 140 characters.' });
   });
 
+  it('says the server is not answering instead of showing a proxy\'s error page', async () => {
+    mockApi({
+      'GET /api/down': () => new Response('<!DOCTYPE html><html><body>Cloudflare Tunnel error</body></html>', { status: 530 }),
+      'GET /api/plain': () => new Response('upstream timed out', { status: 504 }),
+    });
+    const down = (await api('/api/down').catch((e: unknown) => e)) as ApiError;
+    expect(down.status).toBe(530);
+    expect(down.message).toMatch(/isn't answering \(error 530\)/);
+    expect(await api('/api/plain').catch((e: unknown) => e)).toMatchObject({ message: 'upstream timed out' });
+  });
+
   it('announces an expired session, except on auth routes', async () => {
     const seen = vi.fn();
     window.addEventListener(UNAUTHORIZED_EVENT, seen);

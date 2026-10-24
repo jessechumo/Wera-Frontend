@@ -98,6 +98,7 @@ describe('other pages', () => {
 
   it('Tracker cards can be dragged, and a moved card changes column at once', async () => {
     const saved = { ...fixtures.jobs.jobs[0], application_status: 'saved' as const };
+    const sent: unknown[] = [];
     stubApi({
       // Each column asks for its own status; only Saved holds a job.
       'GET /api/jobs': (_init, url) => {
@@ -105,7 +106,10 @@ describe('other pages', () => {
         return { ...fixtures.jobs, total: jobs.length, jobs };
       },
       // The save never returns, so what the board shows is the optimistic move.
-      [`PUT /api/jobs/${saved.id}/application`]: () => new Promise<never>(() => {}),
+      [`PUT /api/jobs/${saved.id}/application`]: (init) => {
+        sent.push(jsonBody(init));
+        return new Promise<never>(() => {});
+      },
     });
     renderApp(<TrackerPage />);
     const savedCol = await screen.findByRole('region', { name: 'Saved' });
@@ -115,6 +119,8 @@ describe('other pages', () => {
     await userEvent.selectOptions(within(savedCol).getByLabelText(`Status for ${saved.title}`), 'applied');
     expect(await within(screen.getByRole('region', { name: 'Applied' })).findByText(saved.title)).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: 'Saved' })).queryByText(saved.title)).toBeNull();
+    // Only the status: the application's notes stay as they are (an empty "notes" would erase them).
+    expect(sent).toEqual([{ id: saved.id, status: 'applied' }]);
   });
 
   it('Industries shows each industry with its matches', async () => {

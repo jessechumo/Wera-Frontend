@@ -50,7 +50,12 @@ export default function JobsPage() {
 
   const [adding, setAdding] = useState(false);
   const [sel, setSel] = useState(0);
-  const query = searchParams.toString();
+  // The filters and page, not the open job: closing the drawer keeps the selection where it was.
+  const query = (() => {
+    const sp = new URLSearchParams(searchParams);
+    sp.delete('job');
+    return sp.toString();
+  })();
   const [selQuery, setSelQuery] = useState(query);
   if (selQuery !== query) {
     // New filters or page: the selection starts at the top.
@@ -106,7 +111,7 @@ export default function JobsPage() {
     }
   }, [routeId, navigate, setSearchParams]);
 
-  const quickStatus = (id: number, status: AppStatus) => update.mutate({ id, status, notes: '' });
+  const quickStatus = (id: number, status: AppStatus) => update.mutate({ id, status });
 
   // Keyboard: j/k move selection, Enter opens, o opens the posting.
   useEffect(() => {
