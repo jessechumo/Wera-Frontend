@@ -5,7 +5,7 @@ import {
   CheckCircle2, ChevronDown, Code2, Download, Eye, FileText, LayoutTemplate, LoaderCircle, Maximize2, PenLine,
   Redo2, SlidersHorizontal, Stethoscope, Trash2, Undo2, Wand2,
 } from 'lucide-react';
-import { errorMessage } from '../api/client';
+import { errorMessage, isOutage } from '../api/client';
 import { useDeleteResume, useFitResume, useSaveResume, useTemplates, type Layout, type ResumeData, type ResumeDoc } from '../api/resumes';
 import { toast } from '../lib/toast';
 import { hiddenCount, showAll, targetId, type Issues } from './edit';
@@ -93,6 +93,7 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
   // Counts local changes: a save clears "dirty" only if nothing changed while it was in flight
   // (else the edits made meanwhile would never be saved, though the page said "Saved").
   const edits = useRef(0);
+  const savedEdits = useRef(0);
   const changed = useCallback(() => { edits.current++; setDirty(true); }, []);
   const edit = useCallback((d: ResumeData) => { history.set(d); changed(); }, [history, changed]);
   const editLayout = (l: Layout) => { setLayout(l); changed(); };
@@ -100,23 +101,43 @@ export function Workspace({ doc }: { doc: ResumeDoc }) {
   const redo = () => { history.redo(); changed(); };
   /** After a save of the copy as it was at `at` edits: synced, and clean unless edited since. */
   const savedAt = useCallback((at: number, s: ResumeDoc) => {
+    savedEdits.current = at;
     setSynced(s.updated_at);
     if (edits.current === at) setDirty(false);
   }, []);
 
-  // Autosave a moment after the last change.
+  // Autosave a moment after the last change. A save that hit an outage is
+  // tried again until it lands: no edit is coming to set it off, and the
+  // page must not sit on "Unsaved" with the server back.
   const saveNow = save.mutate;
+  const [saveRetries, setSaveRetries] = useState(0);
   useEffect(() => {
     if (!dirty) return;
     const t = window.setTimeout(() => {
       const at = edits.current;
       saveNow({ data: draft, layout }, {
-        onSuccess: (saved) => savedAt(at, saved),
-        onError: (e) => toast.error(`Not saved: ${errorMessage(e, 'Something went wrong')}`),
+        onSuccess: (saved) => {
+          setSaveRetries(0);
+          savedAt(at, saved);
+        },
+        onError: (e) => {
+          const outage = isOutage(e);
+          if (saveRetries === 0) toast.error(outage ? 'Not saved yet. Wera will keep trying.' : `Not saved: ${errorMessage(e, 'Something went wrong')}`);
+          if (outage) setSaveRetries((n) => n + 1);
+        },
       });
-    }, 1200);
+    }, saveRetries ? 10_000 : 1200);
     return () => window.clearTimeout(t);
-  }, [draft, layout, dirty, saveNow, savedAt]);
+  }, [draft, layout, dirty, saveRetries, saveNow, savedAt]);
+
+  // Closing the tab with edits not saved yet asks first.
+  useEffect(() => {
+    const warn = (e: BeforeUnloadEvent) => {
+      if (edits.current !== savedEdits.current) e.preventDefault();
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, []);
 
   // Undo and redo from the keyboard, outside text fields (they keep their own).
   useEffect(() => {
