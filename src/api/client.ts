@@ -38,6 +38,11 @@ export function failureMessage(res: { status: number; statusText: string }, text
   return `${res.status} ${res.statusText}`.trim();
 }
 
+/** Whether a failed request may work later: it never reached Wera, or Wera or a proxy on the way failed. */
+export function isOutage(err: unknown): boolean {
+  return !(err instanceof ApiError) || err.status >= 500;
+}
+
 /**
  * For useQuery's refetchInterval: ask again every 10 seconds while the last
  * try failed, since a server coming back fires no event a page can hear.
