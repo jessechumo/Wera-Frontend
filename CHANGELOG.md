@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.7.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.5...wera-frontend-v0.7.0) (2026-10-31)
+
+
+### Features
+
+* **tracker:** say when a tracked job's posting has closed ([d666379](https://github.com/jessechumo/Wera-Frontend/commit/d6663799767efe74d342f8fb88f9373a7490e7fa))
+
+
+### Bug Fixes
+
+* **app:** keep a page's data on screen when a refresh fails ([e939be5](https://github.com/jessechumo/Wera-Frontend/commit/e939be5d8f78690672f0a9234102eba3f6b66a09))
+* **app:** keep working through an outage and recover by itself ([c49dfb1](https://github.com/jessechumo/Wera-Frontend/commit/c49dfb12106c5e03ea57e31d5e73851538c8aca6))
+* **app:** make Copy work on the plain http dashboard ([b17559d](https://github.com/jessechumo/Wera-Frontend/commit/b17559d3aa9faab09bff5cc79003d2f64d7fc1d2))
+* **app:** release the outage work and the sweep's fixes ([0d8de37](https://github.com/jessechumo/Wera-Frontend/commit/0d8de377cd400ec9998176c63632810f081472b4))
+* **app:** stay on the page when a page's code can't load offline ([97a92a5](https://github.com/jessechumo/Wera-Frontend/commit/97a92a55a776957daadf8458459c1cc03b040100))
+* **app:** stop showing a run in flight when there is no run ([363402b](https://github.com/jessechumo/Wera-Frontend/commit/363402b394ce606fbaa4abdcb0f1d65e122f2ac6))
+* **resume:** keep saving through an outage and warn before losing edits ([a50d4dc](https://github.com/jessechumo/Wera-Frontend/commit/a50d4dc47232d1f373e5cfa5deadd3de98817b97))
+* **settings:** export every tracked job, and show a failed first load ([d8b7fa7](https://github.com/jessechumo/Wera-Frontend/commit/d8b7fa78498a9f183a678a2ff39cdb1a08f95373))
+
+
+### Documentation
+
+* **readme:** bring the stack and Vercel steps up to date ([beec974](https://github.com/jessechumo/Wera-Frontend/commit/beec9741f4955425d63fd02eae6d51459f81ed77))
+
 ## [0.6.5](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.4...wera-frontend-v0.6.5) (2026-10-31)
 
 
