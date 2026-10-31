@@ -8,7 +8,7 @@ import { relTime } from '../lib/format';
 import { sendVerification, useAuthConfig, useChangePassword, useDeleteAccount, useMe } from '../api/auth';
 import { api, errorMessage, errorOrNull } from '../api/client';
 import { useHideCompany, useIndustryLabel, useSaveSettings, useSettings } from '../api/hooks';
-import type { JobList, Settings } from '../api/types';
+import type { AppStatus, Job, JobList, Settings } from '../api/types';
 import { Field } from '../components/Field';
 import { INPUT_CLS } from '../lib/styles';
 import { ErrorState, Skeleton } from '../components/States';
@@ -106,23 +106,47 @@ function PasswordForm() {
 }
 
 /** Downloads every job with an application status as CSV. */
+const TRACKED: AppStatus[] = ['saved', 'applied', 'interviewing', 'offer', 'rejected', 'not_interested'];
+const EXPORT_PAGE = 200;
+
+/** Every job the user tracks, a status and a page at a time. */
+async function trackedJobs(): Promise<Job[]> {
+  const out: Job[] = [];
+  for (const status of TRACKED) {
+    for (let offset = 0; ; offset += EXPORT_PAGE) {
+      const { jobs } = await api<JobList>(`/api/jobs?status=${status}&limit=${EXPORT_PAGE}&offset=${offset}`);
+      out.push(...jobs);
+      if (jobs.length < EXPORT_PAGE) break;
+    }
+  }
+  return out;
+}
+
+/** A CSV cell. A leading quote keeps a spreadsheet from running a job title as a formula. */
+function csvCell(v: string | number | null | undefined): string {
+  const s = String(v ?? '');
+  return `"${(/^[=+\-@\t\r]/.test(s) ? `'${s}` : s).replace(/"/g, '""')}"`;
+}
+
 async function exportApplications() {
-  const data = await api<JobList>('/api/jobs?limit=200&include_excluded=true');
-  const rows = data.jobs.filter((j) => j.application_status);
-  const esc = (v: string | number | null | undefined) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-  const csv = [
-    ['company', 'title', 'status', 'fit_score', 'location', 'url', 'notes'].join(','),
-    ...rows.map((j) =>
-      [j.company, j.title, j.application_status, j.fit_score, j.location_summary ?? j.location_raw, j.url, j.application_notes]
-        .map(esc)
-        .join(','),
-    ),
-  ].join('\n');
-  const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-  const a = Object.assign(document.createElement('a'), { href: url, download: 'wera-applications.csv' });
-  a.click();
-  URL.revokeObjectURL(url);
-  toast.success(`Exported ${rows.length} application${rows.length === 1 ? '' : 's'}.`);
+  try {
+    const rows = await trackedJobs();
+    const csv = [
+      ['company', 'title', 'status', 'fit_score', 'location', 'url', 'notes', 'posting_closed'].join(','),
+      ...rows.map((j) =>
+        [j.company, j.title, j.application_status, j.fit_score, j.location_summary ?? j.location_raw, j.url, j.application_notes, j.closed_at?.slice(0, 10)]
+          .map(csvCell)
+          .join(','),
+      ),
+    ].join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const a = Object.assign(document.createElement('a'), { href: url, download: 'wera-applications.csv' });
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${rows.length} application${rows.length === 1 ? '' : 's'}.`);
+  } catch (e) {
+    toast.error(`Couldn't export: ${errorMessage(e)}`);
+  }
 }
 
 function Connections() {
@@ -241,8 +265,8 @@ export default function SettingsPage() {
     setDraft(rest);
   }
 
-  if (settings.isLoading || !draft) return <Skeleton className="h-96 w-full" />;
-  if (settings.error) return <ErrorState message={String(settings.error)} onRetry={() => void settings.refetch()} />;
+  if (settings.isLoading) return <Skeleton className="h-96 w-full" />;
+  if (!draft) return <ErrorState message={errorMessage(settings.error)} onRetry={() => void settings.refetch()} />;
 
   const update = (next: Settings) => {
     setDraft(next);
