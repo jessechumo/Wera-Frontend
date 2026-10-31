@@ -5,7 +5,7 @@ import {
 } from '@dnd-kit/core';
 import { useJobs, useUpdateApplication } from '../api/hooks';
 import type { AppStatus, Job } from '../api/types';
-import { AutofilledBadge } from '../components/JobBadges';
+import { AutofilledBadge, ClosedBadge } from '../components/JobBadges';
 import { JobDrawer } from '../components/JobDrawer';
 import { StatusSelect } from '../components/StatusSelect';
 import { Skeleton } from '../components/States';
@@ -69,6 +69,7 @@ function KanbanCard({
             {relTime(job.first_seen_at)}
           </span>
           <AutofilledBadge at={job.autofilled_at} />
+          <ClosedBadge at={job.closed_at} />
         </div>
       </div>
       <div className="mt-2 flex items-center gap-1.5">

@@ -21,7 +21,7 @@ import { JobResumePanel } from './JobResumePanel';
 import { toast } from '../lib/toast';
 import type { AppStatus, JobDetail } from '../api/types';
 import { Description } from './Description';
-import { IndustryBadge, StatusPill } from './JobBadges';
+import { ClosedBadge, IndustryBadge, StatusPill } from './JobBadges';
 import { Skeleton } from './States';
 import { Insights } from './JobInsights';
 import { absTime, relTime } from '../lib/format';
@@ -71,6 +71,7 @@ function Header({ job }: { job: JobDetail }) {
       <div className="flex flex-wrap items-center gap-2">
         <IndustryBadge value={job.industry} />
         <StatusPill value={job.application_status} />
+        <ClosedBadge at={job.closed_at} />
       </div>
       <h2 className="mt-2 text-xl leading-snug font-semibold text-balance text-text md:text-2xl">{job.title}</h2>
       <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
@@ -315,7 +316,7 @@ export function JobDrawer({
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-3.5 py-2 text-xs font-semibold text-bg transition-colors duration-150 hover:bg-accent/85"
             >
-              <ExternalLink className="size-3.5" /> Apply on {job.company}'s site
+              <ExternalLink className="size-3.5" /> {job.closed_at ? `See it on ${job.company}'s site` : `Apply on ${job.company}'s site`}
             </a>
             <button
               onClick={() => setStatus('saved')}
