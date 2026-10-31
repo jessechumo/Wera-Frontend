@@ -29,6 +29,24 @@ describe('pages after a deploy', () => {
     expect(reloadForNewVersion()).toBe(false);
   });
 
+  it('waits for the network instead of reloading into the browser error page', async () => {
+    stubReload();
+    vi.stubGlobal('navigator', { onLine: false });
+    let tries = 0;
+    const page = loadFresh(() => {
+      tries++;
+      return tries === 1
+        ? Promise.reject(new TypeError('Failed to fetch dynamically imported module: /assets/SettingsPage.js'))
+        : Promise.resolve({ default: 'the page' });
+    });
+    await new Promise((done) => setTimeout(done));
+    expect(reload).not.toHaveBeenCalled();
+    vi.stubGlobal('navigator', { onLine: true });
+    window.dispatchEvent(new Event('online'));
+    await expect(page).resolves.toEqual({ default: 'the page' });
+    expect(reload).not.toHaveBeenCalled();
+  });
+
   it('passes other errors and good loads through', async () => {
     stubReload();
     await expect(loadFresh(() => Promise.reject(new Error('boom')))).rejects.toThrow('boom');
