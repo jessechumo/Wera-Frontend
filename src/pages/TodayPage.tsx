@@ -198,7 +198,7 @@ export default function TodayPage() {
 
       {isLoading ? (
         <SkeletonRows rows={4} />
-      ) : error ? (
+      ) : error && !data ? (
         <ErrorState
           message={error instanceof Error ? error.message : 'unknown error'}
           onRetry={() => void refetch()}
