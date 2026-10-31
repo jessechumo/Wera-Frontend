@@ -43,6 +43,8 @@ export interface Job {
   estimated_score: number | null;
   /** When the Chrome extension last filled an application for it (absent on older servers). */
   autofilled_at?: string | null;
+  /** When the posting came down (null: still open). */
+  closed_at?: string | null;
 }
 
 export interface DeepGap {

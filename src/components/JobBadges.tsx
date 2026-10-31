@@ -33,6 +33,16 @@ export function AutofilledBadge({ at }: { at?: string | null }) {
   );
 }
 
+/** Marks a job whose posting has come down. It stays tracked, but can no longer be applied to. */
+export function ClosedBadge({ at }: { at?: string | null }) {
+  if (!at) return null;
+  return (
+    <span title={`The posting came down ${relTime(at)}`}>
+      <Badge variant="neutral">Posting closed</Badge>
+    </span>
+  );
+}
+
 export function WorkModeBadge({ value }: { value: Job['work_mode'] }) {
   if (!value) return null;
   const label = value === 'remote' ? 'Remote' : value === 'hybrid' ? 'Hybrid' : 'Onsite';
