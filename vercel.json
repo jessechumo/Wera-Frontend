@@ -11,11 +11,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://millennium-gulf-lee-royalty.trycloudflare.com/api/:path*"
+      "destination": "https://investors-gloves-cal-earlier.trycloudflare.com/api/:path*"
     },
     {
       "source": "/healthz",
-      "destination": "https://millennium-gulf-lee-royalty.trycloudflare.com/healthz"
+      "destination": "https://investors-gloves-cal-earlier.trycloudflare.com/healthz"
     },
     {
       "source": "/((?!assets/).*)",
