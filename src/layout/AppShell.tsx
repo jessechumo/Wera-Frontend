@@ -102,10 +102,11 @@ export function AppShell() {
   useScrollRestoration();
   useWarmup();
   const qc = useQueryClient();
-    const latest = useLatestRun();
+  const latest = useLatestRun();
   const location = useLocation();
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const running = latest.data?.runs[0]?.status == null;
+  const latestRun = latest.data?.runs[0];
+  const running = latestRun != null && latestRun.status == null;
 
   // ⌘K / Ctrl+K toggles the command palette.
   useEffect(() => {
