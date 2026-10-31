@@ -18,7 +18,7 @@ function Picker({ onStart, starting }: { onStart: (domain: string, d: Difficulty
   const [domain, setDomain] = useState('');
   const [diff, setDiff] = useState<Difficulty | ''>('');
   if (domains.isLoading) return <Skeleton className="h-80 w-full" />;
-  if (domains.error) return <ErrorState message={String(domains.error)} onRetry={() => void domains.refetch()} />;
+  if (domains.isLoadingError) return <ErrorState message={String(domains.error)} onRetry={() => void domains.refetch()} />;
   const list = domains.data?.domains ?? [];
   if (!list.length) return <EmptyState title="Questions are on their way" hint="Check back soon." />;
   const total = list.reduce((a, d) => a + d.answered, 0);

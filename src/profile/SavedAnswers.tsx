@@ -66,7 +66,7 @@ export function SavedAnswers() {
     if (ready && window.location.hash === '#answers') top.current?.scrollIntoView({ block: 'start' });
   }, [ready]);
   if (q.isPending) return <Skeleton className="h-32 w-full" />;
-  if (q.isError) return <p className="text-xs text-bad">{errorMessage(q.error, 'Could not load your saved answers')}</p>;
+  if (q.isLoadingError) return <p className="text-xs text-bad">{errorMessage(q.error, 'Could not load your saved answers')}</p>;
   const all = q.data.answers;
   if (!all.length) {
     return <p className="text-xs text-muted">None yet. When you fill an application with the extension, the answers you give are kept here and offered on the next form that asks.</p>;

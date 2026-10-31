@@ -52,7 +52,7 @@ export default function CommunityPage() {
 
       {feed.isLoading ? (
         <SkeletonRows rows={4} />
-      ) : feed.error ? (
+      ) : feed.isLoadingError ? (
         <ErrorState message={String(feed.error)} onRetry={() => void feed.refetch()} />
       ) : !feed.data?.posts.length ? (
         <EmptyState
