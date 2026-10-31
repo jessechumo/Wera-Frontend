@@ -12,13 +12,13 @@ export function RequireProfile() {
       </div>
     );
   }
-  if (profile.error) {
+  if (!profile.data) {
     return (
       <div className="mx-auto max-w-md p-6 pt-24">
-        <ErrorState message="Couldn't load your profile." onRetry={() => void profile.refetch()} />
+        <ErrorState message="Couldn't load your profile. Retrying by itself." onRetry={() => void profile.refetch()} />
       </div>
     );
   }
-  if (!profile.data?.ready) return <Navigate to="/welcome" replace />;
+  if (!profile.data.ready) return <Navigate to="/welcome" replace />;
   return <Outlet />;
 }
