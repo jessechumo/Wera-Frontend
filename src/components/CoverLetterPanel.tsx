@@ -4,6 +4,7 @@ import { useMe } from '../api/auth';
 import { errorMessage } from '../api/client';
 import { useCoverLetter, useWriteCoverLetter } from '../api/hooks';
 import type { JobDetail } from '../api/types';
+import { copyText } from '../lib/clipboard';
 import { toast } from '../lib/toast';
 
 const today = () => new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
@@ -98,7 +99,7 @@ export function CoverLetterPanel({ job }: { job: JobDetail }) {
             <ToolButton
               icon={Copy}
               label="Copy"
-              onClick={() => void navigator.clipboard.writeText(letter.data?.body ?? '').then(() => toast.success('Copied.'))}
+              onClick={() => void copyText(letter.data?.body ?? '').then((ok) => (ok ? toast.success('Copied.') : toast.error("Couldn't copy.")))}
               disabled={writing}
             />
             <ToolButton

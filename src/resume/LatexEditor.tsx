@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { Check, ChevronDown, CircleAlert, Copy, Download, ExternalLink, LoaderCircle, RotateCcw } from 'lucide-react';
 import { errorMessage } from '../api/client';
 import { parseResumeTeX, resumeTeX, type Layout, type ResumeData } from '../api/resumes';
+import { copyText } from '../lib/clipboard';
 import { toast } from '../lib/toast';
 
 /** Colors LaTeX: commands, braces, comments and escapes. */
@@ -134,7 +135,7 @@ export function LatexEditor({ data, layout, filename, onApply, onPreview }: {
           </button>
         )}
         <span className="ml-auto flex items-center gap-1.5">
-          <button type="button" onClick={() => void navigator.clipboard.writeText(full).then(() => toast.success('Copied the whole file.'))}
+          <button type="button" onClick={() => void copyText(full).then((ok) => (ok ? toast.success('Copied the whole file.') : toast.error("Couldn't copy.")))}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface-2 px-2.5 py-1.5 text-xs font-medium hover:border-accent/40">
             <Copy className="size-3.5" /> Copy
           </button>
