@@ -8,7 +8,7 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
 [![License](https://img.shields.io/github/license/jessechumo/Wera-Frontend)](LICENSE)
 
-The dashboard for [Wera](https://github.com/jessechumo/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume using Coral Bricks.
+The dashboard for [Wera](https://github.com/jessechumo/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume with an AI model.
 
 https://github.com/user-attachments/assets/525e661c-765b-4137-98b7-168d57af9690
 
@@ -23,6 +23,8 @@ Each user signs up, uploads a resume, and answers a few questions; the AI drafts
 
 A React single-page app. It calls only its own origin (`/api`), so it behaves the same behind the Vite dev proxy, nginx, or Vercel rewrites, and the session cookie never crosses sites. Server state lives in TanStack Query; route guards send signed-out users to login and users without a profile to setup.
 
+The app is built to outlast the server. If the API stops answering, everything already on screen stays there and a banner says what is wrong, telling a server that is down from a device that is offline. The app checks every 10 seconds, and when Wera answers again it refreshes whatever failed, so a tab left open carries on by itself. Resume edits keep trying to save until they land, and leaving with unsaved edits asks first. Visitors still see the landing page.
+
 ## Features
 
 - **Instant start:** right after setup, Today lists your best matches using local estimates (a dashed ring marked "est.") and swaps in AI scores as they arrive; opening a job scores it on the spot
@@ -36,13 +38,13 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
   - a review with a score: missing contact details, weak openers, first person, long bullets, few metrics, mixed date formats and more, each jumping to its bullet
   - a LaTeX tab to edit the resume as LaTeX (the preview follows), then download the `.tex` or open it in Overleaf
   - fit to one page in a click; download PDF, LaTeX or plain text
-- **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected
+- **Tracker:** kanban board from saved to applied, interviewing, offer, or rejected. An application stays on the board after its posting comes down, marked "Posting closed"
 - **Industries:** your matches in each industry, and every company Wera watches there
 - **Sponsorship:** each company's certified H-1B applications (new hires, median offered wage, and by job title, place and wage level) beside what its postings say about sponsorship; look up any employer, even ones Wera does not watch
 - **Interview prep:** quick A to D quizzes by topic and difficulty, with explanations
 - **Community:** a Medium-style blog with tags, reactions and comments; posts are reviewed by an AI moderator before they go live
 - **Profile:** photo, uploaded resume (view, download, see the extracted text), preferences and profile text
-- **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/jessechumo/wera-extension)), password, CSV export, account deletion
+- **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/jessechumo/wera-extension)), password, CSV export of every job you track, account deletion
 - **Application details:** what job applications ask beyond your profile (contact, links, work authorization, education, voluntary self-identification), filled into forms by the extension; can be pre-filled from your resume
 - **Admins** use the separate [wera-admin](https://github.com/jessechumo/wera-admin) console: this dashboard has no admin pages
 - **Excluded:** every filtered job with the reason and evidence
@@ -50,7 +52,7 @@ A React single-page app. It calls only its own origin (`/api`), so it behaves th
 
 ## Stack
 
-Vite, React 18, TypeScript (strict), Tailwind CSS v4, React Router 7, TanStack Query, Lucide icons, Geist fonts (self-hosted). Tests: Vitest, Testing Library, Playwright.
+Vite 8, React 19, TypeScript 6 (strict), Tailwind CSS 4, React Router 7, TanStack Query, Lucide icons, Geist fonts (self-hosted). Tests: Vitest, Testing Library, Playwright.
 
 ## Setup
 
@@ -108,15 +110,17 @@ Released images are published to `ghcr.io/jessechumo/wera-frontend:<version>`.
 
 ## Deploy on Vercel
 
-`vercel.json` serves the built app with the same security headers and rewrites `/api/*` and `/healthz` to the backend, so the browser sees a single origin and the session cookie works without cross-site settings.
+`vercel.json` serves the built app with the same security headers and rewrites `/api/*` and `/healthz` to the backend, so the browser sees a single origin and the session cookie works without cross-site settings. Vercel deploys `main`.
 
-1. Give the backend a public HTTPS address (for example a Cloudflare Tunnel to port 8080) and put it in both `destination` URLs in `vercel.json` (they ship as `https://wera-api.example.com`).
+1. Give the backend a public HTTPS address (for example a Cloudflare Tunnel to port 8080) and put it in both `destination` URLs in `vercel.json`.
 2. Import this repo in Vercel; the framework preset is Vite.
 3. On the backend set `COOKIE_SECURE=true`, `TRUST_PROXY=true`, and `PUBLIC_ORIGINS=https://<your-app>.vercel.app`, then restart it.
 
+While the backend runs behind a Cloudflare quick tunnel, its address changes whenever the tunnel is replaced. The backend's [tunnel watch](https://github.com/jessechumo/Wera/tree/main/deploy/home) handles that by itself: it commits the new address to `vercel.json` on `main` and `dev`, as `chore(deploy): point Vercel rewrites at the new tunnel URL`. Those commits are expected and cut no release.
+
 ## Releases and versioning
 
-Commits follow [Conventional Commits](https://www.conventionalcommits.org), checked on every pull request. [release-please](https://github.com/googleapis/release-please) keeps a release PR with the next semantic version and `CHANGELOG.md`; merging it tags the release, bumps `package.json` and publishes the image. The sidebar footer shows the running web and API versions.
+Commits follow [Conventional Commits](https://www.conventionalcommits.org), checked on every pull request. [release-please](https://github.com/googleapis/release-please) keeps a release PR with the next semantic version and `CHANGELOG.md`; merging it tags `wera-frontend-vX.Y.Z`, bumps `package.json` and publishes the image. The sidebar footer shows the running web and API versions.
 
 ## Project layout
 
