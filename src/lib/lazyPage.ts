@@ -18,6 +18,7 @@ const RELOADED = 'wera-reloaded-at';
  * its error instead of reloading forever. False when it did not reload.
  */
 export function reloadForNewVersion(): boolean {
+  if (navigator.onLine === false) return false; // a reload now would only load the browser's error page
   let last = 0;
   try {
     last = Number(sessionStorage.getItem(RELOADED)) || 0;
@@ -34,12 +35,22 @@ export function reloadForNewVersion(): boolean {
   return true;
 }
 
-/** Loads a page's code; when a deploy removed it, reloads into the new version instead of failing. */
+const backOnline = () => new Promise<void>((resolve) => window.addEventListener('online', () => resolve(), { once: true }));
+
+/**
+ * Loads a page's code. Offline, it waits for the network; when a deploy
+ * removed the file, it reloads into the new version instead of failing.
+ */
 export async function loadFresh<T>(load: () => Promise<T>): Promise<T> {
   try {
     return await load();
   } catch (e) {
-    if (isStaleChunk(e) && reloadForNewVersion()) return new Promise<T>(() => {}); // the page is reloading
+    if (!isStaleChunk(e)) throw e;
+    if (navigator.onLine === false) {
+      await backOnline();
+      return loadFresh(load);
+    }
+    if (reloadForNewVersion()) return new Promise<T>(() => {}); // the page is reloading
     throw e;
   }
 }
