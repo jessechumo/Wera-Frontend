@@ -7,6 +7,7 @@ import { LogOut, Search } from 'lucide-react';
 import { useScrollRestoration } from './useScrollRestoration';
 import { useQueryClient } from '@tanstack/react-query';
 import { useLogout, useMe } from '../api/auth';
+import { ConnectionBanner } from './ConnectionBanner';
 import { NAV } from './nav';
 import { ThemeToggle } from '../lib/theme';
 import { Logo } from '../components/Logo';
@@ -101,10 +102,11 @@ export function AppShell() {
   useScrollRestoration();
   useWarmup();
   const qc = useQueryClient();
-    const latest = useLatestRun();
+  const latest = useLatestRun();
   const location = useLocation();
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const running = latest.data?.runs[0]?.status == null;
+  const latestRun = latest.data?.runs[0];
+  const running = latestRun != null && latestRun.status == null;
 
   // ⌘K / Ctrl+K toggles the command palette.
   useEffect(() => {
@@ -180,6 +182,7 @@ export function AppShell() {
       <div className="flex min-w-0 flex-1 flex-col lg:pl-56">
         {/* Top bar */}
         <header className="sticky top-0 z-40 border-b border-border bg-bg/80 backdrop-blur">
+          <ConnectionBanner />
           <div className="flex h-14 items-center gap-3 px-4 md:px-6">
             <span className="lg:hidden">
               <Logo />

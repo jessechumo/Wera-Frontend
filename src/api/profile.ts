@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from './client';
+import { api, retryWhileDown } from './client';
 import type { Answers, MyUsage, Preferences, Profile, ProfileOptions, Suggestions } from './types';
 
 /**
@@ -24,6 +24,7 @@ export function useProfile() {
     queryKey: ['profile'],
     queryFn: async () => normalizeProfile(await api<Profile>('/api/profile')),
     staleTime: 5 * 60_000,
+    refetchInterval: retryWhileDown,
   });
 }
 

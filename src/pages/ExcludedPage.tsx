@@ -83,7 +83,7 @@ export default function ExcludedPage() {
 
       {isLoading ? (
         <SkeletonRows rows={8} />
-      ) : error ? (
+      ) : error && !data ? (
         <ErrorState
           message={error instanceof Error ? error.message : 'unknown error'}
           onRetry={() => void refetch()}

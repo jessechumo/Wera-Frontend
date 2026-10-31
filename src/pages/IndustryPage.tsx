@@ -17,7 +17,7 @@ function Matches({ industry, onOpen }: { industry: string; onOpen: (id: number) 
   // Scored matches only (min_score 1), the same set the match count covers.
   const jobs = useJobs({ industry, min_score: 1, limit: 100, sort: 'score' });
   if (jobs.isLoading) return <SkeletonRows rows={5} />;
-  if (jobs.error) return <ErrorState message={String(jobs.error)} onRetry={() => void jobs.refetch()} />;
+  if (jobs.isLoadingError) return <ErrorState message={String(jobs.error)} onRetry={() => void jobs.refetch()} />;
   const list = jobs.data?.jobs ?? [];
   if (list.length === 0) {
     return (
@@ -64,7 +64,7 @@ function Matches({ industry, onOpen }: { industry: string; onOpen: (id: number) 
 function Companies({ industry }: { industry: string }) {
   const companies = useCompanies();
   if (companies.isLoading) return <Skeleton className="h-40 w-full" />;
-  if (companies.error) return <ErrorState message={String(companies.error)} />;
+  if (companies.isLoadingError) return <ErrorState message={String(companies.error)} />;
   const list = (companies.data?.companies ?? [])
     .filter((c) => c.industry === industry && c.enabled)
     .sort((a, b) => b.jobs_scored - a.jobs_scored || b.jobs_open - a.jobs_open);

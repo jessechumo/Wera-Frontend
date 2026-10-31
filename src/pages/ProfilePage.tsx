@@ -213,7 +213,7 @@ function ProfileOverview() {
     };
 
   if (profile.isLoading) return <Skeleton className="h-96 w-full" />;
-  if (profile.error) return <ErrorState message={String(profile.error)} onRetry={() => void profile.refetch()} />;
+  if (profile.isLoadingError) return <ErrorState message={String(profile.error)} onRetry={() => void profile.refetch()} />;
 
   const problem = prefsProblem(prefs) ?? (markdown.trim() === '' ? 'The profile text is empty.' : null);
   const onSave = () =>

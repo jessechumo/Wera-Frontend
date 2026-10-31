@@ -4,7 +4,7 @@ import {
   useQueryClient,
   type QueryKey,
 } from '@tanstack/react-query';
-import { api, ApiError, errorMessage } from './client';
+import { api, ApiError, errorMessage, retryWhileDown } from './client';
 import { toast } from '../lib/toast';
 import type {
   AppStatus,
@@ -211,8 +211,9 @@ export function useHealth() {
       const body = (await res.json().catch(() => ({}))) as { version?: string; commit?: string };
       return { version: body.version ?? 'unknown', commit: body.commit ?? '' };
     },
-    refetchInterval: 60_000,
-    retry: false,
+    refetchInterval: (query) => retryWhileDown(query) || 60_000,
+    retry: 1, // one failed look is a blip, not an outage
+    retryDelay: 2_000,
     staleTime: 30_000,
   });
 }

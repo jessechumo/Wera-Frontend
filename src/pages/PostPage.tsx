@@ -70,7 +70,7 @@ export default function PostPage() {
       </div>
     );
   }
-  if (post.error) {
+  if (post.isLoadingError) {
     return <ErrorState message={post.error instanceof ApiError && post.error.status === 404 ? 'This post is no longer available.' : String(post.error)} />;
   }
   const p = post.data!;

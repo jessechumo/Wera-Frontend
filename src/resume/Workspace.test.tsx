@@ -1,9 +1,9 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Layout, ResumeData, ResumeDoc } from '../api/resumes';
 import { stubApi } from '../test/fixtures';
-import { renderApp, jsonBody } from '../test/render';
+import { jsonResponse, renderApp, jsonBody } from '../test/render';
 import { Workspace } from './Workspace';
 
 const data = (): ResumeData => ({
@@ -53,6 +53,19 @@ function server() {
   return { saves, previews };
 }
 
+/** Puts a stand-in in front of one route of the stubbed API, and counts its calls. */
+function stubOver(route: string, handler: (original: (init?: RequestInit) => Promise<Response>, init?: RequestInit) => unknown) {
+  const [method, path] = route.split(' ') as [string, string];
+  const real = globalThis.fetch;
+  let calls = 0;
+  vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
+    if (String(url) !== path || (init?.method ?? 'GET') !== method) return real(url, init);
+    calls++;
+    return handler((i) => real(url, i), init);
+  });
+  return { calls: () => calls };
+}
+
 describe('resume workspace', () => {
   it('switches template and accent, and saves them', async () => {
     const { saves } = server();
@@ -65,6 +78,37 @@ describe('resume workspace', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: 'A4' }));
     await userEvent.click(within(dialog).getByRole('button', { name: 'Done' }));
     await waitFor(() => expect(saves.at(-1)?.layout).toMatchObject({ template: 'signal', accent: '#0f766e', paper: 'a4' }), { timeout: 3000 });
+  });
+
+  it('keeps trying to save through an outage, and warns before leaving unsaved work', async () => {
+    const { saves } = server();
+    let down = true;
+    const up = stubOver('PUT /api/resumes/3', (original, init) => (down ? jsonResponse(502, { error: 'bad gateway' }) : original(init)));
+    renderApp(<Workspace doc={doc()} />);
+    fireEvent.change(await screen.findByLabelText('Bullet 1'), { target: { value: 'Rebuilt the deploy pipeline' } });
+    await waitFor(() => expect(up.calls()).toBe(1), { timeout: 3000 });
+    await waitFor(() => expect(screen.getByText('Unsaved')).toBeInTheDocument());
+
+    const leaving = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(leaving);
+    expect(leaving.defaultPrevented).toBe(true);
+
+    down = false;
+    await waitFor(() => expect(saves.at(-1)?.data.sections[0]!.entries![0]!.bullets![0]!.text).toBe('Rebuilt the deploy pipeline'), { timeout: 15_000 });
+    await waitFor(() => expect(screen.getByText('Saved')).toBeInTheDocument());
+    const left = new Event('beforeunload', { cancelable: true });
+    window.dispatchEvent(left);
+    expect(left.defaultPrevented).toBe(false);
+  }, 20_000);
+
+  it('does not retry an edit the server refused', async () => {
+    server();
+    const refused = stubOver('PUT /api/resumes/3', () => jsonResponse(400, { error: 'the name is required' }));
+    renderApp(<Workspace doc={doc()} />);
+    fireEvent.change(await screen.findByLabelText('Bullet 1'), { target: { value: 'Rebuilt the deploy pipeline' } });
+    await waitFor(() => expect(refused.calls()).toBe(1), { timeout: 3000 });
+    await new Promise((done) => setTimeout(done, 1500));
+    expect(refused.calls()).toBe(1);
   });
 
   it('shows review findings in place and jumps to them', async () => {

@@ -190,7 +190,7 @@ export default function JobsPage() {
 
       {isLoading ? (
         <SkeletonRows rows={8} />
-      ) : error ? (
+      ) : error && !data ? (
         <ErrorState
           message={error instanceof Error ? error.message : 'unknown error'}
           onRetry={() => void refetch()}

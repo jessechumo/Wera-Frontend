@@ -29,10 +29,14 @@ export function RequireAuth() {
       </div>
     );
   }
-  if (me.error) {
+  // No answer and nothing known from before. A session we already know about
+  // skips this: a failed check must not take a working app off the screen
+  // (see ConnectionBanner for what the user sees instead).
+  if (me.data === undefined) {
+    if (location.pathname === '/') return <Suspense fallback={null}><LandingPage /></Suspense>;
     return (
       <div className="mx-auto max-w-md p-6 pt-24">
-        <ErrorState message="Can't reach the Wera API." onRetry={() => void me.refetch()} />
+        <ErrorState message="Can't reach Wera right now. Retrying by itself." onRetry={() => void me.refetch()} />
       </div>
     );
   }

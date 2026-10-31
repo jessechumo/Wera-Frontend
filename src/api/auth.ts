@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
-import { api, ApiError } from './client';
+import { api, ApiError, retryWhileDown } from './client';
 import type { User } from './types';
 
 /** The logged-in user, or null when there is no session. */
@@ -17,6 +17,7 @@ export function useMe() {
     },
     staleTime: 5 * 60_000,
     retry: false,
+    refetchInterval: retryWhileDown,
   });
 }
 

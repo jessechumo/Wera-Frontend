@@ -119,7 +119,7 @@ export function ResumeSection() {
   const doc = useResume(id);
 
   if (list.isLoading || profile.isLoading) return <Skeleton className="h-96 w-full" />;
-  if (list.error) return <ErrorState message={errorMessage(list.error, 'Something went wrong')} onRetry={() => void list.refetch()} />;
+  if (list.isLoadingError) return <ErrorState message={errorMessage(list.error, 'Something went wrong')} onRetry={() => void list.refetch()} />;
   const resumes = list.data?.resumes ?? [];
   const upload = profile.data?.resume_chars ? (profile.data.resume_file?.filename ?? 'your uploaded resume') : null;
   // The upload is usually turned into a resume in the background before the tab is opened.

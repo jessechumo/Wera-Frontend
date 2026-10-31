@@ -1,15 +1,14 @@
 import { act, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { UNAUTHORIZED_EVENT } from '../api/client';
 import { me, profile, stubApi } from '../test/fixtures';
 import { jsonResponse } from '../test/render';
 import { RequireAuth } from './RequireAuth';
 import { RequireProfile } from './RequireProfile';
 
-function app(path = '/') {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+function app(path = '/', client = new QueryClient({ defaultOptions: { queries: { retry: false } } })) {
   return render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[path]}>
@@ -60,5 +59,51 @@ describe('route guards', () => {
     });
     // Signed out at the front door: the landing page, with its log in link.
     expect(await screen.findByRole('heading', { level: 1, name: /Find the jobs that fit you/ })).toBeInTheDocument();
+  });
+
+  describe('when the API stops answering', () => {
+    const down = () => jsonResponse(502, { error: 'bad gateway' });
+
+    it('keeps the app on screen for someone already signed in', async () => {
+      let up = true;
+      stubApi({
+        'GET /api/auth/me': () => (up ? { user: me, avatar_version: null } : down()),
+        'GET /api/profile': () => (up ? profile : down()),
+      });
+      const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      app('/jobs', client);
+      await screen.findByText('jobs page');
+      up = false;
+      await act(async () => {
+        await client.invalidateQueries();
+        await new Promise((done) => setTimeout(done, 50)); // the failed check reaches the screen
+      });
+      expect(client.getQueryState(['me'])?.status).toBe('error');
+      expect(screen.getByText('jobs page')).toBeInTheDocument();
+      expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+    });
+
+    it('still shows visitors the landing page at the front door', async () => {
+      stubApi({ 'GET /api/auth/me': down, 'GET /api/public/stats': down });
+      app('/');
+      expect(await screen.findByRole('heading', { level: 1, name: /Find the jobs that fit you/ })).toBeInTheDocument();
+    });
+
+    it('says it is retrying on any other page, and comes back without a click', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        let up = false;
+        stubApi({ 'GET /api/auth/me': () => (up ? { user: me, avatar_version: null } : down()) });
+        app('/jobs');
+        expect(await screen.findByText(/retrying by itself/i)).toBeInTheDocument();
+        up = true;
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(20_000);
+        });
+        expect(await screen.findByText('jobs page')).toBeInTheDocument();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 });

@@ -1,10 +1,10 @@
 // Page-level tests: each page renders real API fixtures and its main
 // interaction works. Network calls go to stubApi (src/test/fixtures.ts).
-import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 import { fixtures, stubApi } from '../test/fixtures';
-import { renderApp, jsonBody } from '../test/render';
+import { jsonResponse, renderApp, jsonBody } from '../test/render';
 import ExcludedPage from './ExcludedPage';
 import IndustriesPage from './IndustriesPage';
 import IndustryPage from './IndustryPage';
@@ -14,6 +14,29 @@ import TodayPage from './TodayPage';
 import TrackerPage from './TrackerPage';
 
 const firstToday = fixtures.today.jobs[0];
+
+describe('a failed refresh', () => {
+  it('leaves what the page already shows on screen', async () => {
+    let up = true;
+    stubApi({ 'GET /api/jobs': () => (up ? fixtures.jobs : jsonResponse(502, { error: 'bad gateway' })) });
+    const { client } = renderApp(<JobsPage />);
+    const [title] = await screen.findAllByText(fixtures.jobs.jobs[0].title);
+    up = false;
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ['jobs'] });
+      await new Promise((done) => setTimeout(done, 50));
+    });
+    expect(client.getQueriesData({ queryKey: ['jobs'] })).not.toHaveLength(0);
+    expect(title).toBeInTheDocument();
+    expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+  });
+
+  it('shows the error when there is nothing to show', async () => {
+    stubApi({ 'GET /api/jobs': () => jsonResponse(502, { error: 'bad gateway' }) });
+    renderApp(<JobsPage />);
+    expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
+  });
+});
 
 describe('TodayPage', () => {
   it('lists the review queue with the top pick first', async () => {

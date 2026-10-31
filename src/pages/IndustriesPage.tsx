@@ -64,7 +64,7 @@ export default function IndustriesPage() {
       </div>
     );
   }
-  if (industries.error) {
+  if (industries.isLoadingError) {
     return <ErrorState message={String(industries.error)} onRetry={() => void industries.refetch()} />;
   }
   const all = (industries.data?.industries ?? []).filter((i) => i.companies > 0);

@@ -38,6 +38,17 @@ export function failureMessage(res: { status: number; statusText: string }, text
   return `${res.status} ${res.statusText}`.trim();
 }
 
+/** Whether a failed request may work later: it never reached Wera, or Wera or a proxy on the way failed. */
+export function isOutage(err: unknown): boolean {
+  return !(err instanceof ApiError) || err.status >= 500;
+}
+
+/**
+ * For useQuery's refetchInterval: ask again every 10 seconds while the last
+ * try failed, since a server coming back fires no event a page can hear.
+ */
+export const retryWhileDown = (query: { state: { status: string } }) => (query.state.status === 'error' ? 10_000 : false);
+
 /** Fired when a request comes back 401: the session is gone. */
 export const UNAUTHORIZED_EVENT = 'wera:unauthorized';
 
