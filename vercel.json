@@ -11,11 +11,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://investors-gloves-cal-earlier.trycloudflare.com/api/:path*"
+      "destination": "https://api.wera-jobs.com/api/:path*"
     },
     {
       "source": "/healthz",
-      "destination": "https://investors-gloves-cal-earlier.trycloudflare.com/healthz"
+      "destination": "https://api.wera-jobs.com/healthz"
     },
     {
       "source": "/((?!assets/).*)",

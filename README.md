@@ -116,7 +116,7 @@ Released images are published to `ghcr.io/jessechumo/wera-frontend:<version>`.
 2. Import this repo in Vercel; the framework preset is Vite.
 3. On the backend set `COOKIE_SECURE=true`, `TRUST_PROXY=true`, and `PUBLIC_ORIGINS=https://<your-app>.vercel.app`, then restart it.
 
-While the backend runs behind a Cloudflare quick tunnel, its address changes whenever the tunnel is replaced. The backend's [tunnel watch](https://github.com/jessechumo/Wera/tree/main/deploy/home) handles that by itself: it commits the new address to `vercel.json` on `main` and `dev`, as `chore(deploy): point Vercel rewrites at the new tunnel URL`. Those commits are expected and cut no release.
+Wera's own site runs at `wera-jobs.com`, with `api.wera-jobs.com` as the backend's address: a Cloudflare Tunnel, which keeps that address and reconnects by itself after an outage.
 
 ## Releases and versioning
 
