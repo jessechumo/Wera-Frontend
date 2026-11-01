@@ -30,7 +30,7 @@ jobs:
     if: needs.release-please.outputs.created == 'true'
     runs-on: ubuntu-latest
     env:
-      IMAGE: jessechumo/wera-frontend
+      IMAGE: wera-jobs/wera-frontend
     steps:
       - uses: actions/checkout@v7
         with:
