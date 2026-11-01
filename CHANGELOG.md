@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.8.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.7.0...wera-frontend-v0.8.0) (2026-11-01)
+
+
+### Features
+
+* **deploy:** reach the API at its permanent address ([41e3091](https://github.com/jessechumo/Wera-Frontend/commit/41e3091b27b62627257cd43a4f9012b193523867))
+
+
+### Documentation
+
+* **contributing:** say pull requests go to dev first ([#76](https://github.com/jessechumo/Wera-Frontend/issues/76)) ([dbcbfdb](https://github.com/jessechumo/Wera-Frontend/commit/dbcbfdb279dd8f5ed74391f76cea5fde9c8b2612))
+
 ## [0.7.0](https://github.com/jessechumo/Wera-Frontend/compare/wera-frontend-v0.6.5...wera-frontend-v0.7.0) (2026-10-31)
 
 
