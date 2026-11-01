@@ -339,22 +339,6 @@ export default function SettingsPage() {
             ]}
           />
         </Row>
-        <Row label="Strong match alerts" hint={`An alert when a new job scores ${n.min_score} or higher.`}>
-          <div className="flex items-center gap-3">
-            <input
-              type="range"
-              min={60}
-              max={95}
-              step={5}
-              value={n.min_score}
-              disabled={!n.strong_matches}
-              onChange={(e) => setN({ min_score: Number(e.target.value) })}
-              aria-label="Alert threshold"
-              className="w-28 accent-accent disabled:opacity-40"
-            />
-            <Switch label="Strong match alerts" checked={n.strong_matches} onChange={(v) => setN({ strong_matches: v })} />
-          </div>
-        </Row>
         <Row label="Product updates" hint="Occasional news about new Wera features.">
           <Switch label="Product updates" checked={n.product_updates} onChange={(v) => setN({ product_updates: v })} />
         </Row>
