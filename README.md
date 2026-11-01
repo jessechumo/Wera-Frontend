@@ -1,14 +1,14 @@
 # Wera Frontend
 
-[![CI](https://github.com/jessechumo/Wera-Frontend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jessechumo/Wera-Frontend/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/jessechumo/Wera-Frontend/badges/coverage.json)](https://github.com/jessechumo/Wera-Frontend/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/jessechumo/Wera-Frontend?sort=semver&display_name=tag)](https://github.com/jessechumo/Wera-Frontend/releases)
+[![CI](https://github.com/wera-jobs/Wera-Frontend/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/wera-jobs/Wera-Frontend/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/wera-jobs/Wera-Frontend/badges/coverage.json)](https://github.com/wera-jobs/Wera-Frontend/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/wera-jobs/Wera-Frontend?sort=semver&display_name=tag)](https://github.com/wera-jobs/Wera-Frontend/releases)
 [![Tested with Playwright](https://img.shields.io/badge/e2e-Playwright-2EAD33?logo=playwright&logoColor=white)](e2e)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
-[![License](https://img.shields.io/github/license/jessechumo/Wera-Frontend)](LICENSE)
+[![License](https://img.shields.io/github/license/wera-jobs/Wera-Frontend)](LICENSE)
 
-The dashboard for [Wera](https://github.com/jessechumo/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume with an AI model.
+The dashboard for [Wera](https://github.com/wera-jobs/Wera), a self-hosted job radar that collects jobs from public job boards and scores them against your resume with an AI model.
 
 https://github.com/user-attachments/assets/525e661c-765b-4137-98b7-168d57af9690
 
@@ -44,9 +44,9 @@ The app is built to outlast the server. If the API stops answering, everything a
 - **Interview prep:** quick A to D quizzes by topic and difficulty, with explanations
 - **Community:** a Medium-style blog with tags, reactions and comments; posts are reviewed by an AI moderator before they go live
 - **Profile:** photo, uploaded resume (view, download, see the extracted text), preferences and profile text
-- **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/jessechumo/wera-extension)), password, CSV export of every job you track, account deletion
+- **Settings:** theme (light, dark, system), default sort, notification preferences, hidden companies, connected browsers (the [Chrome extension](https://github.com/wera-jobs/wera-extension)), password, CSV export of every job you track, account deletion
 - **Application details:** what job applications ask beyond your profile (contact, links, work authorization, education, voluntary self-identification), filled into forms by the extension; can be pre-filled from your resume
-- **Admins** use the separate [wera-admin](https://github.com/jessechumo/wera-admin) console: this dashboard has no admin pages
+- **Admins** use the separate [wera-admin](https://github.com/wera-jobs/wera-admin) console: this dashboard has no admin pages
 - **Excluded:** every filtered job with the reason and evidence
 - **Polish:** a sun and moon toggle with a circular reveal between themes, a soft light palette, count-up stats, staggered entrances, all respecting reduced motion
 
@@ -106,7 +106,7 @@ cd ../wera
 docker compose up -d --build wera-web   # http://localhost:3000
 ```
 
-Released images are published to `ghcr.io/jessechumo/wera-frontend:<version>`.
+Released images are published to `ghcr.io/wera-jobs/wera-frontend:<version>`.
 
 ## Deploy on Vercel
 
